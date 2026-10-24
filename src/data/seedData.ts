@@ -379,124 +379,31 @@ export const YKS_SUBJECTS: SubjectItem[] = [
   }
 ];
 
-// Initial Profile
+// Initial Profile (Clean Slate)
 export const INITIAL_PROFILE: StudentProfile = {
-  name: 'Ahmet Yılmaz',
+  name: '',
   classLevel: '12',
   fieldTrack: 'sayisal',
-  targetTytNet: 95.0,
-  targetAytNet: 70.0,
-  targetUniversity: 'Boğaziçi Üniversitesi',
-  targetDepartment: 'Bilgisayar Mühendisliği',
-  currentStreak: 12,
-  longestStreak: 19,
-  streakFreezeActive: true,
+  targetTytNet: 0,
+  targetAytNet: 0,
+  targetUniversity: '',
+  targetDepartment: '',
+  currentStreak: 0,
+  longestStreak: 0,
+  streakFreezeActive: false,
   streakFreezeAvailable: 1,
-  obp: 92.5,
-  dailyQuestionGoal: 150,
-  dailyStudyMinutesGoal: 210,
+  obp: 85.0,
+  dailyQuestionGoal: 100,
+  dailyStudyMinutesGoal: 120,
   darkMode: true
 };
 
-// Initial Question Vault (Hata Defteri - 6)
-export const INITIAL_QUESTION_VAULT: QuestionVaultItem[] = [
-  {
-    id: 'qv-1',
-    subjectCode: 'tyt_mat',
-    subjectName: 'TYT Matematik',
-    topicName: 'Hız ve Hareket Problemleri',
-    imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80',
-    correctAnswer: 'C',
-    difficulty: 'Orta',
-    note: 'Ters orantı kurarken akıntı hızını çıkarmayı unuttum, işlem hatası.',
-    reason: 'dikkat',
-    isResolved: false,
-    date: '2026-10-19',
-    reviewStage: 1,
-    nextReviewDate: '2026-10-20'
-  },
-  {
-    id: 'qv-2',
-    subjectCode: 'ayt_fizik',
-    subjectName: 'AYT Fizik',
-    topicName: 'Elektriksel Potansiyel Enerji',
-    imageUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=600&q=80',
-    correctAnswer: 'E',
-    difficulty: 'Zor',
-    note: 'Vektörel değil skaler olduğunu gözden kaçırdım. Formül: q1*q2 / d',
-    reason: 'bilgi',
-    isResolved: false,
-    date: '2026-10-18',
-    reviewStage: 2,
-    nextReviewDate: '2026-10-20'
-  },
-  {
-    id: 'qv-3',
-    subjectCode: 'tyt_turkce',
-    subjectName: 'TYT Türkçe',
-    topicName: 'Paragrafta Çıkarım Yapma',
-    imageUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80',
-    correctAnswer: 'B',
-    difficulty: 'ÖSYM Seviyesi',
-    note: 'Son cümleyi aceleyle okudum, "değinilmemiştir" kökünü olumlu sandım.',
-    reason: 'soru_koku',
-    isResolved: true,
-    date: '2026-10-17',
-    reviewStage: 4,
-    nextReviewDate: '2026-11-05'
-  },
-  {
-    id: 'qv-4',
-    subjectCode: 'tyt_mat',
-    subjectName: 'TYT Matematik',
-    topicName: 'Mutlak Değerli Eşitsizlikler',
-    imageUrl: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=600&q=80',
-    correctAnswer: 'D',
-    difficulty: 'Zor',
-    note: 'Kritik noktaları tabloya aktarırken işaret tablosunda çift katlı kökü tek katlı saydım.',
-    reason: 'dikkat',
-    isResolved: false,
-    date: '2026-10-21',
-    reviewStage: 1,
-    nextReviewDate: '2026-10-25'
-  }
-];
+// Initial Question Vault (Hata Defteri - Boş Temiz Başlangıç)
+export const INITIAL_QUESTION_VAULT: QuestionVaultItem[] = [];
 
-// Initial Book Tracker (Kaynak Kitap Takipçisi - 8)
-export const INITIAL_BOOKS: BookTrackerItem[] = [
-  {
-    id: 'book-1',
-    title: 'TYT Matematik Soru Bankası',
-    publisher: '3D Yayınları',
-    subjectName: 'TYT Matematik',
-    totalTests: 48,
-    completedTests: 32
-  },
-  {
-    id: 'book-2',
-    title: 'Kronometre Paragraf Soru Bankası',
-    publisher: 'Limit Yayınları',
-    subjectName: 'TYT Türkçe',
-    totalTests: 36,
-    completedTests: 24
-  },
-  {
-    id: 'book-3',
-    title: 'AYT Fizik Soru Kitabı',
-    publisher: 'Palme Yayıncılık',
-    subjectName: 'AYT Fizik',
-    totalTests: 30,
-    completedTests: 12
-  },
-  {
-    id: 'book-4',
-    title: 'Trigonometri Fasikülü',
-    publisher: 'Apotemi',
-    subjectName: 'AYT Matematik',
-    totalTests: 20,
-    completedTests: 15
-  }
-];
+// Initial Book Tracker (Kaynak Kitap Takipçisi - Boş Temiz Başlangıç)
+export const INITIAL_BOOKS: BookTrackerItem[] = [];
+
 
 // YÖK Atlas Resmi Veritabanı (Bölüm Hedefleri, Taban Puan, Başarı Sırası ve Son Giren Netleri)
 export const YOK_ATLAS_BENCHMARKS: DepartmentBenchmark[] = [
@@ -1483,174 +1390,14 @@ export const YOK_ATLAS_BENCHMARKS: DepartmentBenchmark[] = [
   }
 ];
 
-// Initial Exams Seed
-export const INITIAL_EXAMS: Exam[] = [
-  {
-    id: 'exam-0a',
-    title: 'Bilgi Sarmal TYT Başlangıç Denemesi',
-    type: 'TYT',
-    publisher: 'Bilgi Sarmal',
-    difficulty: 'kolay',
-    date: '2026-09-24',
-    totalNet: 83.0,
-    durationMinutes: 165,
-    subjectResults: [
-      { subjectCode: 'tyt_turkce', subjectName: 'Türkçe', correct: 31, wrong: 6, blank: 3, net: 29.5 },
-      { subjectCode: 'tyt_sosyal', subjectName: 'Sosyal Bilimler', correct: 14, wrong: 4, blank: 2, net: 13.0 },
-      { subjectCode: 'tyt_mat', subjectName: 'Temel Matematik', correct: 27, wrong: 4, blank: 9, net: 26.0 },
-      { subjectCode: 'tyt_fizik', subjectName: 'Fizik', correct: 4, wrong: 2, blank: 1, net: 3.5 },
-      { subjectCode: 'tyt_kimya', subjectName: 'Kimya', correct: 6, wrong: 1, blank: 0, net: 5.75 },
-      { subjectCode: 'tyt_biyo', subjectName: 'Biyoloji', correct: 6, wrong: 3, blank: 1, net: 5.25 }
-    ]
-  },
-  {
-    id: 'exam-0b',
-    title: 'Hız ve Renk Kurumsal TYT-1',
-    type: 'TYT',
-    publisher: 'Hız ve Renk',
-    difficulty: 'orta',
-    date: '2026-10-03',
-    totalNet: 85.5,
-    durationMinutes: 160,
-    subjectResults: [
-      { subjectCode: 'tyt_turkce', subjectName: 'Türkçe', correct: 33, wrong: 4, blank: 3, net: 32.0 },
-      { subjectCode: 'tyt_sosyal', subjectName: 'Sosyal Bilimler', correct: 15, wrong: 3, blank: 2, net: 14.25 },
-      { subjectCode: 'tyt_mat', subjectName: 'Temel Matematik', correct: 28, wrong: 3, blank: 9, net: 27.25 },
-      { subjectCode: 'tyt_fizik', subjectName: 'Fizik', correct: 4, wrong: 1, blank: 2, net: 3.75 },
-      { subjectCode: 'tyt_kimya', subjectName: 'Kimya', correct: 5, wrong: 2, blank: 0, net: 4.5 },
-      { subjectCode: 'tyt_biyo', subjectName: 'Biyoloji', correct: 4, wrong: 1, blank: 1, net: 3.75 }
-    ]
-  },
-  {
-    id: 'exam-2',
-    title: '3D Yayınları TYT Simülasyon Denemesi',
-    type: 'TYT',
-    publisher: '3D Yayınları',
-    difficulty: 'orta',
-    date: '2026-10-12',
-    totalNet: 87.25,
-    durationMinutes: 160,
-    subjectResults: [
-      { subjectCode: 'tyt_turkce', subjectName: 'Türkçe', correct: 33, wrong: 5, blank: 2, net: 31.75 },
-      { subjectCode: 'tyt_sosyal', subjectName: 'Sosyal Bilimler', correct: 15, wrong: 4, blank: 1, net: 14.0 },
-      { subjectCode: 'tyt_mat', subjectName: 'Temel Matematik', correct: 29, wrong: 3, blank: 8, net: 28.25 },
-      { subjectCode: 'tyt_fizik', subjectName: 'Fizik', correct: 4, wrong: 2, blank: 1, net: 3.5 },
-      { subjectCode: 'tyt_kimya', subjectName: 'Kimya', correct: 5, wrong: 1, blank: 1, net: 4.75 },
-      { subjectCode: 'tyt_biyo', subjectName: 'Biyoloji', correct: 6, wrong: 0, blank: 0, net: 5.0 }
-    ]
-  },
-  {
-    id: 'exam-1',
-    title: 'Özdebir Türkiye Geneli TYT-1',
-    type: 'TYT',
-    publisher: 'Özdebir',
-    difficulty: 'osym',
-    date: '2026-10-18',
-    totalNet: 91.5,
-    durationMinutes: 165,
-    subjectResults: [
-      { subjectCode: 'tyt_turkce', subjectName: 'Türkçe', correct: 35, wrong: 4, blank: 1, net: 34.0 },
-      { subjectCode: 'tyt_sosyal', subjectName: 'Sosyal Bilimler', correct: 16, wrong: 3, blank: 1, net: 15.25 },
-      { subjectCode: 'tyt_mat', subjectName: 'Temel Matematik', correct: 28, wrong: 2, blank: 0, net: 27.5 },
-      { subjectCode: 'tyt_fizik', subjectName: 'Fizik', correct: 5, wrong: 2, blank: 0, net: 4.5 },
-      { subjectCode: 'tyt_kimya', subjectName: 'Kimya', correct: 6, wrong: 1, blank: 0, net: 5.75 },
-      { subjectCode: 'tyt_biyo', subjectName: 'Biyoloji', correct: 5, wrong: 2, blank: 0, net: 4.5 }
-    ]
-  },
-  {
-    id: 'exam-0c',
-    title: 'Apotemi AYT Sayısal Seviye Belirleme',
-    type: 'AYT',
-    publisher: 'Apotemi',
-    difficulty: 'zor',
-    date: '2026-10-01',
-    totalNet: 58.0,
-    durationMinutes: 180,
-    subjectResults: [
-      { subjectCode: 'ayt_mat', subjectName: 'AYT Matematik', correct: 29, wrong: 5, blank: 6, net: 27.75 },
-      { subjectCode: 'ayt_fizik', subjectName: 'AYT Fizik', correct: 9, wrong: 3, blank: 2, net: 8.25 },
-      { subjectCode: 'ayt_kimya', subjectName: 'AYT Kimya', correct: 10, wrong: 2, blank: 2, net: 9.5 },
-      { subjectCode: 'ayt_biyo', subjectName: 'AYT Biyoloji', correct: 13, wrong: 2, blank: 0, net: 12.5 }
-    ]
-  },
-  {
-    id: 'exam-3',
-    title: 'Limit Türkiye Geneli AYT Sayısal-1',
-    type: 'AYT',
-    publisher: 'Limit Yayınları',
-    difficulty: 'zor',
-    date: '2026-10-15',
-    totalNet: 64.75,
-    durationMinutes: 180,
-    subjectResults: [
-      { subjectCode: 'ayt_mat', subjectName: 'AYT Matematik', correct: 32, wrong: 3, blank: 5, net: 31.25 },
-      { subjectCode: 'ayt_fizik', subjectName: 'AYT Fizik', correct: 11, wrong: 2, blank: 1, net: 10.5 },
-      { subjectCode: 'ayt_kimya', subjectName: 'AYT Kimya', correct: 11, wrong: 1, blank: 1, net: 10.75 },
-      { subjectCode: 'ayt_biyo', subjectName: 'AYT Biyoloji', correct: 13, wrong: 1, blank: 0, net: 12.25 }
-    ]
-  }
-];
+// Initial Exams Seed (Boş Temiz Başlangıç)
+export const INITIAL_EXAMS: Exam[] = [];
 
-// Initial Tasks
-export const INITIAL_TASKS: DailyTask[] = [
-  {
-    id: 'task-1',
-    subjectCode: 'tyt_mat',
-    subjectName: 'TYT Matematik',
-    topicName: 'Hız & Hareket Problemleri',
-    targetQuestions: 40,
-    solvedQuestions: 40,
-    targetMinutes: 60,
-    spentMinutes: 55,
-    isCompleted: true,
-    date: '2026-10-20'
-  },
-  {
-    id: 'task-2',
-    subjectCode: 'ayt_fizik',
-    subjectName: 'AYT Fizik',
-    topicName: 'Newton\'un Hareket Yasaları Test 3-4',
-    targetQuestions: 30,
-    solvedQuestions: 30,
-    targetMinutes: 50,
-    spentMinutes: 45,
-    isCompleted: true,
-    date: '2026-10-20'
-  },
-  {
-    id: 'task-3',
-    subjectCode: 'tyt_turkce',
-    subjectName: 'TYT Türkçe',
-    topicName: 'Paragraf Çözümü (Hızlanma Denemesi)',
-    targetQuestions: 35,
-    solvedQuestions: 25,
-    targetMinutes: 40,
-    spentMinutes: 30,
-    isCompleted: false,
-    date: '2026-10-20'
-  },
-  {
-    id: 'task-4',
-    subjectCode: 'ayt_mat',
-    subjectName: 'AYT Matematik',
-    topicName: 'Trigonometri Toplam-Fark Formülleri',
-    targetQuestions: 45,
-    solvedQuestions: 0,
-    targetMinutes: 60,
-    spentMinutes: 0,
-    isCompleted: false,
-    date: '2026-10-20'
-  }
-];
+// Initial Tasks (Boş Temiz Başlangıç)
+export const INITIAL_TASKS: DailyTask[] = [];
 
-// Initial Question Logs
-export const INITIAL_QUESTION_LOGS: QuestionLog[] = [
-  { id: 'ql-1', date: '2026-10-20', subjectName: 'TYT Matematik', sourceBook: 'Orijinal TYT Soru Bankası', count: 40, durationMinutes: 55 },
-  { id: 'ql-2', date: '2026-10-20', subjectName: 'AYT Fizik', sourceBook: 'Palme AYT Fizik', count: 30, durationMinutes: 45 },
-  { id: 'ql-3', date: '2026-10-20', subjectName: 'TYT Türkçe', sourceBook: 'Limit Paragraf Kronometre', count: 25, durationMinutes: 30 },
-  { id: 'ql-4', date: '2026-10-19', subjectName: 'AYT Kimya', sourceBook: 'Aydın AYT Kimya', count: 50, durationMinutes: 60 },
-  { id: 'ql-5', date: '2026-10-19', subjectName: 'TYT Geometri', sourceBook: 'Karakök Geometri', count: 45, durationMinutes: 50 }
-];
+// Initial Question Logs (Boş Temiz Başlangıç)
+export const INITIAL_QUESTION_LOGS: QuestionLog[] = [];
 
 export const MOTIVATIONAL_QUOTES = [
   "Her gün çözdüğün fazladan 1 soru, sınav günü binlerce rakibinin önüne geçmeni sağlar.",

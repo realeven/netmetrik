@@ -155,32 +155,47 @@ export default function App() {
   // Core Persistent State
   const [profile, setProfile] = useState<StudentProfile>(() => {
     const saved = localStorage.getItem('netmetrik_student_profile');
-    return saved ? JSON.parse(saved) : INITIAL_PROFILE;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.name === 'Ahmet Yılmaz') return INITIAL_PROFILE;
+      return parsed;
+    }
+    return INITIAL_PROFILE;
   });
 
   const [exams, setExams] = useState<Exam[]>(() => {
+    const pSaved = localStorage.getItem('netmetrik_student_profile');
+    if (pSaved && JSON.parse(pSaved).name === 'Ahmet Yılmaz') return INITIAL_EXAMS;
     const saved = localStorage.getItem('netmetrik_student_exams');
     return saved ? JSON.parse(saved) : INITIAL_EXAMS;
   });
 
   const [tasks, setTasks] = useState<DailyTask[]>(() => {
+    const pSaved = localStorage.getItem('netmetrik_student_profile');
+    if (pSaved && JSON.parse(pSaved).name === 'Ahmet Yılmaz') return INITIAL_TASKS;
     const saved = localStorage.getItem('netmetrik_student_tasks');
     return saved ? JSON.parse(saved) : INITIAL_TASKS;
   });
 
   const [questionLogs, setQuestionLogs] = useState<QuestionLog[]>(() => {
+    const pSaved = localStorage.getItem('netmetrik_student_profile');
+    if (pSaved && JSON.parse(pSaved).name === 'Ahmet Yılmaz') return INITIAL_QUESTION_LOGS;
     const saved = localStorage.getItem('netmetrik_student_question_logs');
     return saved ? JSON.parse(saved) : INITIAL_QUESTION_LOGS;
   });
 
   // Feature 6: Question Vault (Hata Defteri) State
   const [questionVault, setQuestionVault] = useState<QuestionVaultItem[]>(() => {
+    const pSaved = localStorage.getItem('netmetrik_student_profile');
+    if (pSaved && JSON.parse(pSaved).name === 'Ahmet Yılmaz') return INITIAL_QUESTION_VAULT;
     const saved = localStorage.getItem('netmetrik_question_vault');
     return saved ? JSON.parse(saved) : INITIAL_QUESTION_VAULT;
   });
 
   // Feature 8: Book Tracker State
   const [books, setBooks] = useState<BookTrackerItem[]>(() => {
+    const pSaved = localStorage.getItem('netmetrik_student_profile');
+    if (pSaved && JSON.parse(pSaved).name === 'Ahmet Yılmaz') return INITIAL_BOOKS;
     const saved = localStorage.getItem('netmetrik_books');
     return saved ? JSON.parse(saved) : INITIAL_BOOKS;
   });
@@ -193,23 +208,11 @@ export default function App() {
 
   // Topic Progress Map: topicKey -> TopicStatus
   const [topicProgress, setTopicProgress] = useState<Record<string, TopicStatus>>(() => {
+    const pSaved = localStorage.getItem('netmetrik_student_profile');
+    if (pSaved && JSON.parse(pSaved).name === 'Ahmet Yılmaz') return {};
     const saved = localStorage.getItem('netmetrik_topic_progress');
     if (saved) return JSON.parse(saved);
-    return {
-      'tyt_mat_Temel Kavramlar & Sayı Kümeleri': 'completed',
-      'tyt_mat_Basamak Kavramı': 'completed',
-      'tyt_mat_Bölme ve Bölünebilme': 'completed',
-      'tyt_mat_EBOB - EKOK': 'needs_review',
-      'tyt_mat_Rasyonel ve Ondalık Sayılar': 'completed',
-      'tyt_mat_Basit Eşitsizlikler': 'in_progress',
-      'tyt_turkce_Sözcükte Anlam': 'completed',
-      'tyt_turkce_Cümlede Anlam': 'completed',
-      'tyt_turkce_Paragrafta Anlam': 'in_progress',
-      'tyt_fizik_Fizik Bilimine Giriş': 'completed',
-      'tyt_fizik_Madde ve Özellikleri': 'completed',
-      'ayt_fizik_Vektörler ve Bağıl Hareket': 'completed',
-      'ayt_fizik_Newton’un Hareket Yasaları': 'in_progress'
-    };
+    return {};
   });
 
   // Theme State (Apple System Presets - Cupertino Blue as primary)
@@ -814,6 +817,31 @@ export default function App() {
     e.target.value = '';
   };
 
+  const handleResetAllData = () => {
+    localStorage.removeItem('netmetrik_student_profile');
+    localStorage.removeItem('netmetrik_student_exams');
+    localStorage.removeItem('netmetrik_student_tasks');
+    localStorage.removeItem('netmetrik_student_question_logs');
+    localStorage.removeItem('netmetrik_question_vault');
+    localStorage.removeItem('netmetrik_books');
+    localStorage.removeItem('netmetrik_topic_progress');
+    localStorage.removeItem('netmetrik_flashcards');
+    localStorage.removeItem('netmetrik_ai_sessions');
+    localStorage.removeItem('netmetrik_ai_energy');
+    localStorage.setItem('netmetrik_clean_reset_v1', 'true');
+
+    setProfile(INITIAL_PROFILE);
+    setExams([]);
+    setTasks([]);
+    setQuestionLogs([]);
+    setQuestionVault([]);
+    setBooks([]);
+    setTopicProgress({});
+
+    sounds.playSuccess();
+    confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+  };
+
   const renderScreenContent = (isDesktop: boolean) => (
     <div key={activeTab} className="tab-content-transition">
       {activeTab === 'analytics' && (
@@ -937,6 +965,7 @@ export default function App() {
           onExportBackup={handleExportBackup}
           onImportBackup={handleImportBackup}
           onOpenFeatureModal={(feat) => setActiveFeatureModal(feat)}
+          onResetAllData={handleResetAllData}
           viewMode={viewMode}
           onToggleViewMode={(mode) => setViewMode(mode)}
           isDesktop={isDesktop}
@@ -2724,7 +2753,7 @@ function HomeScreenView({
   onOpenQuickAdd: (type: 'question' | 'task' | 'exam') => void;
   isDesktop?: boolean;
 }) {
-  const questionPct = Math.min(100, Math.round((todaySolvedQuestions / profile.dailyQuestionGoal) * 100));
+  const questionPct = Math.min(100, Math.round((todaySolvedQuestions / (profile.dailyQuestionGoal || 100)) * 100));
   const pendingVaultCount = questionVault.filter((q) => !q.isResolved).length;
 
   const totalTests = books.reduce((sum, b) => sum + b.totalTests, 0);
@@ -2749,10 +2778,16 @@ function HomeScreenView({
             <span>2026-2027 HAZIRLIK SEZONU</span>
           </div>
           <h1 style={{ fontSize: isDesktop ? 24 : 20, fontWeight: 700, color: '#FFFFFF', margin: 0, letterSpacing: -0.3 }}>
-            Hoş geldin, {profile.name || 'Öğrenci'} 👋
+            Hoş geldin{profile.name ? `, ${profile.name}` : ''} 👋
           </h1>
           <p style={{ margin: '6px 0 0 0', fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>
-            Hedef: <strong style={{ color: '#FFFFFF' }}>{profile.targetDepartment || 'Tıp Fakültesi'}</strong> ({profile.fieldTrack?.toUpperCase() || 'SAY'}) • <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>{profile.targetUniversity || 'Hacettepe Üniversitesi'}</span>
+            {profile.targetDepartment ? (
+              <>
+                Hedef: <strong style={{ color: '#FFFFFF' }}>{profile.targetDepartment}</strong> ({profile.fieldTrack?.toUpperCase() || 'SAY'}) • <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>{profile.targetUniversity}</span>
+              </>
+            ) : (
+              <span>Hedef: <em style={{ color: 'var(--color-text-dim)' }}>Henüz hedef bölüm seçilmedi</em></span>
+            )}
           </p>
           <div style={{ marginTop: 8 }}>
             <button
@@ -4795,6 +4830,7 @@ function ProfileScreenView({
   onExportBackup,
   onImportBackup,
   onOpenFeatureModal,
+  onResetAllData,
   viewMode = 'desktop',
   onToggleViewMode,
   isDesktop = false
@@ -4817,12 +4853,31 @@ function ProfileScreenView({
   onExportBackup?: () => void;
   onImportBackup?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onOpenFeatureModal?: (feat: FeatureModalType) => void;
+  onResetAllData?: () => void;
   viewMode?: 'desktop' | 'mobile';
   onToggleViewMode?: (mode: 'desktop' | 'mobile') => void;
   isDesktop?: boolean;
 }) {
   // Navigation Sub-Tabs: 'profile' (Profil & Hedefler) | 'settings' (Ayarlar & Tercihler) | 'cloud' (Bulut & Yedekleme)
   const [activeSubTab, setActiveSubTab] = useState<'profile' | 'settings' | 'cloud'>('profile');
+
+  // Reset confirmation state
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetSuccessMessage, setResetSuccessMessage] = useState(false);
+
+  const handleExecuteReset = () => {
+    if (onResetAllData) {
+      onResetAllData();
+    }
+    setName('');
+    setTargetUni('');
+    setTargetDept('');
+    setTargetTytNet(0);
+    setTargetAytNet(0);
+    setShowResetConfirm(false);
+    setResetSuccessMessage(true);
+    setTimeout(() => setResetSuccessMessage(false), 3500);
+  };
 
   // Profile Edit Local States
   const [editingProfile, setEditingProfile] = useState(false);
@@ -4945,12 +5000,113 @@ function ProfileScreenView({
     alert('Özel Supabase yapılandırması kaldırıldı.');
   };
 
-  const handleResetDataConfirm = () => {
-    if (window.confirm('DİKKAT: Tüm çalışma kayıtları, çözülen sorular ve deneme verileri sıfırlanacaktır. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?')) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
+  const renderResetAccountCard = () => (
+    <div
+      className="app-card"
+      style={{
+        padding: 16,
+        borderRadius: 16,
+        border: '1px solid rgba(255, 69, 58, 0.3)',
+        background: 'rgba(255, 69, 58, 0.05)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+        <div>
+          <div style={{ fontSize: 13.5, fontWeight: 800, color: '#FF453A', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>🗑️</span>
+            <span>Tüm Hesap Verilerini Sıfırla</span>
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--color-text-dim)', marginTop: 2 }}>
+            Çözülen tüm soru sayılarını, denemeleri, çalışma sürelerini ve hedefleri sıfırlar
+          </div>
+        </div>
+        {!showResetConfirm && (
+          <button
+            type="button"
+            onClick={() => setShowResetConfirm(true)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 10,
+              background: 'rgba(255, 69, 58, 0.15)',
+              border: '1px solid rgba(255, 69, 58, 0.4)',
+              color: '#FF453A',
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            Hesabı Sıfırla
+          </button>
+        )}
+      </div>
+
+      {showResetConfirm && (
+        <div
+          style={{
+            padding: 14,
+            borderRadius: 12,
+            background: 'rgba(255, 69, 58, 0.15)',
+            border: '1px solid rgba(255, 69, 58, 0.35)',
+            display: 'flex',
+            flexDirection: isDesktop ? 'row' : 'column',
+            justifyContent: 'space-between',
+            alignItems: isDesktop ? 'center' : 'stretch',
+            gap: 12
+          }}
+        >
+          <div style={{ fontSize: 12, color: '#FFB3B0', fontWeight: 600 }}>
+            ⚠️ DİKKAT: Çözülen tüm soru sayıları, deneme netleri ve çalışma verileri kalıcı olarak sıfırlanacaktır. Devam etmek istiyor musun?
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(false)}
+              style={{
+                padding: '7px 14px',
+                borderRadius: 8,
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#fff',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Vazgeç
+            </button>
+            <button
+              type="button"
+              onClick={handleExecuteReset}
+              style={{
+                padding: '7px 18px',
+                borderRadius: 8,
+                background: '#FF453A',
+                border: 'none',
+                color: '#fff',
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(255, 69, 58, 0.4)'
+              }}
+            >
+              Evet, Hepsini Sıfırla
+            </button>
+          </div>
+        </div>
+      )}
+
+      {resetSuccessMessage && (
+        <div style={{ padding: '9px 14px', borderRadius: 10, background: 'rgba(48, 209, 88, 0.15)', border: '1px solid rgba(48, 209, 88, 0.3)', color: '#30D158', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>✓</span>
+          <span>Tüm soru sayıları, denemeler ve çalışma kayıtları başarıyla sıfırlandı!</span>
+        </div>
+      )}
+    </div>
+  );
 
   // Get Initials for Avatar
   const getInitials = (n: string) => {
@@ -5341,6 +5497,9 @@ function ProfileScreenView({
               </div>
             </div>
           </div>
+
+          {/* Reset Account Option directly accessible in Profile */}
+          {renderResetAccountCard()}
         </div>
       )}
 
@@ -5870,27 +6029,9 @@ function ProfileScreenView({
               </label>
             </div>
 
-            {/* Reset All Data Option */}
-            <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#FF453A' }}>Tüm Verileri Sıfırla</div>
-                <div style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>Fabrika ayarlarına dönüp yerel veriyi temizler</div>
-              </div>
-              <button
-                onClick={handleResetDataConfirm}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 8,
-                  background: 'rgba(255, 69, 58, 0.12)',
-                  border: '1px solid rgba(255, 69, 58, 0.25)',
-                  color: '#FF453A',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                Sıfırla
-              </button>
+            {/* Reset All Data Card */}
+            <div style={{ marginTop: 14 }}>
+              {renderResetAccountCard()}
             </div>
           </div>
         </div>
