@@ -3,13 +3,13 @@ import {
   CheckCircle2,
   Circle,
   Search,
-  ArrowUpDown,
-  ExternalLink
+  ExternalLink,
+  ChevronDown
 } from 'lucide-react';
 import {
   OSYM_QUESTION_DISTRIBUTION
 } from '../data/osymDistributionData';
-import type { OsymTopicItem } from '../data/osymDistributionData';
+import type { OsymSubjectDistribution, OsymTopicItem } from '../data/osymDistributionData';
 import type { TopicStatus } from '../data/seedData';
 import { sounds } from '../lib/sound';
 
@@ -27,103 +27,52 @@ export function OsymDistributionView({
   const [selectedExam, setSelectedExam] = useState<'TYT' | 'AYT'>('TYT');
   const [selectedSubjectCode, setSelectedSubjectCode] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'uncompleted'>('all');
-  const [sortBy, setSortBy] = useState<'total' | 'recent' | 'name'>('total');
   const [searchQuery, setSearchQuery] = useState('');
+  const [collapsedSubjects, setCollapsedSubjects] = useState<Record<string, boolean>>({});
 
-  // Available subjects for current exam category
+  // 2018 - 2026 years
+  const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+
+  // Available subjects for the active exam category
   const examSubjects = useMemo(() => {
     return OSYM_QUESTION_DISTRIBUTION.filter((s) => s.exam === selectedExam);
   }, [selectedExam]);
 
-  // Active subjects to show (either 1 selected or all in this exam)
+  // Active subjects to display
   const activeSubjects = useMemo(() => {
     if (selectedSubjectCode === 'all') return examSubjects;
     return examSubjects.filter((s) => s.code === selectedSubjectCode);
   }, [examSubjects, selectedSubjectCode]);
 
-  // Flattened topic list with subject metadata
-  interface FlatTopicItem extends OsymTopicItem {
-    subjectCode: string;
-    subjectName: string;
-    subjectColor: string;
-    topicKey: string;
-    isCompleted: boolean;
-  }
-
-  const allFilteredTopics = useMemo(() => {
-    const list: FlatTopicItem[] = [];
-
-    activeSubjects.forEach((sub) => {
-      sub.topics.forEach((t) => {
-        const topicKey = `${sub.code}_${t.topic}`;
-        const isCompleted = topicProgress[topicKey] === 'completed';
-
-        // Filter by status
-        if (statusFilter === 'completed' && !isCompleted) return;
-        if (statusFilter === 'uncompleted' && isCompleted) return;
-
-        // Filter by search query
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          const matches =
-            t.topic.toLowerCase().includes(q) ||
-            (t.unit && t.unit.toLowerCase().includes(q)) ||
-            sub.name.toLowerCase().includes(q);
-          if (!matches) return;
-        }
-
-        list.push({
-          ...t,
-          subjectCode: sub.code,
-          subjectName: sub.name,
-          subjectColor: sub.color,
-          topicKey,
-          isCompleted
-        });
-      });
-    });
-
-    // Sorting
-    list.sort((a, b) => {
-      if (sortBy === 'total') return b.total - a.total;
-      if (sortBy === 'recent') {
-        const recA = (a.yearly['2026'] || 0) * 3 + (a.yearly['2025'] || 0) * 2 + (a.yearly['2024'] || 0);
-        const recB = (b.yearly['2026'] || 0) * 3 + (b.yearly['2025'] || 0) * 2 + (b.yearly['2024'] || 0);
-        return recB - recA;
-      }
-      return a.topic.localeCompare(b.topic, 'tr');
-    });
-
-    return list;
-  }, [activeSubjects, topicProgress, statusFilter, searchQuery, sortBy]);
-
-  // Overall stats for current view
+  // Overall stats for the selected exam
   const stats = useMemo(() => {
-    let totalQuestionsAllYears = 0;
-    let completedCount = 0;
-    let totalTopicsCount = 0;
+    let totalQuestions = 0;
+    let completedTopics = 0;
+    let totalTopics = 0;
 
     examSubjects.forEach((sub) => {
       sub.topics.forEach((t) => {
-        totalTopicsCount++;
-        totalQuestionsAllYears += t.total;
+        totalTopics++;
+        totalQuestions += t.total;
         const topicKey = `${sub.code}_${t.topic}`;
         if (topicProgress[topicKey] === 'completed') {
-          completedCount++;
+          completedTopics++;
         }
       });
     });
 
     return {
-      totalTopicsCount,
-      completedCount,
-      pct: Math.round((completedCount / (totalTopicsCount || 1)) * 100),
-      totalQuestionsAllYears
+      totalTopics,
+      completedTopics,
+      pct: Math.round((completedTopics / (totalTopics || 1)) * 100),
+      totalQuestions
     };
   }, [examSubjects, topicProgress]);
 
-  // Years list from data
-  const yearsList = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'];
+  const toggleSubjectCollapse = (code: string) => {
+    sounds.playClick();
+    setCollapsedSubjects((prev) => ({ ...prev, [code]: !prev[code] }));
+  };
 
   return (
     <div style={{ padding: isDesktop ? 0 : '0 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -135,72 +84,73 @@ export function OsymDistributionView({
           border: '1px solid rgba(212, 255, 0, 0.25)',
           borderRadius: 20,
           padding: '20px 22px',
-          position: 'relative',
-          overflow: 'hidden'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 14
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
-          <div style={{ maxWidth: 520 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 900,
-                  textTransform: 'uppercase',
-                  padding: '3px 8px',
-                  borderRadius: 6,
-                  background: 'rgba(212, 255, 0, 0.2)',
-                  color: 'var(--color-accent)',
-                  letterSpacing: 0.5
-                }}
-              >
-                ÖSYM 2018–2026 Çıkmış Sorular
-              </span>
-              <a
-                href="https://ertansinansahin.com/yks-soru-dagilimi/"
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  fontSize: 11,
-                  color: 'var(--color-text-dim)',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 3
-                }}
-              >
-                <span>Kaynak: Ertan Sinan Şahin</span>
-                <ExternalLink size={11} />
-              </a>
-            </div>
-            <h2 style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 8px 0', color: '#FFFFFF', letterSpacing: -0.3 }}>
-              ÖSYM YKS Konu ve Soru Dağılımı
-            </h2>
-            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', margin: 0, lineHeight: 1.5 }}>
-              ÖSYM sınavlarında hangi konudan kaç soru çıktığını yıl yıl inceleyin; bitirdiğiniz konuların yanına tik koyarak eksiklerinizi doğrudan tespit edin.
-            </p>
+        <div style={{ maxWidth: 560 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                padding: '3px 8px',
+                borderRadius: 6,
+                background: 'rgba(212, 255, 0, 0.2)',
+                color: 'var(--color-accent)',
+                letterSpacing: 0.5
+              }}
+            >
+              2018–2026 Çıkmış Sorular Tablosu
+            </span>
+            <a
+              href="https://ertansinansahin.com/yks-soru-dagilimi/"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                fontSize: 11,
+                color: 'var(--color-text-dim)',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 3
+              }}
+            >
+              <span>Kaynak: Ertan Sinan Şahin</span>
+              <ExternalLink size={11} />
+            </a>
           </div>
+          <h2 style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 6px 0', color: '#FFFFFF', letterSpacing: -0.3 }}>
+            ÖSYM YKS Konu ve Soru Dağılımı Tablosu
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--color-text-muted)', margin: 0, lineHeight: 1.5 }}>
+            ÖSYM çıkmış sorular analizine göre hazırlanan ders ve konu tabloları. Bitirdiğiniz konuların solundaki kutucuğa tıklayarak <strong>tik koyabilirsiniz</strong>.
+          </p>
+        </div>
 
-          {/* Quick Progress KPI */}
-          <div
-            style={{
-              background: '#16181F',
-              border: '1px solid var(--color-border)',
-              borderRadius: 14,
-              padding: '12px 18px',
-              textAlign: 'center',
-              minWidth: 160
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 2 }}>
-              {selectedExam} TAMAMLANMA
-            </div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}>
-              %{stats.pct}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
-              {stats.completedCount} / {stats.totalTopicsCount} Konu Tiklendi
-            </div>
+        {/* Quick KPI Badge */}
+        <div
+          style={{
+            background: '#16181F',
+            border: '1px solid var(--color-border)',
+            borderRadius: 14,
+            padding: '12px 18px',
+            textAlign: 'center',
+            minWidth: 160
+          }}
+        >
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 2 }}>
+            {selectedExam} TAMAMLANMA
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}>
+            %{stats.pct}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
+            {stats.completedTopics} / {stats.totalTopics} Konu Tiklendi
           </div>
         </div>
       </div>
@@ -217,7 +167,7 @@ export function OsymDistributionView({
             setSelectedSubjectCode('all');
           }}
         >
-          📘 TYT Soru Dağılımı ({OSYM_QUESTION_DISTRIBUTION.filter((s) => s.exam === 'TYT').length} Ders)
+          📘 TYT Soru Dağılımı Tabloları
         </button>
         <button
           type="button"
@@ -229,7 +179,7 @@ export function OsymDistributionView({
             setSelectedSubjectCode('all');
           }}
         >
-          📕 AYT Soru Dağılımı ({OSYM_QUESTION_DISTRIBUTION.filter((s) => s.exam === 'AYT').length} Ders)
+          📕 AYT Soru Dağılımı Tabloları
         </button>
       </div>
 
@@ -239,7 +189,7 @@ export function OsymDistributionView({
           className={`pill-toggle-btn ${selectedSubjectCode === 'all' ? 'active' : ''}`}
           onClick={() => setSelectedSubjectCode('all')}
         >
-          Tüm Dersler
+          Tüm Dersler ({examSubjects.length})
         </button>
         {examSubjects.map((sub) => (
           <button
@@ -265,13 +215,13 @@ export function OsymDistributionView({
         ))}
       </div>
 
-      {/* Search, Status & Sorting Bar */}
+      {/* Search & Completion Status Filters */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ position: 'relative' }}>
           <Search size={16} color="var(--color-text-dim)" style={{ position: 'absolute', left: 12, top: 12 }} />
           <input
             type="text"
-            placeholder="Konu veya ünite ara (ör: paragraf, türev, modern atom, kalıtım)..."
+            placeholder="Tabloda konu veya ünite ara (ör: paragraf, fonksiyon, modern atom, kalıtım)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -287,268 +237,365 @@ export function OsymDistributionView({
           />
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          {/* Status Tabs */}
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button
-              className={`pill-toggle-btn ${statusFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('all')}
-            >
-              Tümü ({allFilteredTopics.length})
-            </button>
-            <button
-              className={`pill-toggle-btn ${statusFilter === 'completed' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('completed')}
-            >
-              ✅ Bitirdiklerim
-            </button>
-            <button
-              className={`pill-toggle-btn ${statusFilter === 'uncompleted' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('uncompleted')}
-            >
-              ⏳ Kalan Konular
-            </button>
-          </div>
-
-          {/* Sort Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <ArrowUpDown size={14} color="var(--color-text-muted)" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: 10,
-                background: '#1D1F25',
-                border: '1px solid var(--color-border)',
-                color: '#fff',
-                fontSize: 12,
-                cursor: 'pointer'
-              }}
-            >
-              <option value="total">🔥 En Çok Soru Çıkanlar (Toplam)</option>
-              <option value="recent">⚡ Son Yılların Ağırlığı (2024-2026)</option>
-              <option value="name">🔤 Konu Adına Göre (A-Z)</option>
-            </select>
-          </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button
+            className={`pill-toggle-btn ${statusFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('all')}
+          >
+            Tümü
+          </button>
+          <button
+            className={`pill-toggle-btn ${statusFilter === 'completed' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('completed')}
+          >
+            ✅ Bitirdiğim Konular
+          </button>
+          <button
+            className={`pill-toggle-btn ${statusFilter === 'uncompleted' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('uncompleted')}
+          >
+            ⏳ Henüz Bitirmediklerim
+          </button>
         </div>
       </div>
 
-      {/* Topics Distribution List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {allFilteredTopics.length === 0 ? (
-          <div
-            className="app-card"
-            style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--color-text-muted)' }}
-          >
-            Arama veya filtre kriterlerinize uygun konu bulunamadı.
-          </div>
-        ) : (
-          allFilteredTopics.map((topicItem) => {
-            const isCompleted = topicItem.isCompleted;
+      {/* Tables List (Subject by Subject) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {activeSubjects.map((subject: OsymSubjectDistribution) => {
+          // Filter topics of this subject
+          const filteredTopics = subject.topics.filter((t: OsymTopicItem) => {
+            const topicKey = `${subject.code}_${t.topic}`;
+            const isCompleted = topicProgress[topicKey] === 'completed';
 
-            // Frequency weight badge
-            let badgeText = '• Ara Sıra';
-            let badgeBg = 'rgba(255, 255, 255, 0.05)';
-            let badgeColor = 'var(--color-text-dim)';
-            if (topicItem.total >= 30) {
-              badgeText = '🔥 Çok Yüksek Ağırlık';
-              badgeBg = 'rgba(255, 80, 80, 0.15)';
-              badgeColor = '#FF5050';
-            } else if (topicItem.total >= 10) {
-              badgeText = '⭐ Düzenli Çıkan';
-              badgeBg = 'rgba(255, 184, 0, 0.15)';
-              badgeColor = '#FFB800';
-            } else if (topicItem.total >= 5) {
-              badgeText = '📌 Sık Sorulan';
-              badgeBg = 'rgba(0, 240, 255, 0.15)';
-              badgeColor = '#00F0FF';
+            if (statusFilter === 'completed' && !isCompleted) return false;
+            if (statusFilter === 'uncompleted' && isCompleted) return false;
+
+            if (searchQuery.trim()) {
+              const q = searchQuery.toLowerCase();
+              const matches =
+                t.topic.toLowerCase().includes(q) ||
+                (t.unit && t.unit.toLowerCase().includes(q)) ||
+                subject.name.toLowerCase().includes(q);
+              if (!matches) return false;
             }
 
-            return (
+            return true;
+          });
+
+          if (filteredTopics.length === 0 && searchQuery) return null;
+
+          const isCollapsed = !!collapsedSubjects[subject.code];
+          const completedInSub = subject.topics.filter(
+            (t) => topicProgress[`${subject.code}_${t.topic}`] === 'completed'
+          ).length;
+
+          // Compute column sums for this subject table
+          const columnSums: Record<string, number> = {};
+          years.forEach((yr) => {
+            columnSums[yr] = filteredTopics.reduce((sum, t) => sum + (t.yearly[yr] || 0), 0);
+          });
+          const totalTableSum = filteredTopics.reduce((sum, t) => sum + t.total, 0);
+
+          return (
+            <div
+              key={subject.code}
+              className="app-card"
+              style={{
+                padding: 0,
+                overflow: 'hidden',
+                borderRadius: 16,
+                border: '1px solid var(--color-border)',
+                background: '#16181F'
+              }}
+            >
+              {/* Subject Table Header Bar */}
               <div
-                key={topicItem.topicKey}
-                className="app-card"
+                onClick={() => toggleSubjectCollapse(subject.code)}
                 style={{
-                  padding: '14px 16px',
-                  borderRadius: 16,
-                  border: isCompleted
-                    ? '1px solid rgba(212, 255, 0, 0.3)'
-                    : '1px solid var(--color-border)',
-                  background: isCompleted ? 'rgba(212, 255, 0, 0.03)' : '#191B22',
-                  transition: 'all 0.15s ease'
+                  padding: '14px 18px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderBottom: isCollapsed ? 'none' : '1px solid var(--color-border)',
+                  cursor: 'pointer'
                 }}
               >
-                {/* Top Row: Tick Button + Topic & Unit + Badges + Total Questions */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1, minWidth: 0 }}>
-                    {/* Checkmark Button */}
-                    <button
-                      type="button"
-                      onClick={() => onToggleTopicCompleted(topicItem.topicKey)}
-                      title={isCompleted ? 'Bitirildi olarak işaretli (kaldırmak için tıklayın)' : 'Bu konuyu bitirdim olarak işaretle'}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 2,
-                        marginTop: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: isCompleted ? 'var(--color-accent)' : 'var(--color-text-muted)',
-                        transition: 'transform 0.1s ease'
-                      }}
-                      onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.85)')}
-                      onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                    >
-                      {isCompleted ? (
-                        <CheckCircle2 size={24} color="var(--color-accent)" />
-                      ) : (
-                        <Circle size={24} color="var(--color-text-dim)" />
-                      )}
-                    </button>
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
-                        <span
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 800,
-                            padding: '2px 7px',
-                            borderRadius: 6,
-                            background: `${topicItem.subjectColor}20`,
-                            color: topicItem.subjectColor
-                          }}
-                        >
-                          {topicItem.subjectName}
-                        </span>
-
-                        <span
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 800,
-                            padding: '2px 7px',
-                            borderRadius: 6,
-                            background: badgeBg,
-                            color: badgeColor
-                          }}
-                        >
-                          {badgeText}
-                        </span>
-
-                        {isCompleted && (
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 800,
-                              padding: '2px 7px',
-                              borderRadius: 6,
-                              background: 'rgba(212, 255, 0, 0.15)',
-                              color: 'var(--color-accent)',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 2
-                            }}
-                          >
-                            ✓ Bitirildi
-                          </span>
-                        )}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 800,
-                          color: isCompleted ? 'rgba(255, 255, 255, 0.75)' : '#FFFFFF',
-                          lineHeight: 1.3
-                        }}
-                      >
-                        {topicItem.topic}
-                      </div>
-
-                      {topicItem.unit && (
-                        <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                          Ünite: {topicItem.unit}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Total Question Count Badge */}
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 22,
-                        fontWeight: 900,
-                        color: topicItem.total > 0 ? 'var(--color-accent)' : 'var(--color-text-dim)',
-                        fontFamily: 'var(--font-mono)',
-                        lineHeight: 1
-                      }}
-                    >
-                      {topicItem.total}
-                    </div>
-                    <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                      TOPLAM SORU
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      background: subject.color,
+                      boxShadow: `0 0 8px ${subject.color}`
+                    }}
+                  />
+                  <div>
+                    <h3 style={{ fontSize: 16, fontWeight: 900, margin: 0, color: '#FFFFFF' }}>
+                      {subject.name} Soru Dağılımı Tablosu
+                    </h3>
+                    <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                      {completedInSub} / {subject.topics.length} Konu Tamamlandı • Toplam {totalTableSum} Soru
                     </div>
                   </div>
                 </div>
 
-                {/* Yearly Questions Breakdown Strip */}
-                <div
-                  style={{
-                    marginTop: 12,
-                    paddingTop: 10,
-                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 6,
-                    overflowX: 'auto',
-                    paddingBottom: 2
-                  }}
-                >
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', minWidth: 60 }}>
-                    Yıl Yıl Dağılım:
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 6, flex: 1, justifyContent: 'flex-end' }}>
-                    {yearsList.map((yr) => {
-                      const count = topicItem.yearly[yr] || 0;
-                      return (
-                        <div
-                          key={yr}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            minWidth: 32,
-                            padding: '4px 6px',
-                            borderRadius: 8,
-                            background: count > 0 ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                            border: count > 0 ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid transparent'
-                          }}
-                        >
-                          <span style={{ fontSize: 9, color: 'var(--color-text-dim)', fontWeight: 600 }}>{yr.slice(2)}</span>
-                          <span
-                            style={{
-                              fontSize: 12,
-                              fontWeight: count > 0 ? 900 : 500,
-                              color: count > 0 ? '#FFFFFF' : 'var(--color-text-dim)',
-                              fontFamily: 'var(--font-mono)'
-                            }}
-                          >
-                            {count > 0 ? count : '–'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      padding: '3px 8px',
+                      borderRadius: 6,
+                      background: `${subject.color}20`,
+                      color: subject.color
+                    }}
+                  >
+                    %{Math.round((completedInSub / (subject.topics.length || 1)) * 100)}
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    color="var(--color-text-muted)"
+                    style={{
+                      transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+                      transition: 'transform 0.2s ease'
+                    }}
+                  />
                 </div>
               </div>
-            );
-          })
-        )}
+
+              {/* The Actual Table */}
+              {!isCollapsed && (
+                <div style={{ width: '100%', overflowX: 'auto' }}>
+                  <table
+                    style={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      fontSize: 12,
+                      textAlign: 'left',
+                      minWidth: 780
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          background: '#121318',
+                          borderBottom: '1px solid var(--color-border)',
+                          color: 'var(--color-text-muted)',
+                          fontWeight: 800,
+                          fontSize: 11
+                        }}
+                      >
+                        <th style={{ padding: '10px 12px', width: 44, textAlign: 'center' }}>Tik</th>
+                        <th style={{ padding: '10px 14px' }}>Konu Adı</th>
+                        {years.map((yr) => (
+                          <th key={yr} style={{ padding: '10px 8px', textAlign: 'center', width: 46 }}>
+                            {yr}
+                          </th>
+                        ))}
+                        <th
+                          style={{
+                            padding: '10px 14px',
+                            textAlign: 'right',
+                            width: 65,
+                            color: 'var(--color-accent)'
+                          }}
+                        >
+                          Toplam
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTopics.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={12}
+                            style={{
+                              padding: '24px',
+                              textAlign: 'center',
+                              color: 'var(--color-text-muted)'
+                            }}
+                          >
+                            Bu filtreye uygun konu bulunamadı.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredTopics.map((topicItem, idx) => {
+                          const topicKey = `${subject.code}_${topicItem.topic}`;
+                          const isCompleted = topicProgress[topicKey] === 'completed';
+
+                          return (
+                            <tr
+                              key={topicKey}
+                              style={{
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                                background: isCompleted
+                                  ? 'rgba(212, 255, 0, 0.035)'
+                                  : idx % 2 === 1
+                                  ? 'rgba(255, 255, 255, 0.015)'
+                                  : 'transparent',
+                                transition: 'background 0.15s ease'
+                              }}
+                              className="table-row-hover"
+                            >
+                              {/* Tik Column */}
+                              <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => onToggleTopicCompleted(topicKey)}
+                                  title={
+                                    isCompleted
+                                      ? 'Bitirildi (kaldırmak için tıklayın)'
+                                      : 'Bu konuyu bitirdim olarak işaretle'
+                                  }
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: isCompleted ? 'var(--color-accent)' : 'var(--color-text-dim)',
+                                    transition: 'transform 0.1s ease'
+                                  }}
+                                  onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.85)')}
+                                  onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                                >
+                                  {isCompleted ? (
+                                    <CheckCircle2 size={19} color="var(--color-accent)" />
+                                  ) : (
+                                    <Circle size={19} color="rgba(255, 255, 255, 0.25)" />
+                                  )}
+                                </button>
+                              </td>
+
+                              {/* Topic Name & Unit */}
+                              <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
+                                <div
+                                  style={{
+                                    fontWeight: isCompleted ? 700 : 600,
+                                    fontSize: 13,
+                                    color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
+                                    textDecoration: isCompleted ? 'line-through' : 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 6
+                                  }}
+                                >
+                                  <span>{topicItem.topic}</span>
+                                  {isCompleted && (
+                                    <span
+                                      style={{
+                                        fontSize: 9.5,
+                                        fontWeight: 800,
+                                        padding: '1px 5px',
+                                        borderRadius: 4,
+                                        background: 'rgba(212, 255, 0, 0.15)',
+                                        color: 'var(--color-accent)'
+                                      }}
+                                    >
+                                      ✓ Bitti
+                                    </span>
+                                  )}
+                                </div>
+                                {topicItem.unit && (
+                                  <div style={{ fontSize: 10.5, color: 'var(--color-text-dim)', marginTop: 2 }}>
+                                    {topicItem.unit}
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* Years 2018 - 2026 */}
+                              {years.map((yr) => {
+                                const count = topicItem.yearly[yr] || 0;
+                                return (
+                                  <td
+                                    key={yr}
+                                    style={{
+                                      padding: '10px 8px',
+                                      textAlign: 'center',
+                                      verticalAlign: 'middle',
+                                      fontFamily: 'var(--font-mono)',
+                                      fontWeight: count > 0 ? 800 : 500,
+                                      color: count > 0 ? '#FFFFFF' : 'var(--color-text-dim)',
+                                      background: count > 0 ? 'rgba(255, 255, 255, 0.02)' : 'transparent'
+                                    }}
+                                  >
+                                    {count > 0 ? count : '–'}
+                                  </td>
+                                );
+                              })}
+
+                              {/* Total Column */}
+                              <td
+                                style={{
+                                  padding: '10px 14px',
+                                  textAlign: 'right',
+                                  verticalAlign: 'middle',
+                                  fontWeight: 900,
+                                  fontSize: 13,
+                                  fontFamily: 'var(--font-mono)',
+                                  color: topicItem.total > 0 ? 'var(--color-accent)' : 'var(--color-text-dim)'
+                                }}
+                              >
+                                {topicItem.total}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+
+                    {/* Table Summary Footer Row */}
+                    {filteredTopics.length > 0 && (
+                      <tfoot>
+                        <tr
+                          style={{
+                            background: '#121318',
+                            borderTop: '2px solid var(--color-border)',
+                            fontWeight: 900,
+                            fontSize: 12
+                          }}
+                        >
+                          <td style={{ padding: '12px', textAlign: 'center' }}>∑</td>
+                          <td style={{ padding: '12px 14px', color: '#FFFFFF' }}>
+                            {subject.name} Toplam Soru Sayısı
+                          </td>
+                          {years.map((yr) => (
+                            <td
+                              key={yr}
+                              style={{
+                                padding: '12px 8px',
+                                textAlign: 'center',
+                                fontFamily: 'var(--font-mono)',
+                                color: columnSums[yr] > 0 ? '#FFFFFF' : 'var(--color-text-dim)'
+                              }}
+                            >
+                              {columnSums[yr] || '–'}
+                            </td>
+                          ))}
+                          <td
+                            style={{
+                              padding: '12px 14px',
+                              textAlign: 'right',
+                              fontFamily: 'var(--font-mono)',
+                              color: 'var(--color-accent)',
+                              fontSize: 14
+                            }}
+                          >
+                            {totalTableSum}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
