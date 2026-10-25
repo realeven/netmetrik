@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   CheckCircle2,
   Circle,
@@ -16,32 +16,54 @@ import { sounds } from '../lib/sound';
 interface OsymDistributionViewProps {
   topicProgress: Record<string, TopicStatus>;
   onToggleTopicCompleted: (topicKey: string) => void;
+  userFieldTrack?: string;
   isDesktop?: boolean;
 }
 
 export function OsymDistributionView({
   topicProgress,
   onToggleTopicCompleted,
+  userFieldTrack = 'sayisal',
   isDesktop
 }: OsymDistributionViewProps) {
-  const [selectedExam, setSelectedExam] = useState<'TYT' | 'AYT'>('TYT');
+  const [selectedExam, setSelectedExam] = useState<'TYT' | 'AYT'>('AYT');
+  const [selectedFieldTrack, setSelectedFieldTrack] = useState<'sayisal' | 'esit_agirlik' | 'sozel' | 'all'>(
+    userFieldTrack === 'sayisal' || userFieldTrack === 'esit_agirlik' || userFieldTrack === 'sozel'
+      ? (userFieldTrack as any)
+      : 'sayisal'
+  );
   const [selectedSubjectCode, setSelectedSubjectCode] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'uncompleted'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsedSubjects, setCollapsedSubjects] = useState<Record<string, boolean>>({});
 
-  // Available subjects for the active exam category
+  // Available subjects for the active exam category and field track
   const examSubjects = useMemo(() => {
-    return OSYM_QUESTION_DISTRIBUTION.filter((s) => s.exam === selectedExam);
-  }, [selectedExam]);
+    return OSYM_QUESTION_DISTRIBUTION.filter((s) => {
+      if (s.exam !== selectedExam) return false;
+      if (selectedExam === 'AYT' && selectedFieldTrack !== 'all') {
+        if (!s.fieldTrack || !s.fieldTrack.includes(selectedFieldTrack)) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [selectedExam, selectedFieldTrack]);
 
-  // Active subjects to display
+  // Reset selected subject if not present in active field track
+  useEffect(() => {
+    if (selectedSubjectCode !== 'all' && !examSubjects.some((s) => s.code === selectedSubjectCode)) {
+      setSelectedSubjectCode('all');
+    }
+  }, [examSubjects, selectedSubjectCode]);
+
+  // Active subjects to render
   const activeSubjects = useMemo(() => {
     if (selectedSubjectCode === 'all') return examSubjects;
     return examSubjects.filter((s) => s.code === selectedSubjectCode);
   }, [examSubjects, selectedSubjectCode]);
 
-  // Overall stats for the selected exam
+  // Overall stats for the selected exam & field track
   const stats = useMemo(() => {
     let totalQuestions = 0;
     let completedTopics = 0;
@@ -102,13 +124,13 @@ export function OsymDistributionView({
                 letterSpacing: 0.5
               }}
             >
-              {selectedExam === 'TYT' ? 'MEB 2018–2025 Resmi TYT Soru Dağılımı' : '2018–2026 Çıkmış Sorular Tablosu'}
+              {selectedExam === 'TYT' ? 'MEB 2018–2025 Resmi TYT Soru Dağılımı' : 'MEB 2018/2019–2025 Resmi AYT Soru Dağılımı'}
             </span>
             <a
               href={
                 selectedExam === 'TYT'
                   ? 'https://reyhanlisfkasml.meb.k12.tr/meb_iys_dosyalar/31/08/963209/dosyalar/2025_12/694bcadab4eec921652162_2025TYT_Y%C4%B1llara_Gore_Soru_Dag%C4%B1l%C4%B1m%C4%B1.pdf'
-                  : 'https://ertansinansahin.com/yks-soru-dagilimi/'
+                  : 'https://reyhanlisfkasml.meb.k12.tr/meb_iys_dosyalar/31/08/963209/dosyalar/2025_12/694bcaf0da32d183108646_2025AYT_Y%C4%B1llara_Gore_Soru_Dag%C4%B1l%C4%B1m%C4%B1.pdf'
               }
               target="_blank"
               rel="noreferrer"
@@ -121,7 +143,7 @@ export function OsymDistributionView({
                 gap: 3
               }}
             >
-              <span>Kaynak: {selectedExam === 'TYT' ? 'MEB Resmi TYT Analizi (PDF)' : 'Ertan Sinan Şahin'}</span>
+              <span>Kaynak: {selectedExam === 'TYT' ? 'MEB Resmi TYT Analizi (PDF)' : 'MEB Resmi AYT Analizi (PDF)'}</span>
               <ExternalLink size={11} />
             </a>
           </div>
@@ -144,8 +166,16 @@ export function OsymDistributionView({
             minWidth: 160
           }}
         >
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 2 }}>
-            {selectedExam} TAMAMLANMA
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 2, textTransform: 'uppercase' }}>
+            {selectedExam === 'AYT'
+              ? selectedFieldTrack === 'sayisal'
+                ? 'AYT SAYISAL TAMAMLANMA'
+                : selectedFieldTrack === 'esit_agirlik'
+                ? 'AYT EŞİT AĞIRLIK TAMAMLANMA'
+                : selectedFieldTrack === 'sozel'
+                ? 'AYT SÖZEL TAMAMLANMA'
+                : 'AYT GENEL TAMAMLANMA'
+              : 'TYT TAMAMLANMA'}
           </div>
           <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}>
             %{stats.pct}
@@ -184,6 +214,53 @@ export function OsymDistributionView({
         </button>
       </div>
 
+      {/* AYT Alan Seçimi (Sayısal, Eşit Ağırlık, Sözel, Tüm Dersler) */}
+      {selectedExam === 'AYT' && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '12px 16px',
+            background: 'linear-gradient(90deg, rgba(212, 255, 0, 0.08) 0%, rgba(20, 22, 28, 0.8) 100%)',
+            border: '1px solid rgba(212, 255, 0, 0.25)',
+            borderRadius: 14,
+            overflowX: 'auto'
+          }}
+        >
+          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-accent)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5 }}>
+            🎯 Alanını Seç:
+          </span>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
+            {[
+              { id: 'sayisal', label: '🔬 Sayısal (MF)', sub: 'Matematik, Fizik, Kimya, Biyoloji' },
+              { id: 'esit_agirlik', label: '⚖️ Eşit Ağırlık (TM)', sub: 'Matematik, Edebiyat, Tarih, Coğrafya' },
+              { id: 'sozel', label: '📚 Sözel (TS)', sub: 'Edebiyat, Tarih, Coğrafya, Felsefe, Din' },
+              { id: 'all', label: '🌐 Tüm Dersler', sub: 'Tüm AYT branşları' }
+            ].map((track) => {
+              const isActive = selectedFieldTrack === track.id;
+              return (
+                <button
+                  key={track.id}
+                  type="button"
+                  className={`alan-btn${isActive ? ' active' : ''}`}
+                  onClick={() => {
+                    sounds.playClick();
+                    // Toggle off if already selected
+                    const nextTrack = selectedFieldTrack === track.id ? 'all' : (track.id as any);
+                    setSelectedFieldTrack(nextTrack);
+                    setSelectedSubjectCode('all');
+                  }}
+                  title={isActive ? `${track.sub} (Tıklayarak seçimi kaldır / geri çek)` : track.sub}
+                >
+                  {track.label} {isActive && track.id !== 'all' ? '✕' : ''}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Subject Filter Pills */}
       <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
         <button
@@ -192,28 +269,33 @@ export function OsymDistributionView({
         >
           Tüm Dersler ({examSubjects.length})
         </button>
-        {examSubjects.map((sub) => (
-          <button
-            key={sub.code}
-            className={`pill-toggle-btn ${selectedSubjectCode === sub.code ? 'active' : ''}`}
-            onClick={() => {
-              sounds.playClick();
-              setSelectedSubjectCode(sub.code);
-            }}
-          >
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                background: sub.color,
-                display: 'inline-block',
-                marginRight: 6
+        {examSubjects.map((sub) => {
+          const isActive = selectedSubjectCode === sub.code;
+          return (
+            <button
+              key={sub.code}
+              className={`pill-toggle-btn ${isActive ? 'active' : ''}`}
+              onClick={() => {
+                sounds.playClick();
+                // Toggle off to 'all' if clicked again
+                setSelectedSubjectCode(isActive ? 'all' : sub.code);
               }}
-            />
-            {sub.name}
-          </button>
-        ))}
+              title={isActive ? 'Filtreyi kaldır (Tüm dersler)' : sub.name}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: sub.color,
+                  display: 'inline-block',
+                  marginRight: 6
+                }}
+              />
+              {sub.name} {isActive ? '✕' : ''}
+            </button>
+          );
+        })}
       </div>
 
       {/* Search & Completion Status Filters */}
@@ -247,15 +329,23 @@ export function OsymDistributionView({
           </button>
           <button
             className={`pill-toggle-btn ${statusFilter === 'completed' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('completed')}
+            onClick={() => {
+              sounds.playClick();
+              setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed');
+            }}
+            title={statusFilter === 'completed' ? 'Filtreyi geri çek / kaldır' : 'Bitirdiğim konular'}
           >
-            ✅ Bitirdiğim Konular
+            ✅ Bitirdiğim Konular {statusFilter === 'completed' ? '✕' : ''}
           </button>
           <button
             className={`pill-toggle-btn ${statusFilter === 'uncompleted' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('uncompleted')}
+            onClick={() => {
+              sounds.playClick();
+              setStatusFilter(statusFilter === 'uncompleted' ? 'all' : 'uncompleted');
+            }}
+            title={statusFilter === 'uncompleted' ? 'Filtreyi geri çek / kaldır' : 'Henüz bitirmediklerim'}
           >
-            ⏳ Henüz Bitirmediklerim
+            ⏳ Henüz Bitirmediklerim {statusFilter === 'uncompleted' ? '✕' : ''}
           </button>
         </div>
       </div>

@@ -47,6 +47,7 @@ import {
   Bot,
   Image as ImageIcon,
   XCircle,
+  Eye,
   EyeOff,
   Maximize2,
   Settings
@@ -969,6 +970,7 @@ export default function App() {
           onCycleStatus={handleCycleTopicStatus}
           onToggleTopicCompleted={handleToggleTopicCompleted}
           onOpenOsymDistribution={() => handleNavigateTab('osym')}
+          userFieldTrack={profile.fieldTrack}
           isDesktop={isDesktop}
         />
       )}
@@ -977,6 +979,7 @@ export default function App() {
         <OsymDistributionView
           topicProgress={topicProgress}
           onToggleTopicCompleted={handleToggleTopicCompleted}
+          userFieldTrack={profile.fieldTrack}
           isDesktop={isDesktop}
         />
       )}
@@ -4626,15 +4629,23 @@ function ExamsScreenView({
                 </button>
                 <button
                   className={`pill-toggle-btn ${filterType === 'TYT' ? 'active' : ''}`}
-                  onClick={() => setFilterType('TYT')}
+                  onClick={() => {
+                    sounds.playClick();
+                    setFilterType(filterType === 'TYT' ? 'all' : 'TYT');
+                  }}
+                  title={filterType === 'TYT' ? 'Filtreyi kaldır (Tüm sınavlar)' : 'Sadece TYT'}
                 >
-                  TYT
+                  TYT {filterType === 'TYT' ? '✕' : ''}
                 </button>
                 <button
                   className={`pill-toggle-btn ${filterType === 'AYT' ? 'active' : ''}`}
-                  onClick={() => setFilterType('AYT')}
+                  onClick={() => {
+                    sounds.playClick();
+                    setFilterType(filterType === 'AYT' ? 'all' : 'AYT');
+                  }}
+                  title={filterType === 'AYT' ? 'Filtreyi kaldır (Tüm sınavlar)' : 'Sadece AYT'}
                 >
-                  AYT
+                  AYT {filterType === 'AYT' ? '✕' : ''}
                 </button>
               </div>
 
@@ -4669,27 +4680,43 @@ function ExamsScreenView({
               </button>
               <button
                 className={`pill-toggle-btn ${filterDifficulty === 'kolay' ? 'active' : ''}`}
-                onClick={() => setFilterDifficulty('kolay')}
+                onClick={() => {
+                  sounds.playClick();
+                  setFilterDifficulty(filterDifficulty === 'kolay' ? 'all' : 'kolay');
+                }}
+                title={filterDifficulty === 'kolay' ? 'Filtreyi kaldır' : 'Kolay'}
               >
-                🟢 Kolay
+                🟢 Kolay {filterDifficulty === 'kolay' ? '✕' : ''}
               </button>
               <button
                 className={`pill-toggle-btn ${filterDifficulty === 'orta' ? 'active' : ''}`}
-                onClick={() => setFilterDifficulty('orta')}
+                onClick={() => {
+                  sounds.playClick();
+                  setFilterDifficulty(filterDifficulty === 'orta' ? 'all' : 'orta');
+                }}
+                title={filterDifficulty === 'orta' ? 'Filtreyi kaldır' : 'Orta'}
               >
-                🟡 Orta
+                🟡 Orta {filterDifficulty === 'orta' ? '✕' : ''}
               </button>
               <button
                 className={`pill-toggle-btn ${filterDifficulty === 'osym' ? 'active' : ''}`}
-                onClick={() => setFilterDifficulty('osym')}
+                onClick={() => {
+                  sounds.playClick();
+                  setFilterDifficulty(filterDifficulty === 'osym' ? 'all' : 'osym');
+                }}
+                title={filterDifficulty === 'osym' ? 'Filtreyi kaldır' : 'ÖSYM Ayarı'}
               >
-                🟣 ÖSYM Ayarı
+                🟣 ÖSYM Ayarı {filterDifficulty === 'osym' ? '✕' : ''}
               </button>
               <button
                 className={`pill-toggle-btn ${filterDifficulty === 'zor' ? 'active' : ''}`}
-                onClick={() => setFilterDifficulty('zor')}
+                onClick={() => {
+                  sounds.playClick();
+                  setFilterDifficulty(filterDifficulty === 'zor' ? 'all' : 'zor');
+                }}
+                title={filterDifficulty === 'zor' ? 'Filtreyi kaldır' : 'Zor'}
               >
-                🔴 Zor
+                🔴 Zor {filterDifficulty === 'zor' ? '✕' : ''}
               </button>
             </div>
           </div>
@@ -5262,16 +5289,23 @@ function CurriculumScreenView({
   onCycleStatus,
   onToggleTopicCompleted,
   onOpenOsymDistribution,
+  userFieldTrack = 'sayisal',
   isDesktop
 }: {
   topicProgress: Record<string, TopicStatus>;
   onCycleStatus: (topicKey: string) => void;
   onToggleTopicCompleted?: (topicKey: string) => void;
   onOpenOsymDistribution?: () => void;
+  userFieldTrack?: string;
   isDesktop?: boolean;
 }) {
   const [activeCurriculumTab, setActiveCurriculumTab] = useState<'mufredat' | 'osym'>('mufredat');
   const [examCategory, setExamCategory] = useState<'TYT' | 'AYT'>('TYT');
+  const [selectedFieldTrack, setSelectedFieldTrack] = useState<'sayisal' | 'esit_agirlik' | 'sozel' | 'all'>(
+    userFieldTrack === 'sayisal' || userFieldTrack === 'esit_agirlik' || userFieldTrack === 'sozel'
+      ? (userFieldTrack as any)
+      : 'sayisal'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'in_progress' | 'not_started'>('all');
   const [expandedSubjectCodes, setExpandedSubjectCodes] = useState<Record<string, boolean>>({
@@ -5280,7 +5314,19 @@ function CurriculumScreenView({
     ayt_mat: true
   });
 
-  const availableSubjects = YKS_SUBJECTS.filter((s) => s.category === examCategory);
+  const availableSubjects = YKS_SUBJECTS.filter((s) => {
+    if (s.category !== examCategory) return false;
+    if (examCategory === 'AYT' && selectedFieldTrack === 'sayisal') {
+      return ['ayt_mat', 'ayt_geo', 'ayt_fizik', 'ayt_kimya', 'ayt_biyo'].includes(s.code);
+    }
+    if (examCategory === 'AYT' && selectedFieldTrack === 'esit_agirlik') {
+      return ['ayt_mat', 'ayt_geo', 'ayt_edebiyat', 'ayt_tarih', 'ayt_cografya'].includes(s.code);
+    }
+    if (examCategory === 'AYT' && selectedFieldTrack === 'sozel') {
+      return ['ayt_edebiyat', 'ayt_tarih', 'ayt_cografya', 'ayt_felsefe', 'ayt_din'].includes(s.code);
+    }
+    return true;
+  });
 
   const totalTopicsInCategory = availableSubjects.reduce((sum, s) => sum + s.topics.length, 0);
   const completedTopicsInCategory = availableSubjects.reduce(
@@ -5346,6 +5392,7 @@ function CurriculumScreenView({
         <OsymDistributionView
           topicProgress={topicProgress}
           onToggleTopicCompleted={onToggleTopicCompleted || onCycleStatus}
+          userFieldTrack={selectedFieldTrack}
           isDesktop={isDesktop}
         />
       ) : (
@@ -5374,6 +5421,52 @@ function CurriculumScreenView({
             </button>
           </div>
 
+          {/* AYT Alan Seçimi (Sayısal, Eşit Ağırlık, Sözel, Tüm Dersler) */}
+          {examCategory === 'AYT' && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 12px',
+                background: 'rgba(212, 255, 0, 0.05)',
+                border: '1px solid rgba(212, 255, 0, 0.2)',
+                borderRadius: 12,
+                overflowX: 'auto'
+              }}
+            >
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-accent)', whiteSpace: 'nowrap' }}>
+                🎯 Alan:
+              </span>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
+                {[
+                  { id: 'sayisal', label: '🔬 Sayısal (MF)' },
+                  { id: 'esit_agirlik', label: '⚖️ Eşit Ağırlık (TM)' },
+                  { id: 'sozel', label: '📚 Sözel (TS)' },
+                  { id: 'all', label: '🌐 Tüm Dersler' }
+                ].map((track) => {
+                  const isActive = selectedFieldTrack === track.id;
+                  return (
+                    <button
+                      key={track.id}
+                      type="button"
+                      className={`alan-btn${isActive ? ' active' : ''}`}
+                      style={{ padding: '5px 10px', borderRadius: 8, fontSize: 11 }}
+                      onClick={() => {
+                        sounds.playClick();
+                        const nextTrack = selectedFieldTrack === track.id ? 'all' : (track.id as any);
+                        setSelectedFieldTrack(nextTrack);
+                      }}
+                      title={isActive ? 'Tıklayarak seçimi kaldır / geri çek' : track.label}
+                    >
+                      {track.label} {isActive && track.id !== 'all' ? '✕' : ''}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Category Overall Progress Banner */}
           <div
             className="app-card"
@@ -5386,7 +5479,13 @@ function CurriculumScreenView({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <div>
                 <div style={{ fontSize: 16, fontWeight: 800 }}>
-                  {examCategory} Müfredat İlerlemesi
+                  {examCategory === 'AYT' && selectedFieldTrack === 'sayisal'
+                    ? 'AYT Sayısal (MF) Müfredat İlerlemesi'
+                    : examCategory === 'AYT' && selectedFieldTrack === 'esit_agirlik'
+                    ? 'AYT Eşit Ağırlık (TM) Müfredat İlerlemesi'
+                    : examCategory === 'AYT' && selectedFieldTrack === 'sozel'
+                    ? 'AYT Sözel (TS) Müfredat İlerlemesi'
+                    : `${examCategory} Müfredat İlerlemesi`}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
                   Toplam {completedTopicsInCategory} / {totalTopicsInCategory} Konu Tamamlandı
@@ -5449,15 +5548,23 @@ function CurriculumScreenView({
                 </button>
                 <button
                   className={`pill-toggle-btn ${statusFilter === 'completed' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('completed')}
+                  onClick={() => {
+                    sounds.playClick();
+                    setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed');
+                  }}
+                  title={statusFilter === 'completed' ? 'Filtreyi geri çek / kaldır' : 'Bitti'}
                 >
-                  ✓ Bitti
+                  ✓ Bitti {statusFilter === 'completed' ? '✕' : ''}
                 </button>
                 <button
                   className={`pill-toggle-btn ${statusFilter === 'in_progress' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('in_progress')}
+                  onClick={() => {
+                    sounds.playClick();
+                    setStatusFilter(statusFilter === 'in_progress' ? 'all' : 'in_progress');
+                  }}
+                  title={statusFilter === 'in_progress' ? 'Filtreyi geri çek / kaldır' : 'Çalışılıyor'}
                 >
-                  ⏳ Çalışılıyor
+                  ⏳ Çalışılıyor {statusFilter === 'in_progress' ? '✕' : ''}
                 </button>
               </div>
 
@@ -6971,12 +7078,13 @@ function QuestionVaultModal({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [selectedOption, setSelectedOption] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState<boolean>(false);
+  const [showAnswerKey, setShowAnswerKey] = useState<boolean>(false);
   const [sessionScore, setSessionScore] = useState<{ correct: number; totalAnswered: number }>({ correct: 0, totalAnswered: 0 });
 
   // Add Form state
   const [formSubject, setFormSubject] = useState<string>('tyt_mat');
   const [formTopic, setFormTopic] = useState<string>('');
-  const [formCorrectAnswer, setFormCorrectAnswer] = useState<'A' | 'B' | 'C' | 'D' | 'E'>('A');
+  const [formCorrectAnswer, setFormCorrectAnswer] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>(null);
   const [formDifficulty, setFormDifficulty] = useState<QuestionDifficulty>('Orta');
   const [formNote, setFormNote] = useState<string>('');
   const [formImageUrl, setFormImageUrl] = useState<string>('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80');
@@ -7010,21 +7118,30 @@ function QuestionVaultModal({
 
   // Switch course in practice mode
   const handleSelectPracticeSubject = (code: string) => {
+    sounds.playClick();
     setPracticeSubject(code);
     setCurrentQuestionIndex(0);
     setSelectedOption(null);
     setIsAnswerSubmitted(false);
+    setShowAnswerKey(false);
   };
 
-  // Option Click Handler
+  // Option Click Handler — just selects/deselects, does NOT submit automatically
   const handleOptionClick = (option: 'A' | 'B' | 'C' | 'D' | 'E') => {
     if (!currentQuestion) return;
-    if (isAnswerSubmitted) return;
+    if (isAnswerSubmitted) return; // cevap zaten gönderildiyse tıklamayı engelle
 
-    setSelectedOption(option);
+    sounds.playClick();
+    // Aynı şıkta tekrar tıklamak seçimi kaldırır
+    setSelectedOption(selectedOption === option ? null : option);
+  };
+
+  // Cevabı Onayla — seçili şıkkı kesinleştirir
+  const handleSubmitAnswer = () => {
+    if (!currentQuestion || !selectedOption || isAnswerSubmitted) return;
+
     setIsAnswerSubmitted(true);
-
-    const isCorrect = option === currentQuestion.correctAnswer;
+    const isCorrect = selectedOption === currentQuestion.correctAnswer;
     if (isCorrect) {
       sounds.playSuccess();
       confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
@@ -7047,11 +7164,18 @@ function QuestionVaultModal({
     }
   };
 
+  const handleRetractOption = () => {
+    sounds.playClick();
+    setSelectedOption(null);
+    setIsAnswerSubmitted(false);
+  };
+
   const handleNextQuestion = () => {
     if (currentQuestionIndex < practiceQuestions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswerSubmitted(false);
+      setShowAnswerKey(false);
     }
   };
 
@@ -7060,12 +7184,15 @@ function QuestionVaultModal({
       setCurrentQuestionIndex((prev) => prev - 1);
       setSelectedOption(null);
       setIsAnswerSubmitted(false);
+      setShowAnswerKey(false);
     }
   };
 
   const handleRetryCurrent = () => {
+    sounds.playClick();
     setSelectedOption(null);
     setIsAnswerSubmitted(false);
+    setShowAnswerKey(false);
   };
 
   // File Upload (Device Camera or Photo Library -> Base64)
@@ -7107,7 +7234,7 @@ function QuestionVaultModal({
       subjectName: foundSub ? foundSub.name : 'Matematik',
       topicName: formTopic.trim(),
       imageUrl: formImageUrl || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80',
-      correctAnswer: formCorrectAnswer,
+      correctAnswer: formCorrectAnswer || 'A',
       difficulty: formDifficulty,
       note: formNote.trim() || 'Doğru çözüm notu belirtilmedi.',
       reason: 'dikkat',
@@ -7303,16 +7430,20 @@ function QuestionVaultModal({
                 >
                   Tüm Dersler ({vault.length})
                 </button>
-                {subjectsInVault.map((s) => (
-                  <button
-                    key={s.code}
-                    className={`pill-toggle-btn ${practiceSubject === s.code ? 'active' : ''}`}
-                    onClick={() => handleSelectPracticeSubject(s.code)}
-                    style={{ fontSize: 12, padding: '6px 12px' }}
-                  >
-                    {s.name} ({s.count})
-                  </button>
-                ))}
+                {subjectsInVault.map((s) => {
+                  const isActive = practiceSubject === s.code;
+                  return (
+                    <button
+                      key={s.code}
+                      className={`pill-toggle-btn ${isActive ? 'active' : ''}`}
+                      onClick={() => handleSelectPracticeSubject(isActive ? 'all' : s.code)}
+                      style={{ fontSize: 12, padding: '6px 12px' }}
+                      title={isActive ? 'Filtreyi kaldır (Tüm dersler)' : s.name}
+                    >
+                      {s.name} ({s.count}) {isActive ? '✕' : ''}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -7515,28 +7646,100 @@ function QuestionVaultModal({
                   </div>
                 </div>
 
-                {/* Hidden Answer Notice & Status Banner */}
-                {!isAnswerSubmitted ? (
+                {/* Answer Key Toggle & Hidden Answer Notice Banner */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div
                     style={{
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
                       gap: 8,
                       background: 'rgba(255, 255, 255, 0.04)',
                       border: '1px dashed rgba(255, 255, 255, 0.12)',
                       borderRadius: 12,
-                      padding: '10px 14px',
-                      fontSize: 13,
-                      color: 'var(--color-text-muted)'
+                      padding: '10px 14px'
                     }}
                   >
-                    <EyeOff size={16} color="var(--color-accent)" />
-                    <span>
-                      <strong>Doğru cevap gizli:</strong> Soruyu çöz ve aşağıdaki şıklardan birini işaretle.
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--color-text-muted)' }}>
+                      <EyeOff size={16} color="var(--color-accent)" />
+                      <span>
+                        <strong>Doğru cevap:</strong> {isAnswerSubmitted || showAnswerKey ? `"${currentQuestion.correctAnswer}" şıkkı` : 'Gizli (soruyu çöz ve işaretle)'}
+                      </span>
+                    </div>
+
+                    {/* Cevap Anahtarı Toggle Butonu (Açılır / Geri Çekilir) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playClick();
+                        setShowAnswerKey(!showAnswerKey);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        background: showAnswerKey ? 'var(--color-accent)' : 'rgba(255, 255, 255, 0.08)',
+                        color: showAnswerKey ? '#0A0C10' : '#E5E5EA',
+                        border: showAnswerKey ? '1px solid var(--color-accent)' : '1px solid rgba(255, 255, 255, 0.15)',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title="Cevap anahtarını aç veya kapat (geri çek)"
+                    >
+                      {showAnswerKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                      <span>{showAnswerKey ? '🔑 Cevap Anahtarını Kapat (Geri Çek)' : '🔑 Cevap Anahtarı'}</span>
+                    </button>
                   </div>
-                ) : (
-                  // Answer Result Feedback Card
+
+                  {/* Show Answer Key Banner when showAnswerKey is true and not submitted */}
+                  {showAnswerKey && !isAnswerSubmitted && (
+                    <div
+                      style={{
+                        borderRadius: 12,
+                        padding: '12px 16px',
+                        background: 'rgba(212, 255, 0, 0.08)',
+                        border: '1px solid var(--color-accent)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6,
+                        animation: 'fadeIn 0.2s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--color-accent)' }}>
+                          🔑 Doğru Cevap: {currentQuestion.correctAnswer}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowAnswerKey(false)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--color-text-muted)',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ✕ Gizle (Geri Çek)
+                        </button>
+                      </div>
+                      {currentQuestion.note && (
+                        <div style={{ fontSize: 12, color: '#FFFFFF', lineHeight: 1.4 }}>
+                          💡 <strong>Çözüm Notu:</strong> {currentQuestion.note}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Answer Result Feedback Card (Shown after an option is selected) */}
+                {isAnswerSubmitted && (
                   <div
                     style={{
                       borderRadius: 14,
@@ -7551,32 +7754,57 @@ function QuestionVaultModal({
                       animation: 'slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      {selectedOption === currentQuestion.correctAnswer ? (
-                        <>
-                          <CheckCircle2 size={22} color="#30D158" />
-                          <div>
-                            <div style={{ fontSize: 15, fontWeight: 700, color: '#30D158' }}>
-                              Tebrikler! Doğru Cevap: {currentQuestion.correctAnswer}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {selectedOption === currentQuestion.correctAnswer ? (
+                          <>
+                            <CheckCircle2 size={22} color="#30D158" />
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: '#30D158' }}>
+                                Tebrikler! Doğru Cevap: {currentQuestion.correctAnswer}
+                              </div>
+                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>
+                                Bu soruyu başarıyla pekiştirdin.
+                              </div>
                             </div>
-                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>
-                              Bu soruyu başarıyla çözdün.
+                          </>
+                        ) : (
+                          <>
+                            <XCircle size={22} color="#FF453A" />
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: '#FF453A' }}>
+                                Yanlış! Sen "{selectedOption}" dedin. Doğru Cevap: {currentQuestion.correctAnswer}
+                              </div>
+                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>
+                                Çözüm notunu inceleyebilir veya şıkkı geri çekip tekrar deneyebilirsin.
+                              </div>
                             </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <XCircle size={22} color="#FF453A" />
-                          <div>
-                            <div style={{ fontSize: 15, fontWeight: 700, color: '#FF453A' }}>
-                              Yanlış! Sen "{selectedOption}" dedin. Doğru Cevap: {currentQuestion.correctAnswer}
-                            </div>
-                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>
-                              Aşağıdaki çözüm notunu ve püf noktasını inceleyebilirsin.
-                            </div>
-                          </div>
-                        </>
-                      )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Seçimi Geri Çek butonu */}
+                      <button
+                        type="button"
+                        onClick={handleRetractOption}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: 'none',
+                          borderRadius: 8,
+                          padding: '6px 12px',
+                          color: '#FFFFFF',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5
+                        }}
+                        title="İşaretlemeyi geri çek / iptal et"
+                      >
+                        <RotateCcw size={13} />
+                        <span>Seçimi Geri Çek</span>
+                      </button>
                     </div>
 
                     {/* Solution / Note */}
@@ -7603,8 +7831,30 @@ function QuestionVaultModal({
 
                 {/* Option Buttons A, B, C, D, E */}
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8 }}>
-                    Cevabını İşaretle:
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)' }}>
+                      Cevabını İşaretle (Seçtiğin şıkka tekrar basarak geri çekebilirsin):
+                    </div>
+                    {selectedOption && (
+                      <button
+                        type="button"
+                        onClick={handleRetractOption}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#FF453A',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                      >
+                        <RotateCcw size={12} />
+                        <span>Seçimi Geri Çek</span>
+                      </button>
+                    )}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
                     {(['A', 'B', 'C', 'D', 'E'] as const).map((opt) => {
@@ -7626,15 +7876,29 @@ function QuestionVaultModal({
                           btnBorder = '1.5px solid #FF453A';
                           btnColor = '#FFFFFF';
                         } else {
-                          opacity = 0.4;
+                          opacity = 0.45;
                         }
+                      } else if (showAnswerKey && isCorrectAnswer) {
+                        btnBg = 'rgba(212, 255, 0, 0.2)';
+                        btnBorder = '1.5px dashed var(--color-accent)';
+                        btnColor = 'var(--color-accent)';
+                      } else if (isChosen) {
+                        // Seçili ama henüz cevap gönderilmemiş → accent rengiyle vurgula
+                        btnBg = 'var(--color-accent)';
+                        btnBorder = '1.5px solid var(--color-accent)';
+                        btnColor = 'var(--color-on-accent)';
+                      } else {
+                        // Seçili olmayan → tamamen sönük/normal
+                        btnBg = 'var(--color-surface)';
+                        btnBorder = '1px solid rgba(255, 255, 255, 0.08)';
+                        btnColor = 'var(--color-text-muted)';
                       }
 
                       return (
                         <button
                           key={opt}
+                          type="button"
                           onClick={() => handleOptionClick(opt)}
-                          disabled={isAnswerSubmitted}
                           style={{
                             padding: '16px 0',
                             borderRadius: 14,
@@ -7643,7 +7907,10 @@ function QuestionVaultModal({
                             color: btnColor,
                             fontSize: 18,
                             fontWeight: 700,
-                            cursor: isAnswerSubmitted ? 'default' : 'pointer',
+                            userSelect: 'none',
+                            WebkitUserSelect: 'none',
+                            outline: 'none',
+                            cursor: 'pointer',
                             opacity,
                             transition: 'all 0.15s ease',
                             display: 'flex',
@@ -7652,6 +7919,7 @@ function QuestionVaultModal({
                             justifyContent: 'center',
                             gap: 4
                           }}
+                          title={isChosen ? 'Seçimi geri çekmek için tekrar tıkla' : `Şık ${opt}`}
                         >
                           <span>{opt}</span>
                           {isAnswerSubmitted && isCorrectAnswer && (
@@ -7665,6 +7933,17 @@ function QuestionVaultModal({
                     })}
                   </div>
                 </div>
+
+                {/* Cevabı Onayla — sadece seçili şık varsa ve henüz gönderilmediyse görünür */}
+                {!isAnswerSubmitted && selectedOption && (
+                  <button
+                    className="btn-primary"
+                    onClick={handleSubmitAnswer}
+                    style={{ width: '100%', padding: '14px', fontSize: 14, gap: 8, marginTop: 4, borderRadius: 14 }}
+                  >
+                    <span>✓ Cevabı Onayla ({selectedOption})</span>
+                  </button>
+                )}
 
                 {/* Action Buttons Post-Answer */}
                 {isAnswerSubmitted && (
@@ -8138,7 +8417,10 @@ function QuestionVaultModal({
                       <button
                         type="button"
                         key={d}
-                        onClick={() => setFormDifficulty(d)}
+                        onClick={() => {
+                          sounds.playClick();
+                          setFormDifficulty(formDifficulty === d ? 'Orta' : d);
+                        }}
                         style={{
                           padding: '7px 4px',
                           borderRadius: 8,
@@ -8150,8 +8432,9 @@ function QuestionVaultModal({
                           cursor: 'pointer',
                           transition: 'all 0.12s ease'
                         }}
+                        title={isSelected ? 'Zorluğu varsayılana çekmek için tıkla' : d}
                       >
-                        {d}
+                        {d} {isSelected ? '✓' : ''}
                       </button>
                     );
                   })}
@@ -8161,9 +8444,30 @@ function QuestionVaultModal({
 
             {/* Correct Answer Selection */}
             <div>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 6 }}>
-                Sorunun Doğru Cevabı (Şıkkı):
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)' }}>
+                  Sorunun Doğru Cevabı (Şıkkı):
+                </label>
+                {formCorrectAnswer && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playClick();
+                      setFormCorrectAnswer(null);
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#FF453A',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Seçimi Kaldır ✕
+                  </button>
+                )}
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
                 {(['A', 'B', 'C', 'D', 'E'] as const).map((opt) => {
                   const isSelected = formCorrectAnswer === opt;
@@ -8171,20 +8475,14 @@ function QuestionVaultModal({
                     <button
                       type="button"
                       key={opt}
-                      onClick={() => setFormCorrectAnswer(opt)}
-                      style={{
-                        padding: '12px 0',
-                        borderRadius: 12,
-                        fontSize: 16,
-                        fontWeight: 700,
-                        background: isSelected ? 'var(--color-accent)' : '#2C2C2E',
-                        color: isSelected ? 'var(--color-on-accent)' : '#FFFFFF',
-                        border: isSelected ? '1.5px solid var(--color-accent)' : '1px solid rgba(255, 255, 255, 0.08)',
-                        cursor: 'pointer',
-                        transition: 'all 0.12s ease'
+                      className={`option-btn${isSelected ? ' selected' : ''}`}
+                      onClick={() => {
+                        sounds.playClick();
+                        setFormCorrectAnswer(isSelected ? null : opt);
                       }}
+                      title={isSelected ? 'Seçimi geri çekmek için tekrar tıkla' : `Şık ${opt}`}
                     >
-                      {opt}
+                      {opt} {isSelected ? '✓' : ''}
                     </button>
                   );
                 })}
