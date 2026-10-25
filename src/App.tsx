@@ -54,6 +54,7 @@ import {
 import { AiTutorScreenView } from './components/AiTutorView';
 import { FlocusPomodoroView } from './components/FlocusPomodoroView';
 import { OsymDistributionView } from './components/OsymDistributionView';
+import { OSYM_QUESTION_DISTRIBUTION } from './data/osymDistributionData';
 import { sounds } from './lib/sound';
 import {
   getCurrentCloudUser,
@@ -5547,106 +5548,155 @@ function CurriculumScreenView({
                   </div>
 
                   {isExpanded && (
-                    <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {subTopics.map((topic) => {
-                        const topicKey = `${sub.code}_${topic}`;
-                        const currentStatus: TopicStatus = topicProgress[topicKey] || 'not_started';
-                        const isCompleted = currentStatus === 'completed';
-
-                        return (
-                          <div
-                            key={topic}
-                            onClick={() => {
-                              if (onToggleTopicCompleted) {
-                                onToggleTopicCompleted(topicKey);
-                              } else {
-                                onCycleStatus(topicKey);
-                              }
-                            }}
+                    <div style={{ width: '100%', overflowX: 'auto' }}>
+                      <table
+                        style={{
+                          width: '100%',
+                          borderCollapse: 'collapse',
+                          fontSize: 12,
+                          textAlign: 'left'
+                        }}
+                      >
+                        <thead>
+                          <tr
                             style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '10px 12px',
-                              borderRadius: 10,
-                              background: isCompleted ? 'rgba(212, 255, 0, 0.05)' : '#1F2027',
-                              border: isCompleted ? '1px solid rgba(212, 255, 0, 0.25)' : '1px solid transparent',
-                              cursor: 'pointer',
-                              transition: 'all 0.12s ease'
+                              background: '#121318',
+                              borderBottom: '1px solid var(--color-border)',
+                              color: 'var(--color-text-muted)',
+                              fontWeight: 800,
+                              fontSize: 11
                             }}
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, marginRight: 8 }}>
-                              {/* Tik (Checkmark) icon */}
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0
-                                }}
-                              >
-                                {isCompleted ? (
-                                  <CheckCircle2 size={20} color="var(--color-accent)" />
-                                ) : currentStatus === 'in_progress' ? (
-                                  <Circle size={20} color="#00F0FF" />
-                                ) : (
-                                  <Circle size={20} color="var(--color-text-dim)" />
-                                )}
-                              </div>
+                            <th style={{ padding: '10px 12px', width: 44, textAlign: 'center' }}>Tik</th>
+                            <th style={{ padding: '10px 14px' }}>Konu Adı</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'center', width: 130 }}>ÖSYM Çıkmış</th>
+                            <th style={{ padding: '10px 14px', textAlign: 'right', width: 130 }}>Durum</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {subTopics.map((topic, idx) => {
+                            const topicKey = `${sub.code}_${topic}`;
+                            const currentStatus: TopicStatus = topicProgress[topicKey] || 'not_started';
+                            const isCompleted = currentStatus === 'completed';
 
-                              <span
-                                style={{
-                                  fontSize: 13,
-                                  fontWeight: isCompleted ? 700 : 600,
-                                  color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
-                                  textDecoration: isCompleted ? 'line-through' : 'none'
-                                }}
-                              >
-                                {topic}
-                              </span>
-                            </div>
+                            // Match topic with ÖSYM distribution data
+                            const osymSub = OSYM_QUESTION_DISTRIBUTION.find((os) => os.code === sub.code);
+                            const osymTopic = osymSub?.topics.find((ot) => {
+                              const a = ot.topic.toLowerCase().trim();
+                              const b = topic.toLowerCase().trim();
+                              return a === b || a.includes(b) || b.includes(a);
+                            });
 
-                            <div
-                              style={{
-                                fontSize: 10,
-                                fontWeight: 800,
-                                padding: '3px 8px',
-                                borderRadius: 6,
-                                background:
-                                  isCompleted
-                                    ? 'rgba(212, 255, 0, 0.15)'
-                                    : currentStatus === 'in_progress'
-                                    ? 'rgba(0, 240, 255, 0.15)'
-                                    : currentStatus === 'needs_review'
-                                    ? 'rgba(192, 132, 252, 0.15)'
-                                    : '#1A1C22',
-                                color:
-                                  isCompleted
-                                    ? 'var(--color-accent)'
-                                    : currentStatus === 'in_progress'
-                                    ? '#00F0FF'
-                                    : currentStatus === 'needs_review'
-                                    ? '#C084FC'
-                                    : 'var(--color-text-dim)',
-                                border:
-                                  isCompleted
-                                    ? '1px solid rgba(212, 255, 0, 0.3)'
-                                    : currentStatus === 'in_progress'
-                                    ? '1px solid rgba(0, 240, 255, 0.3)'
-                                    : currentStatus === 'needs_review'
-                                    ? '1px solid rgba(192, 132, 252, 0.3)'
-                                    : '1px solid #232530',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {isCompleted && '✓ Bitti'}
-                              {currentStatus === 'in_progress' && '⏳ Çalışılıyor'}
-                              {currentStatus === 'needs_review' && '🔄 Tekrar Et'}
-                              {currentStatus === 'not_started' && '○ Başlanmadı'}
-                            </div>
-                          </div>
-                        );
-                      })}
+                            return (
+                              <tr
+                                key={topic}
+                                onClick={() => {
+                                  if (onToggleTopicCompleted) {
+                                    onToggleTopicCompleted(topicKey);
+                                  } else {
+                                    onCycleStatus(topicKey);
+                                  }
+                                }}
+                                style={{
+                                  borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                                  background: isCompleted
+                                    ? 'rgba(212, 255, 0, 0.04)'
+                                    : idx % 2 === 1
+                                    ? 'rgba(255, 255, 255, 0.015)'
+                                    : 'transparent',
+                                  cursor: 'pointer',
+                                  transition: 'background 0.12s ease'
+                                }}
+                                className="table-row-hover"
+                              >
+                                <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {isCompleted ? (
+                                      <CheckCircle2 size={19} color="var(--color-accent)" />
+                                    ) : currentStatus === 'in_progress' ? (
+                                      <Circle size={19} color="#00F0FF" />
+                                    ) : (
+                                      <Circle size={19} color="rgba(255, 255, 255, 0.25)" />
+                                    )}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
+                                  <span
+                                    style={{
+                                      fontSize: 13,
+                                      fontWeight: isCompleted ? 700 : 600,
+                                      color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
+                                      textDecoration: isCompleted ? 'line-through' : 'none'
+                                    }}
+                                  >
+                                    {topic}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                  {osymTopic ? (
+                                    <span
+                                      style={{
+                                        fontSize: 11,
+                                        fontWeight: 800,
+                                        fontFamily: 'var(--font-mono)',
+                                        padding: '2px 8px',
+                                        borderRadius: 6,
+                                        background: osymTopic.total >= 10 ? 'rgba(212, 255, 0, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                                        color: osymTopic.total >= 10 ? 'var(--color-accent)' : 'var(--color-text-dim)'
+                                      }}
+                                    >
+                                      {osymTopic.total} Soru
+                                    </span>
+                                  ) : (
+                                    <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>–</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '10px 14px', textAlign: 'right', verticalAlign: 'middle' }}>
+                                  <span
+                                    style={{
+                                      fontSize: 10,
+                                      fontWeight: 800,
+                                      padding: '3px 8px',
+                                      borderRadius: 6,
+                                      background:
+                                        isCompleted
+                                          ? 'rgba(212, 255, 0, 0.15)'
+                                          : currentStatus === 'in_progress'
+                                          ? 'rgba(0, 240, 255, 0.15)'
+                                          : currentStatus === 'needs_review'
+                                          ? 'rgba(192, 132, 252, 0.15)'
+                                          : '#1A1C22',
+                                      color:
+                                        isCompleted
+                                          ? 'var(--color-accent)'
+                                          : currentStatus === 'in_progress'
+                                          ? '#00F0FF'
+                                          : currentStatus === 'needs_review'
+                                          ? '#C084FC'
+                                          : 'var(--color-text-dim)',
+                                      border:
+                                        isCompleted
+                                          ? '1px solid rgba(212, 255, 0, 0.3)'
+                                          : currentStatus === 'in_progress'
+                                          ? '1px solid rgba(0, 240, 255, 0.3)'
+                                          : currentStatus === 'needs_review'
+                                          ? '1px solid rgba(192, 132, 252, 0.3)'
+                                          : '1px solid #232530',
+                                      display: 'inline-block',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {isCompleted && '✓ Bitti'}
+                                    {currentStatus === 'in_progress' && '⏳ Çalışılıyor'}
+                                    {currentStatus === 'needs_review' && '🔄 Tekrar Et'}
+                                    {currentStatus === 'not_started' && '○ Başlanmadı'}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>
