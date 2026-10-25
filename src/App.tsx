@@ -55,6 +55,7 @@ import {
 import { AiTutorScreenView } from './components/AiTutorView';
 import { FlocusPomodoroView } from './components/FlocusPomodoroView';
 import { OsymDistributionView } from './components/OsymDistributionView';
+import { OnboardingModal } from './components/OnboardingModal';
 import { OSYM_QUESTION_DISTRIBUTION } from './data/osymDistributionData';
 import { sounds } from './lib/sound';
 import {
@@ -284,12 +285,18 @@ export default function App() {
   // Cloud Sync & Guest Mode State
   const [cloudUser, setCloudUser] = useState<CloudUser | null>(null);
   const [lastSyncedTime, setLastSyncedTime] = useState<string | null>(null);
+  const [showOnboardingModal, setShowOnboardingModal] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const onboarded = localStorage.getItem('netmetrik_onboarded');
+    return !onboarded;
+  });
 
   // 1. Initial Cloud Auth Check & Hydrate
   useEffect(() => {
     getCurrentCloudUser().then(async (user) => {
       if (user) {
         setCloudUser(user);
+        setShowOnboardingModal(false);
         try {
           const cloudData = await pullPayloadFromCloud();
           if (cloudData) {
@@ -305,6 +312,11 @@ export default function App() {
           }
         } catch (err) {
           console.warn('Initial cloud pull error:', err);
+        }
+      } else {
+        const onboarded = localStorage.getItem('netmetrik_onboarded');
+        if (!onboarded) {
+          setShowOnboardingModal(true);
         }
       }
     });
@@ -364,6 +376,8 @@ export default function App() {
   const handleCloudLogin = async (email: string, pass: string) => {
     const user = await loginCloudUser(email, pass);
     setCloudUser(user);
+    localStorage.setItem('netmetrik_onboarded', 'true');
+    setShowOnboardingModal(false);
     sounds.playSuccess();
     confetti({ particleCount: 50, spread: 60 });
     const cloudData = await pullPayloadFromCloud();
@@ -393,15 +407,31 @@ export default function App() {
     setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
   };
 
-  const handleCloudRegister = async (email: string, pass: string, name: string) => {
-    const user = await registerCloudUser(email, pass, name);
+  const handleCloudRegister = async (
+    email: string,
+    pass: string,
+    name: string,
+    classLevel?: string,
+    fieldTrack?: 'sayisal' | 'sozel' | 'esit_agirlik' | 'dil'
+  ) => {
+    const user = await registerCloudUser(email, pass, name, classLevel, fieldTrack);
     setCloudUser(user);
+    const updatedProfile: StudentProfile = {
+      ...profile,
+      name: name || profile.name,
+      classLevel: classLevel || profile.classLevel,
+      fieldTrack: fieldTrack || profile.fieldTrack
+    };
+    setProfile(updatedProfile);
+    localStorage.setItem('netmetrik_profile', JSON.stringify(updatedProfile));
+    localStorage.setItem('netmetrik_onboarded', 'true');
+    setShowOnboardingModal(false);
     sounds.playSuccess();
-    confetti({ particleCount: 60, spread: 70 });
+    confetti({ particleCount: 70, spread: 80 });
     await pushPayloadToCloud({
       version: 1,
       clientUpdatedAt: new Date().toISOString(),
-      profile: { ...profile, name: name || profile.name },
+      profile: updatedProfile,
       exams,
       tasks,
       questionLogs,
@@ -1254,9 +1284,28 @@ export default function App() {
                     <Cloud size={12} /> {cloudUser.email}
                   </span>
                 ) : (
-                  <span className="badge-sync-cloud guest" style={{ fontSize: 10.5, padding: '4px 8px' }}>
-                    <CloudOff size={12} /> Misafir Modu
-                  </span>
+                  <button
+                    onClick={() => {
+                      sounds.playClick();
+                      setShowOnboardingModal(true);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      padding: '4px 10px',
+                      borderRadius: 99,
+                      background: 'rgba(10, 132, 255, 0.1)',
+                      border: '1px solid rgba(10, 132, 255, 0.25)',
+                      color: 'var(--color-accent)',
+                      fontSize: 10.5,
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                    title="Giriş Yap veya Hesap Oluştur"
+                  >
+                    <Cloud size={12} /> Giriş Yap / Kayıt Ol
+                  </button>
                 )}
               </div>
             </div>
@@ -1970,6 +2019,21 @@ export default function App() {
           onClose={() => setActiveFeatureModal(null)}
         />
       )}
+
+      {/* 9. First-Time User Onboarding & Cloud Registration Modal */}
+      <OnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={() => {
+          localStorage.setItem('netmetrik_onboarded', 'guest');
+          setShowOnboardingModal(false);
+        }}
+        onRegister={async ({ email, pass, name, classLevel, fieldTrack }) => {
+          await handleCloudRegister(email, pass, name, classLevel, fieldTrack);
+        }}
+        onLogin={async (email, pass) => {
+          await handleCloudLogin(email, pass);
+        }}
+      />
     </div>
   );
 }

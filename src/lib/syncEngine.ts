@@ -166,19 +166,31 @@ export async function loginCloudUser(email: string, pass: string): Promise<Cloud
 /**
  * Sign up for a Cloud account
  */
-export async function registerCloudUser(email: string, pass: string, name: string): Promise<CloudUser> {
+export async function registerCloudUser(
+  email: string,
+  pass: string,
+  name: string,
+  classLevel?: string,
+  fieldTrack?: string
+): Promise<CloudUser> {
   if (supabase) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password: pass,
-      options: { data: { full_name: name } }
+      options: {
+        data: {
+          full_name: name,
+          class_level: classLevel || '12',
+          field_track: fieldTrack || 'sayisal'
+        }
+      }
     });
     if (error) throw error;
     if (!data.user) throw new Error('Kayıt oluşturulamadı');
     return {
       id: data.user.id,
       email: data.user.email || email,
-      name: name || email.split('@')[0]
+      name: name || data.user.user_metadata?.full_name || email.split('@')[0]
     };
   }
 
