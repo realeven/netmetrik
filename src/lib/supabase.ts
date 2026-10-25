@@ -10,8 +10,11 @@ const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PU
 const localUrl = typeof window !== 'undefined' ? localStorage.getItem('netmetrik_custom_supabase_url') || '' : '';
 const localKey = typeof window !== 'undefined' ? localStorage.getItem('netmetrik_custom_supabase_key') || '' : '';
 
-export const supabaseUrl = envUrl || localUrl;
-export const supabaseAnonKey = envKey || localKey;
+const DEFAULT_SUPABASE_URL = 'https://utwswvtwgkcuytvpfwbq.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0d3N3dnR3Z2tjdXl0dnBmd2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MTUxNjEsImV4cCI6MjEwODA5MTE2MX0.SVmGh5E1-8LU8tGt68prHtJ4FMqhITelQay9lRDSBjI';
+
+export const supabaseUrl = envUrl || localUrl || DEFAULT_SUPABASE_URL;
+export const supabaseAnonKey = envKey || localKey || DEFAULT_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl &&
