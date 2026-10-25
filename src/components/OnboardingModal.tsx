@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Mail, Lock, User, GraduationCap, Compass, ArrowRight, Check, X } from 'lucide-react';
+import { Mail, Lock, User, GraduationCap, Compass, ArrowRight, Check, X } from 'lucide-react';
 import { sounds } from '../lib/sound';
 
 interface OnboardingModalProps {
@@ -152,19 +152,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
           <div
             style={{
-              width: 52,
-              height: 52,
+              width: 56,
+              height: 56,
               borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(10, 132, 255, 0.3) 0%, rgba(94, 92, 230, 0.2) 100%)',
-              border: '1px solid rgba(10, 132, 255, 0.35)',
+              overflow: 'hidden',
+              border: '1.5px solid rgba(10, 132, 255, 0.4)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 10,
-              boxShadow: '0 8px 24px rgba(10, 132, 255, 0.25)'
+              boxShadow: '0 8px 24px rgba(10, 132, 255, 0.35)'
             }}
           >
-            <Sparkles size={26} color="var(--color-accent)" />
+            <img src="/logo.jpg" alt="NetMetrik" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
 
           <h2 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 6px 0', letterSpacing: '-0.3px' }}>

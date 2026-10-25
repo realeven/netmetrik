@@ -1105,18 +1105,23 @@ export default function App() {
                     width: 38,
                     height: 38,
                     borderRadius: 10,
-                    background: 'var(--color-accent)',
+                    overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                    boxShadow: '0 4px 14px rgba(10, 132, 255, 0.35)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
                     flexShrink: 0,
                     cursor: 'pointer',
                     transition: 'transform 0.15s ease'
                   }}
                   title="NetMetrik"
                 >
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-on-accent)', letterSpacing: -0.5 }}>NM</span>
+                  <img
+                    src="/logo.jpg"
+                    alt="NetMetrik Logo"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                 </div>
                 <div>
                   <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--color-accent)', letterSpacing: 0.8, textTransform: 'uppercase' }}>
@@ -1468,20 +1473,24 @@ export default function App() {
                   width: 36,
                   height: 36,
                   borderRadius: 11,
-                  background: 'linear-gradient(135deg, var(--color-accent) 0%, rgba(0, 160, 220, 0.9) 100%)',
+                  overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 0 16px var(--color-glow)',
                   flexShrink: 0,
                   cursor: 'pointer',
-                  border: '1px solid rgba(255, 255, 255, 0.35)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
                   transition: 'transform 140ms var(--ease-spring)'
                 }}
                 className="clickable-card"
                 title="NetMetrik Ana Sayfa"
               >
-                <span style={{ fontSize: 13.5, fontWeight: 900, color: 'var(--color-on-accent)', letterSpacing: -0.5, fontFamily: 'var(--font-mono)' }}>NM</span>
+                <img
+                  src="/logo.jpg"
+                  alt="NetMetrik Logo"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </div>
               <div>
                 <div style={{ fontSize: 9.5, fontWeight: 800, color: 'var(--color-accent)', letterSpacing: 1.1, textTransform: 'uppercase', lineHeight: 1 }}>
