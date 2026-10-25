@@ -417,7 +417,13 @@ export default function App() {
     sounds.playClick();
   };
 
-  const todayStr = '2026-10-20';
+  const todayStr = (() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  })();
 
   // Feature 15: Pomodoro Timer & Freeform Stopwatch State
   const [timerType, setTimerType] = useState<'countdown' | 'stopwatch'>('countdown');
@@ -928,6 +934,14 @@ export default function App() {
             setExams((prev) => [newExam, ...prev]);
             sounds.playSuccess();
             confetti({ particleCount: 70, spread: 70 });
+          }}
+          onUpdateExam={(updatedExam) => {
+            setExams((prev) => prev.map((e) => (e.id === updatedExam.id ? updatedExam : e)));
+            sounds.playSuccess();
+          }}
+          onDeleteExam={(examId) => {
+            setExams((prev) => prev.filter((e) => e.id !== examId));
+            sounds.playToggle(false);
           }}
           onOpenPrintReport={() => setActiveFeatureModal('report')}
           isDesktop={isDesktop}
@@ -1894,7 +1908,7 @@ export default function App() {
 // ============================================================================
 function AnalyticsScreenView({
   exams,
-  questionLogs: _questionLogs,
+  questionLogs = [],
   topicProgress = {},
   onOpenCardModal,
   onOpenFeatureModal,
@@ -1911,19 +1925,141 @@ function AnalyticsScreenView({
 }) {
   const [heroCardIndex, setHeroCardIndex] = useState(0);
   const [heatmapRange, setHeatmapRange] = useState<'4_ay' | '1_yil'>('4_ay');
-  const [selectedCellDetail, setSelectedCellDetail] = useState<{ day: string; week: number; questions: number; minutes: number } | null>({
-    day: 'Bugün (Sal)',
-    week: 18,
-    questions: 95,
-    minutes: 130
-  });
+
+  const now = useMemo(() => new Date(), []);
+  const todayDateStr = useMemo(() => {
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }, [now]);
+
+  // Aggregate real question logs by date
+  const logsByDate = useMemo(() => {
+    const map = new Map<string, { questions: number; minutes: number }>();
+    (questionLogs || []).forEach((l: QuestionLog) => {
+      const existing = map.get(l.date) || { questions: 0, minutes: 0 };
+      map.set(l.date, {
+        questions: existing.questions + (l.count || 0),
+        minutes: existing.minutes + (l.durationMinutes || 0)
+      });
+    });
+    return map;
+  }, [questionLogs]);
+
+  // Heatmap dimensions & labels
+  const daysOfWeek = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const columnsCount = heatmapRange === '4_ay' ? 18 : 36;
+
+  // Monday of the current week (0 = Monday, 6 = Sunday)
+  const todayDayOfWeek = (now.getDay() + 6) % 7;
+  const currentWeekMonday = useMemo(() => {
+    const d = new Date(now);
+    d.setDate(now.getDate() - todayDayOfWeek);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [now, todayDayOfWeek]);
+
+  // Start Monday of the entire matrix
+  const startMonday = useMemo(() => {
+    const d = new Date(currentWeekMonday);
+    d.setDate(currentWeekMonday.getDate() - (columnsCount - 1) * 7);
+    return d;
+  }, [currentWeekMonday, columnsCount]);
+
+  // Generate real calendar cell data: 7 rows x columnsCount columns
+  const { heatmapGrid, monthHeaders } = useMemo(() => {
+    const headers: { month: string; colIndex: number }[] = [];
+    let lastMonth = -1;
+
+    for (let c = 0; c < columnsCount; c++) {
+      const colDate = new Date(startMonday);
+      colDate.setDate(startMonday.getDate() + c * 7);
+      const m = colDate.getMonth();
+      if (m !== lastMonth) {
+        headers.push({ month: monthNames[m], colIndex: c });
+        lastMonth = m;
+      }
+    }
+
+    const grid = Array.from({ length: 7 }, (_, rowIndex) =>
+      Array.from({ length: columnsCount }, (_, colIndex) => {
+        const cellDate = new Date(startMonday);
+        cellDate.setDate(startMonday.getDate() + colIndex * 7 + rowIndex);
+        const y = cellDate.getFullYear();
+        const m = String(cellDate.getMonth() + 1).padStart(2, '0');
+        const d = String(cellDate.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${d}`;
+
+        const isToday = dateStr === todayDateStr;
+        const isFuture = cellDate.getTime() > now.getTime() && !isToday;
+        const stats = logsByDate.get(dateStr) || { questions: 0, minutes: 0 };
+
+        let level = 0;
+        if (stats.questions > 0) {
+          if (stats.questions <= 25) level = 1;
+          else if (stats.questions <= 60) level = 2;
+          else if (stats.questions <= 100) level = 3;
+          else if (stats.questions <= 150) level = 4;
+          else level = 5;
+        }
+
+        const formattedDate = cellDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' });
+
+        return {
+          dateStr,
+          formattedDate,
+          level,
+          isToday,
+          isFuture,
+          questions: stats.questions,
+          minutes: stats.minutes
+        };
+      })
+    );
+
+    return { heatmapGrid: grid, monthHeaders: headers };
+  }, [startMonday, columnsCount, todayDateStr, logsByDate, now]);
+
+  const [selectedCellDetail, setSelectedCellDetail] = useState<{
+    dateStr: string;
+    formattedDate: string;
+    questions: number;
+    minutes: number;
+    isToday: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    const todayStats = logsByDate.get(todayDateStr) || { questions: 0, minutes: 0 };
+    setSelectedCellDetail({
+      dateStr: todayDateStr,
+      formattedDate: now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'short' }),
+      questions: todayStats.questions,
+      minutes: todayStats.minutes,
+      isToday: true
+    });
+  }, [logsByDate, todayDateStr, now]);
 
   // Feature 3: Trend Line Chart State
   const [trendMetric, setTrendMetric] = useState<'tyt_total' | 'ayt_total' | 'tyt_mat' | 'tyt_fen'>('tyt_total');
   const [selectedTrendPoint, setSelectedTrendPoint] = useState<{ id: string; title: string; publisher: string; date: string; net: number } | null>(null);
 
   const tytExams = exams.filter((e) => e.type === 'TYT');
+  const aytExams = exams.filter((e) => e.type === 'AYT');
   const latestTyt = tytExams[0];
+  const latestAyt = aytExams[0];
+
+  const last7DaysQuestions = useMemo(() => {
+    return (questionLogs || []).filter((l: QuestionLog) => {
+      const diff = (now.getTime() - new Date(l.date).getTime()) / (1000 * 3600 * 24);
+      return diff >= 0 && diff <= 7;
+    }).reduce((s: number, l: QuestionLog) => s + l.count, 0);
+  }, [questionLogs, now]);
+
+  const avgDuration = useMemo(() => {
+    return exams.length > 0 ? Math.round(exams.reduce((s, e) => s + (e.durationMinutes || 165), 0) / exams.length) : 0;
+  }, [exams]);
 
   // Calculate overall topic percentages
   const totalTytTopics = YKS_SUBJECTS.filter((s) => s.category === 'TYT').reduce((sum, s) => sum + s.topics.length, 0);
@@ -1940,26 +2076,6 @@ function AnalyticsScreenView({
   );
   const aytPct = Math.round((completedAytTopics / (totalAytTopics || 1)) * 100);
 
-  // 7 days x 18 weeks grid matrix for heatmap
-  const daysOfWeek = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-  const columnsCount = heatmapRange === '4_ay' ? 18 : 28;
-
-  // Generate deterministic heatmap data
-  const heatmapGrid = Array.from({ length: 7 }, (_, rowIndex) =>
-    Array.from({ length: columnsCount }, (_, colIndex) => {
-      const seed = (rowIndex * 7 + colIndex * 13) % 100;
-      let level = 0;
-      if (seed > 80) level = 5;
-      else if (seed > 65) level = 4;
-      else if (seed > 45) level = 3;
-      else if (seed > 30) level = 2;
-      else if (seed > 15) level = 1;
-
-      const isToday = rowIndex === 1 && colIndex === columnsCount - 1;
-      return { level, isToday };
-    })
-  );
-
   return (
     <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 22 : 16 }}>
       {/* --------------------------------------------------------------------
@@ -1975,10 +2091,10 @@ function AnalyticsScreenView({
               {heroCardIndex === 3 && 'Ortalama Süre'}
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, marginTop: 10, color: '#FFFFFF' }}>
-              {heroCardIndex === 0 && (latestTyt ? `${latestTyt.totalNet.toFixed(2)} Net` : 'Henüz TYT sınavı yok')}
-              {heroCardIndex === 1 && '64.75 Net (AYT Sayısal)'}
-              {heroCardIndex === 2 && '480 Soru / Hafta'}
-              {heroCardIndex === 3 && '162 dk / Deneme'}
+              {heroCardIndex === 0 && (latestTyt ? `${latestTyt.totalNet.toFixed(2)} Net (TYT)` : 'Henüz TYT sınavı yok')}
+              {heroCardIndex === 1 && (latestAyt ? `${latestAyt.totalNet.toFixed(2)} Net (AYT)` : 'Henüz AYT sınavı yok')}
+              {heroCardIndex === 2 && `${last7DaysQuestions} Soru / Son 7 Gün`}
+              {heroCardIndex === 3 && (exams.length > 0 ? `${avgDuration} dk / Deneme` : '0 dk')}
             </div>
           </div>
 
@@ -2048,18 +2164,28 @@ function AnalyticsScreenView({
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-around',
+            position: 'relative',
+            height: 16,
+            marginBottom: 8,
             paddingLeft: 30,
             fontSize: 11,
             color: 'var(--color-text-dim)',
             fontWeight: 600,
-            marginBottom: 8
+            overflowX: 'hidden'
           }}
         >
-          <span>Haz</span>
-          <span>Ağu</span>
-          <span>Eyl</span>
-          <span>Eki</span>
+          {monthHeaders.map((hdr, i) => (
+            <span
+              key={i}
+              style={{
+                position: 'absolute',
+                left: `calc(30px + ${(hdr.colIndex / columnsCount) * 100}%)`,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {hdr.month}
+            </span>
+          ))}
         </div>
 
         {/* Heatmap Grid with Days on Left */}
@@ -2072,24 +2198,30 @@ function AnalyticsScreenView({
             ))}
           </div>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, overflowX: 'hidden' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, overflowX: heatmapRange === '1_yil' ? 'auto' : 'hidden' }}>
             {heatmapGrid.map((row, rIdx) => (
               <div key={rIdx} style={{ display: 'flex', gap: 5, justifyContent: 'space-between' }}>
                 {row.map((cell, cIdx) => (
                   <div
                     key={cIdx}
                     onClick={() => {
-                      const estimatedQ = cell.level * 25 + 10;
+                      if (cell.isFuture) return;
                       setSelectedCellDetail({
-                        day: daysOfWeek[rIdx],
-                        week: cIdx + 1,
-                        questions: cell.isToday ? 95 : cell.level > 0 ? estimatedQ : 0,
-                        minutes: cell.isToday ? 130 : cell.level * 30
+                        dateStr: cell.dateStr,
+                        formattedDate: cell.formattedDate,
+                        questions: cell.questions,
+                        minutes: cell.minutes,
+                        isToday: cell.isToday
                       });
+                      sounds.playClick();
                     }}
                     className={`heatmap-cell ${cell.isToday ? 'today-selected' : cell.level > 0 ? `level-${cell.level}` : ''}`}
-                    title={`${daysOfWeek[rIdx]} - Hafta ${cIdx + 1}`}
-                    style={{ cursor: 'pointer' }}
+                    title={`${cell.formattedDate}: ${cell.questions} Soru (${cell.minutes} dk)`}
+                    style={{
+                      cursor: cell.isFuture ? 'default' : 'pointer',
+                      opacity: cell.isFuture ? 0.25 : 1,
+                      boxShadow: cell.isToday ? '0 0 0 1.5px var(--color-accent)' : undefined
+                    }}
                   />
                 ))}
               </div>
@@ -2102,21 +2234,23 @@ function AnalyticsScreenView({
           <div
             style={{
               marginTop: 12,
-              padding: '6px 12px',
+              padding: '8px 12px',
               borderRadius: 10,
               background: '#1F2026',
               border: '1px solid var(--color-border)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: 11
+              fontSize: 11.5
             }}
           >
-            <span style={{ color: 'var(--color-text-muted)' }}>
-              {selectedCellDetail.day} (Hafta {selectedCellDetail.week}):
+            <span style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>
+              {selectedCellDetail.isToday ? `Bugün (${selectedCellDetail.formattedDate})` : selectedCellDetail.formattedDate}:
             </span>
-            <span style={{ color: 'var(--color-accent)', fontWeight: 700 }}>
-              {selectedCellDetail.questions} Soru • {selectedCellDetail.minutes} dk Çalışma
+            <span style={{ color: selectedCellDetail.questions > 0 ? 'var(--color-accent)' : 'var(--color-text-dim)', fontWeight: 700 }}>
+              {selectedCellDetail.questions > 0
+                ? `${selectedCellDetail.questions} Soru • ${selectedCellDetail.minutes} dk Çalışma`
+                : 'Soru çözümü kaydedilmedi'}
             </span>
           </div>
         )}
@@ -2127,9 +2261,9 @@ function AnalyticsScreenView({
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span>Az</span>
             <div style={{ width: 10, height: 10, borderRadius: 2, background: '#21232A' }} />
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#323C0A' }} />
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#56680C' }} />
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#B8DD0A' }} />
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#1A3B22' }} />
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#235D33' }} />
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#2E8046' }} />
             <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--color-accent)' }} />
             <span>Çok</span>
           </div>
@@ -2162,7 +2296,7 @@ function AnalyticsScreenView({
         const netValues = trendPoints.map((p) => p.net);
         const minVal = netValues.length > 0 ? Math.min(...netValues) : 0;
         const maxVal = netValues.length > 0 ? Math.max(...netValues) : 100;
-        const minNet = Math.max(0, Math.floor(minVal - (maxVal - minVal < 4 ? 2 : 1.5)));
+        const minNet = Math.floor(minVal - (maxVal - minVal < 4 ? 2 : 1.5));
         const maxNet = Math.ceil(maxVal + (maxVal - minVal < 4 ? 2 : 1.5));
         const netRange = Math.max(4, maxNet - minNet);
 
@@ -4027,11 +4161,15 @@ function CalendarTasksView({
 function ExamsScreenView({
   exams,
   onAddExam,
+  onUpdateExam,
+  onDeleteExam,
   onOpenPrintReport,
   isDesktop
 }: {
   exams: Exam[];
   onAddExam: (newExam: Exam) => void;
+  onUpdateExam?: (updatedExam: Exam) => void;
+  onDeleteExam?: (examId: string) => void;
   onOpenPrintReport?: () => void;
   isDesktop?: boolean;
 }) {
@@ -4040,8 +4178,17 @@ function ExamsScreenView({
   const [title, setTitle] = useState('');
   const [publisher, setPublisher] = useState('');
   const [formDifficulty, setFormDifficulty] = useState<'kolay' | 'orta' | 'osym' | 'zor'>('osym');
-  const [date, setDate] = useState('2026-10-20');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [duration] = useState(165);
+
+  // Exam Detail & Edit Modal States
+  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
+  const [isEditingExam, setIsEditingExam] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editPublisher, setEditPublisher] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editDifficulty, setEditDifficulty] = useState<'kolay' | 'orta' | 'osym' | 'zor'>('orta');
+  const [editScores, setEditScores] = useState<Record<string, { correct: number; wrong: number; blank: number }>>({});
 
   // Feature 6 Filter States
   const [filterType, setFilterType] = useState<'all' | 'TYT' | 'AYT'>('all');
@@ -4106,7 +4253,8 @@ function ExamsScreenView({
       const c = scores[s.code]?.correct || 0;
       const w = scores[s.code]?.wrong || 0;
       const b = scores[s.code]?.blank || 0;
-      const net = Math.max(0, c - w * 0.25);
+      // Allow negative nets (e.g. 0 correct, 1 wrong = -0.25)
+      const net = Math.round((c - w * 0.25) * 100) / 100;
       totalNet += net;
       return {
         subjectCode: s.code,
@@ -4117,6 +4265,7 @@ function ExamsScreenView({
         net
       };
     });
+    totalNet = Math.round(totalNet * 100) / 100;
 
     const newExam: Exam = {
       id: `exam-${Date.now()}`,
@@ -4135,6 +4284,93 @@ function ExamsScreenView({
     setTitle('');
     setPublisher('');
     setScores({});
+  };
+
+  // Open Exam Detail Modal
+  const handleOpenExamDetail = (exam: Exam) => {
+    setSelectedExam(exam);
+    setIsEditingExam(false);
+    setEditTitle(exam.title);
+    setEditPublisher(exam.publisher || '');
+    setEditDate(exam.date);
+    setEditDifficulty(exam.difficulty || 'orta');
+
+    const initScores: Record<string, { correct: number; wrong: number; blank: number }> = {};
+    if (exam.subjectResults && exam.subjectResults.length > 0) {
+      exam.subjectResults.forEach((sr) => {
+        initScores[sr.subjectCode] = {
+          correct: sr.correct,
+          wrong: sr.wrong,
+          blank: sr.blank
+        };
+      });
+    }
+    setEditScores(initScores);
+  };
+
+  const handleEditScoreChange = (code: string, field: 'correct' | 'wrong' | 'blank', val: number) => {
+    setEditScores((prev) => ({
+      ...prev,
+      [code]: {
+        correct: field === 'correct' ? val : prev[code]?.correct || 0,
+        wrong: field === 'wrong' ? val : prev[code]?.wrong || 0,
+        blank: field === 'blank' ? val : prev[code]?.blank || 0
+      }
+    }));
+  };
+
+  const handleSaveEditExam = () => {
+    if (!selectedExam) return;
+    if (!editTitle.trim()) {
+      alert('Lütfen deneme adını girin.');
+      return;
+    }
+
+    const examSubjectsList = selectedExam.type === 'TYT' ? tytSubjects : aytSubjects;
+    let totalNet = 0;
+    const updatedSubjectResults = examSubjectsList.map((s) => {
+      const c = editScores[s.code]?.correct || 0;
+      const w = editScores[s.code]?.wrong || 0;
+      const b = editScores[s.code]?.blank || 0;
+      const net = Math.round((c - w * 0.25) * 100) / 100;
+      totalNet += net;
+      return {
+        subjectCode: s.code,
+        subjectName: s.name,
+        correct: c,
+        wrong: w,
+        blank: b,
+        net
+      };
+    });
+    totalNet = Math.round(totalNet * 100) / 100;
+
+    const updatedExam: Exam = {
+      ...selectedExam,
+      title: editTitle.trim(),
+      publisher: editPublisher.trim() || 'Deneme Yayını',
+      difficulty: editDifficulty,
+      date: editDate || selectedExam.date,
+      totalNet,
+      subjectResults: updatedSubjectResults
+    };
+
+    if (onUpdateExam) {
+      onUpdateExam(updatedExam);
+    }
+    setSelectedExam(updatedExam);
+    setIsEditingExam(false);
+  };
+
+  const handleDeleteSelectedExam = () => {
+    if (!selectedExam) return;
+    if (window.confirm(`"${selectedExam.title}" denemesini silmek istediğinize emin misiniz?`)) {
+      if (onDeleteExam) {
+        onDeleteExam(selectedExam.id);
+      }
+      setSelectedExam(null);
+      setIsEditingExam(false);
+    }
   };
 
   const difficultyBadges: Record<string, { label: string; color: string }> = {
@@ -4276,7 +4512,7 @@ function ExamsScreenView({
 
             {activeSubjects.map((sub) => {
               const currentScore = scores[sub.code] || { correct: 0, wrong: 0, blank: 0 };
-              const currentNet = Math.max(0, currentScore.correct - currentScore.wrong * 0.25);
+              const currentNet = Math.round((currentScore.correct - currentScore.wrong * 0.25) * 100) / 100;
               return (
                 <div key={sub.code} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 6, alignItems: 'center' }}>
                   <span style={{ fontSize: 12, fontWeight: 700 }}>{sub.name}</span>
@@ -4296,8 +4532,8 @@ function ExamsScreenView({
                     onChange={(e) => handleScoreChange(sub.code, 'wrong', Number(e.target.value))}
                     style={{ padding: 6, borderRadius: 8, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', textAlign: 'center' }}
                   />
-                  <div style={{ textAlign: 'center', fontSize: 13, fontWeight: 800, color: 'var(--color-accent)' }}>
-                    {currentNet.toFixed(2)}
+                  <div style={{ textAlign: 'center', fontSize: 13, fontWeight: 800, color: currentNet < 0 ? '#FF453A' : 'var(--color-accent)' }}>
+                    {currentNet > 0 ? `+${currentNet.toFixed(2)}` : currentNet.toFixed(2)}
                   </div>
                 </div>
               );
@@ -4406,7 +4642,7 @@ function ExamsScreenView({
               Filtrelenen: <strong style={{ color: '#fff' }}>{filteredExams.length}</strong> Deneme
             </span>
             <span style={{ color: 'var(--color-text-muted)' }}>
-              Ortalama: <strong style={{ color: 'var(--color-accent)' }}>{avgNet.toFixed(2)}</strong> Net
+              Ortalama: <strong style={{ color: avgNet < 0 ? '#FF453A' : 'var(--color-accent)' }}>{avgNet.toFixed(2)}</strong> Net
             </span>
             <span style={{ color: 'var(--color-text-muted)' }}>
               Zirve: <strong style={{ color: '#00F0FF' }}>{maxNet.toFixed(2)}</strong> Net
@@ -4423,9 +4659,26 @@ function ExamsScreenView({
               filteredExams.map((exam) => {
                 const diff = exam.difficulty ? difficultyBadges[exam.difficulty] : null;
                 return (
-                  <div key={exam.id} className="app-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
+                  <div
+                    key={exam.id}
+                    className="app-card"
+                    onClick={() => handleOpenExamDetail(exam)}
+                    style={{
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s ease, border-color 0.15s ease',
+                      position: 'relative'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(212, 255, 0, 0.4)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-border)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(212, 255, 0, 0.15)', color: 'var(--color-accent)' }}>
                             {exam.type}
@@ -4435,15 +4688,24 @@ function ExamsScreenView({
                               {diff.label}
                             </span>
                           )}
+                          <span style={{ fontSize: 10, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                            Detay & Düzenle ↗
+                          </span>
                         </div>
-                        <div style={{ fontSize: 15, fontWeight: 800, marginTop: 4 }}>{exam.title}</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {exam.title}
+                        </div>
                         <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
                           {exam.publisher} • {exam.date}
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-accent)' }}>
-                          {exam.totalNet.toFixed(2)}
+                        <div style={{
+                          fontSize: 22,
+                          fontWeight: 800,
+                          color: exam.totalNet < 0 ? '#FF453A' : 'var(--color-accent)'
+                        }}>
+                          {exam.totalNet > 0 ? `+${exam.totalNet.toFixed(2)}` : exam.totalNet.toFixed(2)}
                         </div>
                         <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--color-text-muted)' }}>NET</div>
                       </div>
@@ -4454,6 +4716,471 @@ function ExamsScreenView({
             )}
           </div>
         </>
+      )}
+
+      {/* EXAM DETAIL & EDIT MODAL */}
+      {selectedExam && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedExam(null);
+              setIsEditingExam(false);
+            }
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 560,
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              background: '#141519',
+              border: '1px solid var(--color-border)',
+              borderRadius: 20,
+              padding: 20,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              boxShadow: '0 24px 48px rgba(0, 0, 0, 0.6)'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(212, 255, 0, 0.15)', color: 'var(--color-accent)' }}>
+                    {selectedExam.type}
+                  </span>
+                  {selectedExam.difficulty && difficultyBadges[selectedExam.difficulty] && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        padding: '2px 6px',
+                        borderRadius: 6,
+                        background: `${difficultyBadges[selectedExam.difficulty].color}20`,
+                        color: difficultyBadges[selectedExam.difficulty].color
+                      }}
+                    >
+                      {difficultyBadges[selectedExam.difficulty].label}
+                    </span>
+                  )}
+                  {isEditingExam && (
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 6, background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
+                      Düzenleme Modu
+                    </span>
+                  )}
+                </div>
+                {!isEditingExam ? (
+                  <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: '#fff' }}>
+                    {selectedExam.title}
+                  </h3>
+                ) : (
+                  <div>
+                    <label style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'block', marginBottom: 2 }}>Deneme Adı</label>
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        background: '#1D1F25',
+                        border: '1px solid var(--color-border)',
+                        color: '#fff',
+                        fontSize: 14,
+                        fontWeight: 700
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedExam(null);
+                  setIsEditingExam(false);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-muted)',
+                  cursor: 'pointer',
+                  padding: 4,
+                  display: 'flex'
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Meta details / edit fields */}
+            {!isEditingExam ? (
+              <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--color-text-muted)', flexWrap: 'wrap' }}>
+                <span>📚 <strong>Yayın:</strong> {selectedExam.publisher}</span>
+                <span>📅 <strong>Tarih:</strong> {selectedExam.date}</span>
+                {selectedExam.durationMinutes && (
+                  <span>⏱️ <strong>Süre:</strong> {selectedExam.durationMinutes} dk</span>
+                )}
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'block', marginBottom: 2 }}>Yayınevi</label>
+                  <input
+                    type="text"
+                    value={editPublisher}
+                    onChange={(e) => setEditPublisher(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      background: '#1D1F25',
+                      border: '1px solid var(--color-border)',
+                      color: '#fff',
+                      fontSize: 12
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'block', marginBottom: 2 }}>Tarih</label>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      background: '#1D1F25',
+                      border: '1px solid var(--color-border)',
+                      color: '#fff',
+                      fontSize: 12
+                    }}
+                  />
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>Zorluk</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                    {[
+                      { id: 'kolay', label: 'Kolay', color: '#00E599' },
+                      { id: 'orta', label: 'Orta', color: '#FFB800' },
+                      { id: 'osym', label: 'ÖSYM', color: '#C084FC' },
+                      { id: 'zor', label: 'Zor', color: '#FF5050' }
+                    ].map((lvl) => (
+                      <button
+                        key={lvl.id}
+                        type="button"
+                        onClick={() => setEditDifficulty(lvl.id as any)}
+                        style={{
+                          padding: '6px 4px',
+                          borderRadius: 6,
+                          fontSize: 10,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          background: editDifficulty === lvl.id ? `${lvl.color}25` : '#1D1F25',
+                          border: editDifficulty === lvl.id ? `1.5px solid ${lvl.color}` : '1px solid var(--color-border)',
+                          color: editDifficulty === lvl.id ? lvl.color : 'var(--color-text-muted)'
+                        }}
+                      >
+                        {lvl.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Total Net Banner */}
+            {(() => {
+              let displayNet = selectedExam.totalNet;
+              let totalCorrect = selectedExam.subjectResults?.reduce((a, b) => a + (b.correct || 0), 0) || 0;
+              let totalWrong = selectedExam.subjectResults?.reduce((a, b) => a + (b.wrong || 0), 0) || 0;
+              let totalBlank = selectedExam.subjectResults?.reduce((a, b) => a + (b.blank || 0), 0) || 0;
+
+              if (isEditingExam) {
+                const examSubjectsList = selectedExam.type === 'TYT' ? tytSubjects : aytSubjects;
+                let editTotal = 0;
+                totalCorrect = 0;
+                totalWrong = 0;
+                totalBlank = 0;
+                examSubjectsList.forEach((s) => {
+                  const c = editScores[s.code]?.correct || 0;
+                  const w = editScores[s.code]?.wrong || 0;
+                  const b = editScores[s.code]?.blank || 0;
+                  editTotal += Math.round((c - w * 0.25) * 100) / 100;
+                  totalCorrect += c;
+                  totalWrong += w;
+                  totalBlank += b;
+                });
+                displayNet = Math.round(editTotal * 100) / 100;
+              }
+
+              return (
+                <div
+                  style={{
+                    padding: '14px 18px',
+                    borderRadius: 14,
+                    background: displayNet < 0 ? 'rgba(255, 69, 58, 0.1)' : 'rgba(212, 255, 0, 0.08)',
+                    border: displayNet < 0 ? '1px solid rgba(255, 69, 58, 0.3)' : '1px solid rgba(212, 255, 0, 0.25)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)' }}>TOPLAM NET</div>
+                    <div
+                      style={{
+                        fontSize: 28,
+                        fontWeight: 900,
+                        color: displayNet < 0 ? '#FF453A' : 'var(--color-accent)'
+                      }}
+                    >
+                      {displayNet > 0 ? `+${displayNet.toFixed(2)}` : displayNet.toFixed(2)}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 14, textAlign: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Doğru</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: '#00E599' }}>{totalCorrect}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Yanlış</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: '#FF453A' }}>{totalWrong}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Boş</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--color-text-muted)' }}>{totalBlank}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Subject Results Table */}
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 8 }}>
+                Ders Bazlı Net Dağılımı {isEditingExam && '(Doğru / Yanlış Değerlerini Düzenleyin)'}
+              </div>
+
+              {!isEditingExam ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
+                      fontSize: 11,
+                      color: 'var(--color-text-muted)',
+                      fontWeight: 700,
+                      padding: '4px 8px'
+                    }}
+                  >
+                    <span>Ders</span>
+                    <span style={{ textAlign: 'center' }}>Doğru</span>
+                    <span style={{ textAlign: 'center' }}>Yanlış</span>
+                    <span style={{ textAlign: 'center' }}>Boş</span>
+                    <span style={{ textAlign: 'right' }}>Net</span>
+                  </div>
+                  {selectedExam.subjectResults?.map((sr) => (
+                    <div
+                      key={sr.subjectCode}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
+                        padding: '8px 10px',
+                        borderRadius: 10,
+                        background: '#1D1F25',
+                        border: '1px solid var(--color-border)',
+                        alignItems: 'center',
+                        fontSize: 12
+                      }}
+                    >
+                      <span style={{ fontWeight: 700 }}>{sr.subjectName}</span>
+                      <span style={{ textAlign: 'center', color: '#00E599', fontWeight: 700 }}>{sr.correct}</span>
+                      <span style={{ textAlign: 'center', color: '#FF453A', fontWeight: 700 }}>{sr.wrong}</span>
+                      <span style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>{sr.blank}</span>
+                      <span
+                        style={{
+                          textAlign: 'right',
+                          fontWeight: 800,
+                          color: sr.net < 0 ? '#FF453A' : 'var(--color-accent)'
+                        }}
+                      >
+                        {sr.net > 0 ? `+${sr.net.toFixed(2)}` : sr.net.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Editable Table */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1.4fr 1fr 1fr 1fr',
+                      fontSize: 11,
+                      color: 'var(--color-text-muted)',
+                      fontWeight: 700,
+                      padding: '4px 8px'
+                    }}
+                  >
+                    <span>Ders</span>
+                    <span style={{ textAlign: 'center' }}>Doğru</span>
+                    <span style={{ textAlign: 'center' }}>Yanlış</span>
+                    <span style={{ textAlign: 'right' }}>Net</span>
+                  </div>
+                  {(selectedExam.type === 'TYT' ? tytSubjects : aytSubjects).map((sub) => {
+                    const current = editScores[sub.code] || { correct: 0, wrong: 0, blank: 0 };
+                    const currentNet = Math.round((current.correct - current.wrong * 0.25) * 100) / 100;
+                    return (
+                      <div
+                        key={sub.code}
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1.4fr 1fr 1fr 1fr',
+                          gap: 6,
+                          alignItems: 'center',
+                          padding: '6px 8px',
+                          borderRadius: 10,
+                          background: '#1D1F25',
+                          border: '1px solid var(--color-border)'
+                        }}
+                      >
+                        <span style={{ fontSize: 12, fontWeight: 700 }}>{sub.name}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max={sub.q}
+                          value={current.correct || ''}
+                          onChange={(e) => handleEditScoreChange(sub.code, 'correct', Number(e.target.value))}
+                          style={{
+                            padding: 6,
+                            borderRadius: 6,
+                            background: '#141519',
+                            border: '1px solid var(--color-border)',
+                            color: '#fff',
+                            textAlign: 'center',
+                            fontSize: 12
+                          }}
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          max={sub.q}
+                          value={current.wrong || ''}
+                          onChange={(e) => handleEditScoreChange(sub.code, 'wrong', Number(e.target.value))}
+                          style={{
+                            padding: 6,
+                            borderRadius: 6,
+                            background: '#141519',
+                            border: '1px solid var(--color-border)',
+                            color: '#fff',
+                            textAlign: 'center',
+                            fontSize: 12
+                          }}
+                        />
+                        <div
+                          style={{
+                            textAlign: 'right',
+                            fontSize: 13,
+                            fontWeight: 800,
+                            color: currentNet < 0 ? '#FF453A' : 'var(--color-accent)'
+                          }}
+                        >
+                          {currentNet > 0 ? `+${currentNet.toFixed(2)}` : currentNet.toFixed(2)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginTop: 8 }}>
+              {!isEditingExam ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleDeleteSelectedExam}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 10,
+                      background: 'rgba(255, 69, 58, 0.1)',
+                      border: '1px solid rgba(255, 69, 58, 0.3)',
+                      color: '#FF453A',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Trash2 size={14} />
+                    <span>Sil</span>
+                  </button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => setIsEditingExam(true)}
+                      style={{ padding: '8px 14px', fontSize: 12 }}
+                    >
+                      <span>✏️ Düzenle</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      onClick={() => {
+                        setSelectedExam(null);
+                        setIsEditingExam(false);
+                      }}
+                      style={{ padding: '8px 16px', fontSize: 12 }}
+                    >
+                      <span>Kapat</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => {
+                      setIsEditingExam(false);
+                      handleOpenExamDetail(selectedExam);
+                    }}
+                    style={{ padding: '8px 14px', fontSize: 12 }}
+                  >
+                    <span>İptal</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={handleSaveEditExam}
+                    style={{ padding: '8px 18px', fontSize: 12 }}
+                  >
+                    <Check size={14} />
+                    <span>Değişiklikleri Kaydet</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
