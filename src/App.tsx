@@ -53,6 +53,7 @@ import {
 } from 'lucide-react';
 import { AiTutorScreenView } from './components/AiTutorView';
 import { FlocusPomodoroView } from './components/FlocusPomodoroView';
+import { OsymDistributionView } from './components/OsymDistributionView';
 import { sounds } from './lib/sound';
 import {
   getCurrentCloudUser,
@@ -108,11 +109,11 @@ type FeatureModalType = 'vault' | 'speed' | 'books' | 'rank' | 'benchmark' | 're
 // Main Application Component
 // ============================================================================
 export default function App() {
-  // Navigation Tabs: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro'
-  const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro'>(() => {
+  // Navigation Tabs: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro' | 'osym'
+  const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro' | 'osym'>(() => {
     try {
       const saved = localStorage.getItem('netmetrik_active_tab');
-      if (saved && ['home', 'calendar', 'analytics', 'profile', 'exams', 'curriculum', 'ai', 'pomodoro'].includes(saved)) {
+      if (saved && ['home', 'calendar', 'analytics', 'profile', 'exams', 'curriculum', 'ai', 'pomodoro', 'osym'].includes(saved)) {
         return saved as any;
       }
     } catch {}
@@ -128,7 +129,7 @@ export default function App() {
     }
   };
 
-  const handleNavigateTab = (tab: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro') => {
+  const handleNavigateTab = (tab: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro' | 'osym') => {
     if (tab !== activeTab) {
       sounds.playTabSwitch();
       setActiveTab(tab);
@@ -589,6 +590,19 @@ export default function App() {
     setTopicProgress((prev) => ({ ...prev, [topicKey]: next }));
   };
 
+  // Toggle Topic Completed State directly (Tick / Untick)
+  const handleToggleTopicCompleted = (topicKey: string) => {
+    const isCompleted = topicProgress[topicKey] === 'completed';
+    const next: TopicStatus = isCompleted ? 'not_started' : 'completed';
+    if (next === 'completed') {
+      sounds.playSuccess();
+      confetti({ particleCount: 35, spread: 55, origin: { y: 0.8 } });
+    } else {
+      sounds.playToggle(false);
+    }
+    setTopicProgress((prev) => ({ ...prev, [topicKey]: next }));
+  };
+
   // Add Question Log Handler
   const handleAddQuestionLog = (subject: string, source: string, count: number, minutes: number) => {
     const newLog: QuestionLog = {
@@ -952,6 +966,16 @@ export default function App() {
         <CurriculumScreenView
           topicProgress={topicProgress}
           onCycleStatus={handleCycleTopicStatus}
+          onToggleTopicCompleted={handleToggleTopicCompleted}
+          onOpenOsymDistribution={() => handleNavigateTab('osym')}
+          isDesktop={isDesktop}
+        />
+      )}
+
+      {activeTab === 'osym' && (
+        <OsymDistributionView
+          topicProgress={topicProgress}
+          onToggleTopicCompleted={handleToggleTopicCompleted}
           isDesktop={isDesktop}
         />
       )}
@@ -1131,6 +1155,26 @@ export default function App() {
                 >
                   <BookOpen size={19} />
                   <span>Konu Takip Çizelgesi</span>
+                </button>
+
+                <button
+                  className={`desktop-nav-btn ${activeTab === 'osym' ? 'active' : ''}`}
+                  onClick={() => handleNavigateTab('osym')}
+                >
+                  <Flame size={19} color={activeTab === 'osym' ? 'var(--color-accent)' : undefined} />
+                  <span>ÖSYM Soru Dağılımı</span>
+                  <span
+                    style={{
+                      fontSize: 9.5,
+                      fontWeight: 800,
+                      padding: '2px 7px',
+                      borderRadius: 99,
+                      background: 'rgba(212, 255, 0, 0.15)',
+                      color: 'var(--color-accent)'
+                    }}
+                  >
+                    2018–2026
+                  </span>
                 </button>
 
                 <button
@@ -1397,11 +1441,34 @@ export default function App() {
                   {activeTab === 'calendar' && 'Plan & Takvim'}
                   {activeTab === 'exams' && 'Denemeler & Karne'}
                   {activeTab === 'curriculum' && 'Konu Takip'}
+                  {activeTab === 'osym' && 'ÖSYM Soru Dağılımı'}
                   {activeTab === 'profile' && 'Profilim'}
                 </div>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {/* ÖSYM Quick Access Button */}
+              <button
+                onClick={() => handleNavigateTab('osym')}
+                style={{
+                  background: activeTab === 'osym' ? 'rgba(212, 255, 0, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                  border: activeTab === 'osym' ? '1px solid var(--color-accent)' : '1px solid var(--color-border)',
+                  color: activeTab === 'osym' ? 'var(--color-accent)' : '#fff',
+                  borderRadius: 11,
+                  padding: '6px 9px',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 3,
+                  cursor: 'pointer'
+                }}
+                title="ÖSYM Soru Dağılımı (2018–2026)"
+              >
+                <Flame size={13} color="var(--color-accent)" />
+                <span>ÖSYM</span>
+              </button>
+
               {/* Flocus Mobile Quick Access Button */}
               <button
                 onClick={() => handleNavigateTab('pomodoro')}
@@ -5187,17 +5254,22 @@ function ExamsScreenView({
 }
 
 // ============================================================================
-// 5. CURRICULUM SCREEN (MÜFREDAT TABLOSU)
+// 5. CURRICULUM SCREEN (MÜFREDAT TABLOSU & ÖSYM SORU DAĞILIMI)
 // ============================================================================
 function CurriculumScreenView({
   topicProgress,
   onCycleStatus,
+  onToggleTopicCompleted,
+  onOpenOsymDistribution,
   isDesktop
 }: {
   topicProgress: Record<string, TopicStatus>;
   onCycleStatus: (topicKey: string) => void;
+  onToggleTopicCompleted?: (topicKey: string) => void;
+  onOpenOsymDistribution?: () => void;
   isDesktop?: boolean;
 }) {
+  const [activeCurriculumTab, setActiveCurriculumTab] = useState<'mufredat' | 'osym'>('mufredat');
   const [examCategory, setExamCategory] = useState<'TYT' | 'AYT'>('TYT');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'in_progress' | 'not_started'>('all');
@@ -5237,300 +5309,352 @@ function CurriculumScreenView({
 
   return (
     <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Category Toggle: TYT vs AYT */}
+      {/* Top Main Section Switcher: Konu Takip Çizelgesi vs ÖSYM Soru Dağılımı */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <button
-          className={`btn-secondary ${examCategory === 'TYT' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+          type="button"
+          className={`btn-secondary ${activeCurriculumTab === 'mufredat' ? 'active' : ''}`}
+          style={{ justifyContent: 'center', padding: '12px 14px', fontSize: 13, fontWeight: 800 }}
           onClick={() => {
             sounds.playTabSwitch();
-            setExamCategory('TYT');
+            setActiveCurriculumTab('mufredat');
           }}
         >
-          📘 TYT Konu Tablosu
+          <BookOpen size={16} />
+          <span>Konu Takip Çizelgesi</span>
         </button>
         <button
-          className={`btn-secondary ${examCategory === 'AYT' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+          type="button"
+          className={`btn-secondary ${activeCurriculumTab === 'osym' ? 'active' : ''}`}
+          style={{ justifyContent: 'center', padding: '12px 14px', fontSize: 13, fontWeight: 800 }}
           onClick={() => {
             sounds.playTabSwitch();
-            setExamCategory('AYT');
+            if (onOpenOsymDistribution) {
+              onOpenOsymDistribution();
+            } else {
+              setActiveCurriculumTab('osym');
+            }
           }}
         >
-          📕 AYT Konu Tablosu
+          <Flame size={16} color="var(--color-accent)" />
+          <span>ÖSYM Soru Dağılımı</span>
         </button>
       </div>
 
-      {/* Category Overall Progress Banner */}
-      <div
-        className="app-card"
-        style={{
-          background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.08) 0%, rgba(26, 28, 34, 1) 100%)',
-          border: '1px solid var(--color-border)',
-          padding: 16
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 800 }}>
-              {examCategory} Müfredat İlerlemesi
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
-              Toplam {completedTopicsInCategory} / {totalTopicsInCategory} Konu Tamamlandı
-            </div>
-          </div>
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 900,
-              color: 'var(--color-accent)',
-              fontFamily: 'var(--font-mono)'
-            }}
-          >
-            %{categoryPct}
-          </div>
-        </div>
-
-        <div style={{ width: '100%', height: 10, background: '#14161C', borderRadius: 99, overflow: 'hidden' }}>
-          <div
-            style={{
-              width: `${categoryPct}%`,
-              height: '100%',
-              background: 'var(--color-accent)',
-              borderRadius: 99,
-              transition: 'width 0.4s ease'
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Search & Status Filters */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ position: 'relative' }}>
-          <Search size={16} color="var(--color-text-dim)" style={{ position: 'absolute', left: 12, top: 12 }} />
-          <input
-            type="text"
-            placeholder="Konu ara (ör: fonksiyon, türev, paragraf)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 12px 10px 36px',
-              borderRadius: 12,
-              background: '#18191E',
-              border: '1px solid var(--color-border)',
-              color: '#FFFFFF',
-              fontSize: 13,
-              outline: 'none'
-            }}
-          />
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {activeCurriculumTab === 'osym' ? (
+        <OsymDistributionView
+          topicProgress={topicProgress}
+          onToggleTopicCompleted={onToggleTopicCompleted || onCycleStatus}
+          isDesktop={isDesktop}
+        />
+      ) : (
+        <>
+          {/* Category Toggle: TYT vs AYT */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <button
-              className={`pill-toggle-btn ${statusFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('all')}
-            >
-              Tümü
-            </button>
-            <button
-              className={`pill-toggle-btn ${statusFilter === 'completed' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('completed')}
-            >
-              ✓ Bitti
-            </button>
-            <button
-              className={`pill-toggle-btn ${statusFilter === 'in_progress' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('in_progress')}
-            >
-              ⏳ Çalışılıyor
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8, fontSize: 11 }}>
-            <button onClick={expandAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 700 }}>
-              Tümünü Aç
-            </button>
-            <span style={{ color: 'var(--color-text-dim)' }}>•</span>
-            <button onClick={collapseAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-              Kapat
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Subjects Accordion List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {availableSubjects.map((sub) => {
-          const isExpanded = !!expandedSubjectCodes[sub.code];
-          const subTopics = sub.topics.filter((t) => {
-            const matchesQuery = t.toLowerCase().includes(searchQuery.toLowerCase());
-            if (!matchesQuery) return false;
-            const currentStatus = topicProgress[`${sub.code}_${t}`] || 'not_started';
-            if (statusFilter === 'all') return true;
-            return currentStatus === statusFilter;
-          });
-
-          const totalSub = sub.topics.length;
-          const completedSub = sub.topics.filter((t) => topicProgress[`${sub.code}_${t}`] === 'completed').length;
-          const subPct = Math.round((completedSub / (totalSub || 1)) * 100);
-
-          if (subTopics.length === 0 && searchQuery) return null;
-
-          return (
-            <div
-              key={sub.code}
-              className="app-card"
-              style={{
-                padding: 0,
-                overflow: 'hidden',
-                border: '1px solid var(--color-border)',
-                background: '#18191E'
+              className={`btn-secondary ${examCategory === 'TYT' ? 'active' : ''}`}
+              style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+              onClick={() => {
+                sounds.playTabSwitch();
+                setExamCategory('TYT');
               }}
             >
-              <div
-                onClick={() => toggleSubjectExpand(sub.code)}
-                style={{
-                  padding: '14px 16px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  borderBottom: isExpanded ? '1px solid var(--color-border)' : 'none',
-                  background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      background: sub.color,
-                      boxShadow: `0 0 8px ${sub.color}`
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#FFFFFF' }}>{sub.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                      {completedSub} / {totalSub} Konu Tamamlandı
-                    </div>
-                  </div>
-                </div>
+              📘 TYT Konu Tablosu
+            </button>
+            <button
+              className={`btn-secondary ${examCategory === 'AYT' ? 'active' : ''}`}
+              style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+              onClick={() => {
+                sounds.playTabSwitch();
+                setExamCategory('AYT');
+              }}
+            >
+              📕 AYT Konu Tablosu
+            </button>
+          </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: sub.color }}>%{subPct}</div>
-                  </div>
-                  <ChevronDown
-                    size={18}
-                    color="var(--color-text-muted)"
-                    style={{
-                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s ease'
-                    }}
-                  />
+          {/* Category Overall Progress Banner */}
+          <div
+            className="app-card"
+            style={{
+              background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.08) 0%, rgba(26, 28, 34, 1) 100%)',
+              border: '1px solid var(--color-border)',
+              padding: 16
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 800 }}>
+                  {examCategory} Müfredat İlerlemesi
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                  Toplam {completedTopicsInCategory} / {totalTopicsInCategory} Konu Tamamlandı
                 </div>
               </div>
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: 'var(--color-accent)',
+                  fontFamily: 'var(--font-mono)'
+                }}
+              >
+                %{categoryPct}
+              </div>
+            </div>
 
-              {isExpanded && (
-                <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {subTopics.map((topic) => {
-                    const topicKey = `${sub.code}_${topic}`;
-                    const currentStatus: TopicStatus = topicProgress[topicKey] || 'not_started';
+            <div style={{ width: '100%', height: 10, background: '#14161C', borderRadius: 99, overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: `${categoryPct}%`,
+                  height: '100%',
+                  background: 'var(--color-accent)',
+                  borderRadius: 99,
+                  transition: 'width 0.4s ease'
+                }}
+              />
+            </div>
+          </div>
 
-                    return (
+          {/* Search & Status Filters */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ position: 'relative' }}>
+              <Search size={16} color="var(--color-text-dim)" style={{ position: 'absolute', left: 12, top: 12 }} />
+              <input
+                type="text"
+                placeholder="Konu ara (ör: fonksiyon, türev, paragraf)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px 10px 36px',
+                  borderRadius: 12,
+                  background: '#18191E',
+                  border: '1px solid var(--color-border)',
+                  color: '#FFFFFF',
+                  fontSize: 13,
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <button
+                  className={`pill-toggle-btn ${statusFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  Tümü
+                </button>
+                <button
+                  className={`pill-toggle-btn ${statusFilter === 'completed' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('completed')}
+                >
+                  ✓ Bitti
+                </button>
+                <button
+                  className={`pill-toggle-btn ${statusFilter === 'in_progress' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('in_progress')}
+                >
+                  ⏳ Çalışılıyor
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, fontSize: 11 }}>
+                <button onClick={expandAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 700 }}>
+                  Tümünü Aç
+                </button>
+                <span style={{ color: 'var(--color-text-dim)' }}>•</span>
+                <button onClick={collapseAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+                  Kapat
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Subjects Accordion List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {availableSubjects.map((sub) => {
+              const isExpanded = !!expandedSubjectCodes[sub.code];
+              const subTopics = sub.topics.filter((t) => {
+                const matchesQuery = t.toLowerCase().includes(searchQuery.toLowerCase());
+                if (!matchesQuery) return false;
+                const currentStatus = topicProgress[`${sub.code}_${t}`] || 'not_started';
+                if (statusFilter === 'all') return true;
+                return currentStatus === statusFilter;
+              });
+
+              const totalSub = sub.topics.length;
+              const completedSub = sub.topics.filter((t) => topicProgress[`${sub.code}_${t}`] === 'completed').length;
+              const subPct = Math.round((completedSub / (totalSub || 1)) * 100);
+
+              if (subTopics.length === 0 && searchQuery) return null;
+
+              return (
+                <div
+                  key={sub.code}
+                  className="app-card"
+                  style={{
+                    padding: 0,
+                    overflow: 'hidden',
+                    border: '1px solid var(--color-border)',
+                    background: '#18191E'
+                  }}
+                >
+                  <div
+                    onClick={() => toggleSubjectExpand(sub.code)}
+                    style={{
+                      padding: '14px 16px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      borderBottom: isExpanded ? '1px solid var(--color-border)' : 'none',
+                      background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div
-                        key={topic}
-                        onClick={() => onCycleStatus(topicKey)}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '10px 12px',
-                          borderRadius: 10,
-                          background: currentStatus === 'completed' ? 'rgba(212, 255, 0, 0.04)' : '#1F2027',
-                          border: currentStatus === 'completed' ? '1px solid rgba(212, 255, 0, 0.2)' : '1px solid transparent',
-                          cursor: 'pointer'
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          background: sub.color,
+                          boxShadow: `0 0 8px ${sub.color}`
                         }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, marginRight: 8 }}>
-                          <div
-                            style={{
-                              width: 18,
-                              height: 18,
-                              borderRadius: '50%',
-                              border: currentStatus === 'completed' ? 'none' : '2px solid var(--color-border)',
-                              background: currentStatus === 'completed' ? 'var(--color-accent)' : 'transparent',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: '#000',
-                              fontSize: 10,
-                              fontWeight: 900
-                            }}
-                          >
-                            {currentStatus === 'completed' && '✓'}
-                          </div>
-                          <span
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 600,
-                              color: currentStatus === 'completed' ? 'var(--color-text-muted)' : '#FFFFFF'
-                            }}
-                          >
-                            {topic}
-                          </span>
-                        </div>
-
-                        <div
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 800,
-                            padding: '3px 8px',
-                            borderRadius: 6,
-                            background:
-                              currentStatus === 'completed'
-                                ? 'rgba(212, 255, 0, 0.15)'
-                                : currentStatus === 'in_progress'
-                                ? 'rgba(0, 240, 255, 0.15)'
-                                : currentStatus === 'needs_review'
-                                ? 'rgba(192, 132, 252, 0.15)'
-                                : '#1A1C22',
-                            color:
-                              currentStatus === 'completed'
-                                ? 'var(--color-accent)'
-                                : currentStatus === 'in_progress'
-                                ? '#00F0FF'
-                                : currentStatus === 'needs_review'
-                                ? '#C084FC'
-                                : 'var(--color-text-dim)',
-                            border:
-                              currentStatus === 'completed'
-                                ? '1px solid rgba(212, 255, 0, 0.3)'
-                                : currentStatus === 'in_progress'
-                                ? '1px solid rgba(0, 240, 255, 0.3)'
-                                : currentStatus === 'needs_review'
-                                ? '1px solid rgba(192, 132, 252, 0.3)'
-                                : '1px solid #232530',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {currentStatus === 'completed' && '✓ Bitti'}
-                          {currentStatus === 'in_progress' && '⏳ Çalışılıyor'}
-                          {currentStatus === 'needs_review' && '🔄 Tekrar Et'}
-                          {currentStatus === 'not_started' && '○ Başlanmadı'}
+                      />
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 800, color: '#FFFFFF' }}>{sub.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                          {completedSub} / {totalSub} Konu Tamamlandı
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 14, fontWeight: 800, color: sub.color }}>%{subPct}</div>
+                      </div>
+                      <ChevronDown
+                        size={18}
+                        color="var(--color-text-muted)"
+                        style={{
+                          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.2s ease'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {subTopics.map((topic) => {
+                        const topicKey = `${sub.code}_${topic}`;
+                        const currentStatus: TopicStatus = topicProgress[topicKey] || 'not_started';
+                        const isCompleted = currentStatus === 'completed';
+
+                        return (
+                          <div
+                            key={topic}
+                            onClick={() => {
+                              if (onToggleTopicCompleted) {
+                                onToggleTopicCompleted(topicKey);
+                              } else {
+                                onCycleStatus(topicKey);
+                              }
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '10px 12px',
+                              borderRadius: 10,
+                              background: isCompleted ? 'rgba(212, 255, 0, 0.05)' : '#1F2027',
+                              border: isCompleted ? '1px solid rgba(212, 255, 0, 0.25)' : '1px solid transparent',
+                              cursor: 'pointer',
+                              transition: 'all 0.12s ease'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, marginRight: 8 }}>
+                              {/* Tik (Checkmark) icon */}
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}
+                              >
+                                {isCompleted ? (
+                                  <CheckCircle2 size={20} color="var(--color-accent)" />
+                                ) : currentStatus === 'in_progress' ? (
+                                  <Circle size={20} color="#00F0FF" />
+                                ) : (
+                                  <Circle size={20} color="var(--color-text-dim)" />
+                                )}
+                              </div>
+
+                              <span
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: isCompleted ? 700 : 600,
+                                  color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
+                                  textDecoration: isCompleted ? 'line-through' : 'none'
+                                }}
+                              >
+                                {topic}
+                              </span>
+                            </div>
+
+                            <div
+                              style={{
+                                fontSize: 10,
+                                fontWeight: 800,
+                                padding: '3px 8px',
+                                borderRadius: 6,
+                                background:
+                                  isCompleted
+                                    ? 'rgba(212, 255, 0, 0.15)'
+                                    : currentStatus === 'in_progress'
+                                    ? 'rgba(0, 240, 255, 0.15)'
+                                    : currentStatus === 'needs_review'
+                                    ? 'rgba(192, 132, 252, 0.15)'
+                                    : '#1A1C22',
+                                color:
+                                  isCompleted
+                                    ? 'var(--color-accent)'
+                                    : currentStatus === 'in_progress'
+                                    ? '#00F0FF'
+                                    : currentStatus === 'needs_review'
+                                    ? '#C084FC'
+                                    : 'var(--color-text-dim)',
+                                border:
+                                  isCompleted
+                                    ? '1px solid rgba(212, 255, 0, 0.3)'
+                                    : currentStatus === 'in_progress'
+                                    ? '1px solid rgba(0, 240, 255, 0.3)'
+                                    : currentStatus === 'needs_review'
+                                    ? '1px solid rgba(192, 132, 252, 0.3)'
+                                    : '1px solid #232530',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {isCompleted && '✓ Bitti'}
+                              {currentStatus === 'in_progress' && '⏳ Çalışılıyor'}
+                              {currentStatus === 'needs_review' && '🔄 Tekrar Et'}
+                              {currentStatus === 'not_started' && '○ Başlanmadı'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
