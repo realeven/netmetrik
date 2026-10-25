@@ -1,6 +1,7 @@
 // ============================================================================
-// ÖSYM YKS SORU DAĞILIMI VERİ TABANI (2018 - 2026)
-// Kaynak: ertansinansahin.com/yks-soru-dagilimi/ (ÖSYM Çıkmış Sorular Analizi)
+// ÖSYM YKS SORU DAĞILIMI VERİ TABANI (2018 - 2025 / 2026)
+// TYT Kaynak: MEB (reyhanlisfkasml.meb.k12.tr / 2025 TYT Yıllara Göre Soru Dağılımı)
+// AYT Kaynak: ertansinansahin.com/yks-soru-dagilimi/
 // ============================================================================
 
 export interface OsymTopicItem {
@@ -22,7 +23,7 @@ export interface OsymSubjectDistribution {
 export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
   {
     "code": "tyt_turkce",
-    "name": "Türkçe",
+    "name": "TYT Türkçe",
     "exam": "TYT",
     "color": "#38BDF8",
     "years": [
@@ -33,125 +34,53 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
       "2022",
       "2023",
       "2024",
-      "2025",
-      "2026"
+      "2025"
     ],
     "topics": [
       {
-        "topic": "Sözcükte Anlam",
-        "unit": "",
-        "yearly": {
-          "2018": 3,
-          "2019": 3,
-          "2020": 4,
-          "2021": 4,
-          "2022": 4,
-          "2023": 3,
-          "2024": 4,
-          "2025": 4,
-          "2026": 5
-        },
-        "total": 34
-      },
-      {
-        "topic": "Cümlede Anlam",
-        "unit": "",
-        "yearly": {
-          "2018": 3,
-          "2019": 3,
-          "2020": 3,
-          "2021": 3,
-          "2022": 3,
-          "2023": 4,
-          "2024": 3,
-          "2025": 3,
-          "2026": 3
-        },
-        "total": 28
-      },
-      {
-        "topic": "Paragrafın Yapısı",
-        "unit": "",
-        "yearly": {
-          "2018": 4,
-          "2019": 4,
-          "2020": 5,
-          "2021": 4,
-          "2022": 6,
-          "2023": 5,
-          "2024": 3,
-          "2025": 5,
-          "2026": 2
-        },
-        "total": 38
-      },
-      {
-        "topic": "Paragrafta Anlam",
-        "unit": "",
-        "yearly": {
-          "2018": 18,
-          "2019": 18,
-          "2020": 21,
-          "2021": 22,
-          "2022": 20,
-          "2023": 21,
-          "2024": 23,
-          "2025": 21,
-          "2026": 23
-        },
-        "total": 187
-      },
-      {
-        "topic": "Biçim Bilgisi",
-        "unit": "",
-        "yearly": {
-          "2018": 2,
-          "2019": 2,
-          "2020": 1,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 8
-      },
-      {
         "topic": "Ses Bilgisi",
-        "unit": "",
         "yearly": {
-          "2018": 1,
+          "2018": 3,
           "2019": 1,
           "2020": 0,
           "2021": 1,
           "2022": 0,
           "2023": 1,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
-        "total": 4
+        "total": 6
       },
       {
-        "topic": "Yazım Kuralları",
-        "unit": "",
+        "topic": "Dil Bilgisi",
         "yearly": {
-          "2018": 2,
-          "2019": 2,
-          "2020": 2,
+          "2018": 1,
+          "2019": 8,
+          "2020": 3,
           "2021": 2,
-          "2022": 2,
+          "2022": 3,
           "2023": 2,
-          "2024": 2,
-          "2025": 2,
-          "2026": 2
+          "2024": 3,
+          "2025": 3
         },
-        "total": 18
+        "total": 25
       },
       {
         "topic": "Noktalama İşaretleri",
-        "unit": "",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 2,
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        },
+        "total": 14
+      },
+      {
+        "topic": "Yazım Kuralları",
         "yearly": {
           "2018": 2,
           "2019": 2,
@@ -160,78 +89,12 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 2,
           "2023": 2,
           "2024": 2,
-          "2025": 2,
-          "2026": 2
+          "2025": 2
         },
-        "total": 18
-      },
-      {
-        "topic": "İsim Soylu Sözcükler",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 3,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 7
-      },
-      {
-        "topic": "Fiiller",
-        "unit": "",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 4
-      },
-      {
-        "topic": "Cümlenin Öğeleri",
-        "unit": "",
-        "yearly": {
-          "2018": 3,
-          "2019": 2,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 12
-      },
-      {
-        "topic": "Cümle Türleri",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
+        "total": 16
       },
       {
         "topic": "Anlatım Bozukluğu",
-        "unit": "",
         "yearly": {
           "2018": 1,
           "2019": 0,
@@ -240,32 +103,57 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
         "total": 1
       },
       {
-        "topic": "Toplam",
-        "unit": "",
+        "topic": "Paragraf",
         "yearly": {
-          "2018": 40,
-          "2019": 40,
-          "2020": 40,
-          "2021": 40,
-          "2022": 40,
-          "2023": 40,
-          "2024": 40,
-          "2025": 40,
-          "2026": 40
+          "2018": 22,
+          "2019": 22,
+          "2020": 26,
+          "2021": 25,
+          "2022": 26,
+          "2023": 26,
+          "2024": 26,
+          "2025": 26
         },
-        "total": 360
+        "total": 199
+      },
+      {
+        "topic": "Cümlede Anlam",
+        "yearly": {
+          "2018": 7,
+          "2019": 3,
+          "2020": 6,
+          "2021": 3,
+          "2022": 3,
+          "2023": 4,
+          "2024": 3,
+          "2025": 3
+        },
+        "total": 32
+      },
+      {
+        "topic": "Sözcükte Anlam",
+        "yearly": {
+          "2018": 3,
+          "2019": 3,
+          "2020": 1,
+          "2021": 5,
+          "2022": 4,
+          "2023": 3,
+          "2024": 4,
+          "2025": 4
+        },
+        "total": 27
       }
     ]
   },
   {
     "code": "tyt_mat",
-    "name": "Temel Matematik & Geometri",
+    "name": "TYT Temel Matematik",
     "exam": "TYT",
     "color": "#00D696",
     "years": [
@@ -276,189 +164,67 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
       "2022",
       "2023",
       "2024",
-      "2025",
-      "2026"
+      "2025"
     ],
     "topics": [
       {
-        "topic": "Sayı Kümeleri",
-        "unit": "Denklem ve Eşitsizlikler",
-        "yearly": {
-          "2018": 5,
-          "2019": 7,
-          "2020": 4,
-          "2021": 5,
-          "2022": 7,
-          "2023": 6,
-          "2024": 6,
-          "2025": 6,
-          "2026": 5
-        },
-        "total": 51
-      },
-      {
-        "topic": "Bölünebilme Kuralları",
-        "unit": "Denklem ve Eşitsizlikler",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 2,
-          "2024": 2,
-          "2025": 1,
-          "2026": 2
-        },
-        "total": 11
-      },
-      {
-        "topic": "Birinci Dereceden Denklemler ve Eşitsizlikler",
-        "unit": "Denklem ve Eşitsizlikler",
-        "yearly": {
-          "2018": 5,
-          "2019": 4,
-          "2020": 3,
-          "2021": 4,
-          "2022": 1,
-          "2023": 2,
-          "2024": 2,
-          "2025": 4,
-          "2026": 2
-        },
-        "total": 27
-      },
-      {
-        "topic": "Üslü İfadeler ve Denklemler",
-        "unit": "Denklem ve Eşitsizlikler",
+        "topic": "Olasılık",
         "yearly": {
           "2018": 2,
-          "2019": 2,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 9
+      },
+      {
+        "topic": "Permütasyon - Kombinasyon",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
           "2020": 2,
-          "2021": 2,
-          "2022": 2,
-          "2023": 2,
-          "2024": 2,
-          "2025": 2,
-          "2026": 1
-        },
-        "total": 17
-      },
-      {
-        "topic": "Denklemler ve Eşitsizlikler ile İlgili Uygulamalar",
-        "unit": "Denklem ve Eşitsizlikler",
-        "yearly": {
-          "2018": 10,
-          "2019": 11,
-          "2020": 13,
-          "2021": 11,
-          "2022": 12,
-          "2023": 11,
-          "2024": 11,
-          "2025": 10,
-          "2026": 12
-        },
-        "total": 101
-      },
-      {
-        "topic": "Önermeler ve Bileşik Önermeler / Niceleyiciler / Tanım, Aksiyom, Teorem ve İspat Yöntemleri",
-        "unit": "Mantık",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 6
-      },
-      {
-        "topic": "Kümelerde Temel Kavramlar/ Kümelerde İşlemler",
-        "unit": "Kümeler",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 9
-      },
-      {
-        "topic": "Sıralama ve Seçme",
-        "unit": "Sayma ve Olasılık",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 9
-      },
-      {
-        "topic": "Basit Olayların Olasılıkları",
-        "unit": "Sayma ve Olasılık",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 9
-      },
-      {
-        "topic": "Fonksiyon Kavramı ve Gösterimi/İki Fonksiyonun Bileşkesi ve Bir Fonksiyonun Tersi",
-        "unit": "Fonksiyonlar",
-        "yearly": {
-          "2018": 1,
-          "2019": 2,
-          "2020": 2,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 11
-      },
-      {
-        "topic": "Polinom Kavramı ve Polinomlarda İşlemler/ Polinomların Çarpanlara Ayrılması",
-        "unit": "Polinomlar",
-        "yearly": {
-          "2018": 2,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
+          "2021": 0,
           "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2023": 1,
+          "2024": 3,
+          "2025": 1
         },
-        "total": 3
+        "total": 9
       },
       {
-        "topic": "İkinci Dereceden Bir Bilinmeyenli Denklemler",
-        "unit": "İkinci Dereceden Denklemler",
+        "topic": "Oran - Orantı",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 1
+        },
+        "total": 5
+      },
+      {
+        "topic": "Mutlak Değer",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 2,
+          "2025": 1
+        },
+        "total": 9
+      },
+      {
+        "topic": "Modüler Aritmetik",
         "yearly": {
           "2018": 0,
           "2019": 0,
@@ -467,178 +233,413 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
         "total": 0
       },
       {
-        "topic": "Merkezi Eğilim ve Yayılım Ölçüleri/ Verilerin Grafikle Gösterilmesi",
-        "unit": "Veri",
+        "topic": "Problemler",
         "yearly": {
-          "2018": 2,
-          "2019": 2,
-          "2020": 2,
-          "2021": 1,
-          "2022": 2,
-          "2023": 2,
-          "2024": 2,
-          "2025": 2,
-          "2026": 2
+          "2018": 11,
+          "2019": 12,
+          "2020": 13,
+          "2021": 13,
+          "2022": 13,
+          "2023": 10,
+          "2024": 11,
+          "2025": 12
         },
-        "total": 17
+        "total": 95
       },
       {
-        "topic": "Üçgenlerde Temel Kavramlar",
-        "unit": "Üçgenler",
+        "topic": "Temel Kavramlar",
         "yearly": {
-          "2018": 1,
+          "2018": 4,
           "2019": 1,
           "2020": 1,
           "2021": 3,
-          "2022": 2,
-          "2023": 3,
-          "2024": 1,
-          "2025": 3,
-          "2026": 2
-        },
-        "total": 17
-      },
-      {
-        "topic": "Üçgenlerde Eşlik ve Benzerlik",
-        "unit": "Üçgenler",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 2,
-          "2022": 1,
+          "2022": 3,
           "2023": 2,
           "2024": 1,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 9
-      },
-      {
-        "topic": "Üçgenin Yardımcı Elemanları",
-        "unit": "Üçgenler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Dik Üçgen ve Trigonometri",
-        "unit": "Üçgenler",
-        "yearly": {
-          "2018": 3,
-          "2019": 2,
-          "2020": 1,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 10
-      },
-      {
-        "topic": "Üçgenin Alanı/ Üçgenin Alanı ile ilgili Uygulamalar",
-        "unit": "Üçgenler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 2
-        },
-        "total": 4
-      },
-      {
-        "topic": "Çokgenler /Dörtgenler ve Özellikleri",
-        "unit": "Dörtgenler ve Çokgenler",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 2,
-          "2025": 1,
-          "2026": 2
-        },
-        "total": 11
-      },
-      {
-        "topic": "Özel Dörtgenler",
-        "unit": "Dörtgenler ve Çokgenler",
-        "yearly": {
-          "2018": 2,
-          "2019": 2,
-          "2020": 4,
-          "2021": 2,
-          "2022": 2,
-          "2023": 2,
-          "2024": 2,
-          "2025": 2,
-          "2026": 2
-        },
-        "total": 20
-      },
-      {
-        "topic": "Katı Cisimler",
-        "unit": "Uzay Geometri",
-        "yearly": {
-          "2018": 2,
-          "2019": 2,
-          "2020": 2,
-          "2021": 2,
-          "2022": 2,
-          "2023": 2,
-          "2024": 2,
-          "2025": 2,
-          "2026": 2
+          "2025": 3
         },
         "total": 18
       },
       {
-        "topic": "Toplam",
-        "unit": "",
+        "topic": "Sayı Basamakları",
         "yearly": {
-          "2018": 40,
-          "2019": 40,
-          "2020": 40,
-          "2021": 40,
-          "2022": 40,
-          "2023": 40,
-          "2024": 40,
-          "2025": 40,
-          "2026": 40
+          "2018": 1,
+          "2019": 2,
+          "2020": 1,
+          "2021": 2,
+          "2022": 1,
+          "2023": 1,
+          "2024": 2,
+          "2025": 1
         },
-        "total": 360
+        "total": 11
+      },
+      {
+        "topic": "İşlem",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 1
+      },
+      {
+        "topic": "Kümeler ve Kartezyen Çarpım",
+        "yearly": {
+          "2018": 2,
+          "2019": 2,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 10
+      },
+      {
+        "topic": "Mantık",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 4
+      },
+      {
+        "topic": "Fonksiyonlar",
+        "yearly": {
+          "2018": 1,
+          "2019": 2,
+          "2020": 2,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 10
+      },
+      {
+        "topic": "Bölünebilme Kuralları",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 5
+      },
+      {
+        "topic": "Basit Eşitsizlikler",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 3,
+          "2024": 0,
+          "2025": 1
+        },
+        "total": 9
+      },
+      {
+        "topic": "Denklem Çözme",
+        "yearly": {
+          "2018": 0,
+          "2019": 2,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 1
+        },
+        "total": 5
+      },
+      {
+        "topic": "Üslü İfadeler",
+        "yearly": {
+          "2018": 2,
+          "2019": 0,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 7
+      },
+      {
+        "topic": "Çarpanlara Ayırma",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 1
+      },
+      {
+        "topic": "Köklü İfadeler",
+        "yearly": {
+          "2018": 2,
+          "2019": 1,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "OBEB - OKEK",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 2,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 0
+        },
+        "total": 3
+      },
+      {
+        "topic": "Rasyonel Sayılar",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 3,
+          "2021": 3,
+          "2022": 1,
+          "2023": 2,
+          "2024": 2,
+          "2025": 1
+        },
+        "total": 13
+      },
+      {
+        "topic": "Polinomlar",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 2
+      },
+      {
+        "topic": "İstatistik",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 1,
+          "2021": 0,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 5
+      }
+    ]
+  },
+  {
+    "code": "tyt_geo",
+    "name": "TYT Geometri",
+    "exam": "TYT",
+    "color": "#818CF8",
+    "years": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "topics": [
+      {
+        "topic": "Grafik Okuma",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 0
+      },
+      {
+        "topic": "Analitik Geometri",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 4
+      },
+      {
+        "topic": "Çember - Daire",
+        "yearly": {
+          "2018": 1,
+          "2019": 2,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 3
+      },
+      {
+        "topic": "Katı Cisimler",
+        "yearly": {
+          "2018": 1,
+          "2019": 2,
+          "2020": 2,
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        },
+        "total": 15
+      },
+      {
+        "topic": "Yamuk",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 2,
+          "2021": 0,
+          "2022": 0,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 6
+      },
+      {
+        "topic": "Çokgenler",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Açılar ve Üçgenler",
+        "yearly": {
+          "2018": 3,
+          "2019": 1,
+          "2020": 2,
+          "2021": 4,
+          "2022": 4,
+          "2023": 5,
+          "2024": 5,
+          "2025": 4
+        },
+        "total": 28
+      },
+      {
+        "topic": "Eşkenar Dörtgen",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 2
+      },
+      {
+        "topic": "Kare",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 1
+        },
+        "total": 4
+      },
+      {
+        "topic": "Dikdörtgen",
+        "yearly": {
+          "2018": 2,
+          "2019": 2,
+          "2020": 2,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 11
       }
     ]
   },
   {
     "code": "tyt_fizik",
-    "name": "Fizik",
+    "name": "TYT Fizik",
     "exam": "TYT",
-    "color": "#60A5FA",
+    "color": "#FB7185",
     "years": [
       "2018",
       "2019",
@@ -647,13 +648,11 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
       "2022",
       "2023",
       "2024",
-      "2025",
-      "2026"
+      "2025"
     ],
     "topics": [
       {
         "topic": "Fizik Bilimine Giriş",
-        "unit": "",
         "yearly": {
           "2018": 1,
           "2019": 0,
@@ -662,14 +661,12 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
         "total": 2
       },
       {
         "topic": "Madde ve Özellikleri",
-        "unit": "",
         "yearly": {
           "2018": 0,
           "2019": 1,
@@ -678,14 +675,12 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 1,
           "2023": 1,
           "2024": 1,
-          "2025": 0,
-          "2026": 1
+          "2025": 1
         },
         "total": 6
       },
       {
         "topic": "Hareket ve Kuvvet",
-        "unit": "",
         "yearly": {
           "2018": 1,
           "2019": 1,
@@ -693,31 +688,27 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2021": 1,
           "2022": 1,
           "2023": 1,
-          "2024": 1,
-          "2025": 2,
-          "2026": 1
+          "2024": 0,
+          "2025": 1
         },
-        "total": 10
+        "total": 7
       },
       {
-        "topic": "Enerji",
-        "unit": "",
+        "topic": "İş, Güç ve Enerji",
         "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
+          "2018": 1,
+          "2019": 0,
+          "2020": 1,
           "2021": 0,
           "2022": 0,
-          "2023": 1,
+          "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
         "total": 2
       },
       {
         "topic": "Isı, Sıcaklık ve Genleşme",
-        "unit": "",
         "yearly": {
           "2018": 1,
           "2019": 1,
@@ -726,14 +717,12 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 1,
           "2023": 1,
           "2024": 1,
-          "2025": 1,
-          "2026": 1
+          "2025": 1
         },
-        "total": 8
+        "total": 7
       },
       {
         "topic": "Elektrostatik",
-        "unit": "",
         "yearly": {
           "2018": 1,
           "2019": 0,
@@ -742,46 +731,26 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 1,
           "2023": 0,
           "2024": 0,
-          "2025": 1,
-          "2026": 1
+          "2025": 1
         },
-        "total": 4
+        "total": 3
       },
       {
-        "topic": "Elektrik Akımı ve Devreleri",
-        "unit": "",
+        "topic": "Elektrik ve Manyetizma",
         "yearly": {
           "2018": 0,
           "2019": 1,
           "2020": 1,
           "2021": 1,
           "2022": 0,
-          "2023": 1,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
+          "2023": 2,
+          "2024": 2,
+          "2025": 0
         },
-        "total": 5
-      },
-      {
-        "topic": "Mıknatıslar ve Manyetizma",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
+        "total": 7
       },
       {
         "topic": "Basınç",
-        "unit": "",
         "yearly": {
           "2018": 0,
           "2019": 0,
@@ -790,14 +759,12 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 1,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
         "total": 3
       },
       {
         "topic": "Kaldırma Kuvveti",
-        "unit": "",
         "yearly": {
           "2018": 1,
           "2019": 0,
@@ -806,1388 +773,43 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 1,
-          "2025": 1,
-          "2026": 1
+          "2025": 1
+        },
+        "total": 4
+      },
+      {
+        "topic": "Dalgalar",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 1,
+          "2025": 1
         },
         "total": 5
       },
       {
-        "topic": "Dalgalara Giriş ve Yay Dalgaları",
-        "unit": "",
+        "topic": "Optik",
         "yearly": {
-          "2018": 0,
-          "2019": 0,
+          "2018": 2,
+          "2019": 2,
           "2020": 1,
           "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Su, Ses ve Deprem Dalgaları",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
           "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 3
-      },
-      {
-        "topic": "Aydınlanma ve Gölge",
-        "unit": "",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Yansıma ve Düzlem Ayna",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Küresel Aynalar",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 2
-      },
-      {
-        "topic": "Işığın Kırılması",
-        "unit": "",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Mercekler",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
+          "2023": 2,
           "2024": 1,
-          "2025": 0,
-          "2026": 0
+          "2025": 1
         },
-        "total": 2
-      },
-      {
-        "topic": "Prizmalar ve Renk",
-        "unit": "",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Toplam",
-        "unit": "",
-        "yearly": {
-          "2018": 7,
-          "2019": 7,
-          "2020": 7,
-          "2021": 7,
-          "2022": 7,
-          "2023": 7,
-          "2024": 7,
-          "2025": 7,
-          "2026": 7
-        },
-        "total": 63
+        "total": 11
       }
     ]
   },
   {
     "code": "tyt_kimya",
-    "name": "Kimya",
-    "exam": "TYT",
-    "color": "#F472B6",
-    "years": [
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023",
-      "2024",
-      "2025",
-      "2026"
-    ],
-    "topics": [
-      {
-        "topic": "Kimya Disiplinleri ve Kimyacıların Çalışma Alanları",
-        "unit": "Kimya Bilimi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Kimyanın Sembolik Dili",
-        "unit": "Kimya Bilimi",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 4
-      },
-      {
-        "topic": "Kimya Uygulamalarında İş Sağlığı ve Güvenliği",
-        "unit": "Kimya Bilimi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Atom Modelleri",
-        "unit": "Atom ve Periyodik Sistem",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Atomun Yapısı",
-        "unit": "Atom ve Periyodik Sistem",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 3
-      },
-      {
-        "topic": "Periyodik Sistem",
-        "unit": "Atom ve Periyodik Sistem",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 6
-      },
-      {
-        "topic": "Güçlü Etkileşimler",
-        "unit": "Kimyasal Türler Arası Etkileşimler",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 2
-        },
-        "total": 6
-      },
-      {
-        "topic": "Zayıf Etkileşimler",
-        "unit": "Kimyasal Türler Arası Etkileşimler",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Fiziksel ve Kimyasal Değişimler",
-        "unit": "Kimyasal Türler Arası Etkileşimler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Sıvılar",
-        "unit": "Maddenin Hâlleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 7
-      },
-      {
-        "topic": "Gazlar",
-        "unit": "Maddenin Hâlleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Kimyanın Temel Kanunları",
-        "unit": "Kimyanın Temel Kanunları ve Kimyasal Hesaplamalar",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Mol Kavramı",
-        "unit": "Kimyanın Temel Kanunları ve Kimyasal Hesaplamalar",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Kimyasal Tepkimelerde Hesaplamalar",
-        "unit": "Kimyanın Temel Kanunları ve Kimyasal Hesaplamalar",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 3
-      },
-      {
-        "topic": "Homojen ve Heterojen Karışımlar",
-        "unit": "Karışımlar",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 8
-      },
-      {
-        "topic": "Ayırma ve Saflaştırma Teknikleri",
-        "unit": "Karışımlar",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Asitler ve Bazlar",
-        "unit": "Asitler, Bazlar ve Tuzlar",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Asitlerin ve Bazların Tepkimeleri",
-        "unit": "Asitler, Bazlar ve Tuzlar",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 2,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 7
-      },
-      {
-        "topic": "Yaygın Günlük Hayat Kimyasalları",
-        "unit": "Kimya Her Yerde",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Hidrokarbonlar",
-        "unit": "Kimya Her Yerde",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Toplam",
-        "unit": "",
-        "yearly": {
-          "2018": 7,
-          "2019": 7,
-          "2020": 7,
-          "2021": 7,
-          "2022": 7,
-          "2023": 7,
-          "2024": 7,
-          "2025": 7,
-          "2026": 7
-        },
-        "total": 63
-      }
-    ]
-  },
-  {
-    "code": "tyt_biyo",
-    "name": "Biyoloji",
-    "exam": "TYT",
-    "color": "#34D399",
-    "years": [
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023",
-      "2024",
-      "2025",
-      "2026"
-    ],
-    "topics": [
-      {
-        "topic": "Biyoloji ve Canlıların Ortak Özellikleri",
-        "unit": "Yaşam Bilimi Biyoloji",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Canlıların Yapısında Bulunan Temel Bileşikler",
-        "unit": "Yaşam Bilimi Biyoloji",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 7
-      },
-      {
-        "topic": "Hücre",
-        "unit": "Hücre",
-        "yearly": {
-          "2018": 2,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 2
-        },
-        "total": 11
-      },
-      {
-        "topic": "Canlıların Çeşitliliği ve Sınıflandırılması",
-        "unit": "Canlılar Dünyası",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Canlı Âlemleri ve Özellikleri",
-        "unit": "Canlılar Dünyası",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 1,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 5
-      },
-      {
-        "topic": "Mitoz ve Eşeysiz Üreme",
-        "unit": "Hücre Bölünmeleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 5
-      },
-      {
-        "topic": "Mayoz ve Eşeyli Üreme",
-        "unit": "Hücre Bölünmeleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 4
-      },
-      {
-        "topic": "Kalıtım ve Biyolojik Çeşitlilik",
-        "unit": "Kalıtımın Genel İlkeleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 9
-      },
-      {
-        "topic": "Ekosistem Ekolojisi",
-        "unit": "Ekosistem Ekolojisi ve Güncel Çevre Sorunları",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 1,
-          "2024": 1,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 5
-      },
-      {
-        "topic": "Güncel Çevre Sorunları ve İnsan",
-        "unit": "Ekosistem Ekolojisi ve Güncel Çevre Sorunları",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Doğal Kaynaklar ve Biyolojik Çeşitliliğin Korunması",
-        "unit": "Ekosistem Ekolojisi ve Güncel Çevre Sorunları",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Biyomlar",
-        "unit": "Canlılar ve Çevre",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Toplam",
-        "unit": "",
-        "yearly": {
-          "2018": 6,
-          "2019": 6,
-          "2020": 6,
-          "2021": 6,
-          "2022": 6,
-          "2023": 6,
-          "2024": 6,
-          "2025": 6,
-          "2026": 6
-        },
-        "total": 54
-      }
-    ]
-  },
-  {
-    "code": "tyt_tarih",
-    "name": "Tarih",
-    "exam": "TYT",
-    "color": "#FB923C",
-    "years": [
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023",
-      "2024",
-      "2025",
-      "2026"
-    ],
-    "topics": [
-      {
-        "topic": "Coğrafya ile Oluşan Yaşam Tarzı",
-        "unit": "İlk ve Orta Çağlarda Türk Dünyası",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 2
-      },
-      {
-        "topic": "Boylardan Devlete",
-        "unit": "İlk ve Orta Çağlarda Türk Dünyası",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 1,
-          "2023": 1,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 4
-      },
-      {
-        "topic": "Kavimler Göçü",
-        "unit": "İlk ve Orta Çağlarda Türk Dünyası",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Türklerin İslamiyet’i Kabulü",
-        "unit": "Türklerin İslamiyet’I Kabulü ve İlk Türk İslam Devletleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "İslamiyet’in Türk Devlet ve Toplum Yapısına Etkisi",
-        "unit": "Türklerin İslamiyet’I Kabulü ve İlk Türk İslam Devletleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 3
-      },
-      {
-        "topic": "Büyük Selçuklu Devleti (1040-1157)",
-        "unit": "Türklerin İslamiyet’I Kabulü ve İlk Türk İslam Devletleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Anadolu’nun İlk Türk Siyasi Teşekkülleri",
-        "unit": "Yerleşme ve Devletleşme Sürecinde Selçuklu Türkiyesi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Devletleşme Sürecinde Osmanlı-Bizans İlişkileri",
-        "unit": "Beylikten Devlete Osmanlı Siyaseti (1302-1453)",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Osmanlı Devleti’nin Rumeli’deki İskân ve İstimâlet Politikası",
-        "unit": "Beylikten Devlete Osmanlı Siyaseti (1302-1453)",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Saray ve Şehir Kültürü",
-        "unit": "Sultan ve Osmanlı Merkez Teşkilatı",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 2
-      },
-      {
-        "topic": "Tek Hanedan Anlayışı ve Gelenekler Işığında Devlet İdarecisi",
-        "unit": "Sultan ve Osmanlı Merkez Teşkilatı",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Uzun Savaşlardan Diplomasiye",
-        "unit": "Değişen Dünya Dengeleri Karşısında Osmanlı Siyaseti (1595-1774)",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Osmanlı Devleti’nde Demokratikleşme Hareketleri",
-        "unit": "Uluslararası İlişkilerde Denge Stratejisi (1774-1914)",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Osmanlı Devleti’nde Sanayileşme Çabaları",
-        "unit": "XIX ve XX. Yüzyılda Değişen Sosyoekonomik Hayat",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Millî Mücadele’ye Hazırlık Dönemi",
-        "unit": "Millî Mücadele",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 6
-      },
-      {
-        "topic": "Büyük Millet Meclisinin Açılması (23 Nisan 1920)",
-        "unit": "Millî Mücadele",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 2
-      },
-      {
-        "topic": "Batı Cephesi ve Bu Cephede Öne Çıkan Şahsiyetler",
-        "unit": "Millî Mücadele",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 2,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Millî Mücadele’nin Sona Ermesi ve Lozan Barış Antlaşması",
-        "unit": "Millî Mücadele",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 4
-      },
-      {
-        "topic": "Atatürk İlkeleri",
-        "unit": "Atatürkçülük ve Türk İnkılabı",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Eğitim ve Kültür Alanındaki İnkılaplar",
-        "unit": "Atatürkçülük ve Türk İnkılabı",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Toplam",
-        "unit": "",
-        "yearly": {
-          "2018": 5,
-          "2019": 5,
-          "2020": 5,
-          "2021": 5,
-          "2022": 5,
-          "2023": 5,
-          "2024": 5,
-          "2025": 5,
-          "2026": 5
-        },
-        "total": 45
-      }
-    ]
-  },
-  {
-    "code": "tyt_cografya",
-    "name": "Coğrafya",
-    "exam": "TYT",
-    "color": "#A78BFA",
-    "years": [
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023",
-      "2024",
-      "2025",
-      "2026"
-    ],
-    "topics": [
-      {
-        "topic": "Doğa ve İnsan Etkileşimi",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Coğrafya Bilimi ve Bölümlenmesi",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Dünya’nın Şekli ve Hareketleri",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Coğrafi Koordinat Sistemi",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Harita Okuryazarlığı",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Atmosfer ve İklim Bilgisi",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 8
-      },
-      {
-        "topic": "Dünya’nın Yapısı ve Oluşum Süreci",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 3
-      },
-      {
-        "topic": "Su Kaynakları",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Topraklar",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Bitkiler",
-        "unit": "Doğal Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Yerleşmeler",
-        "unit": "Beşerî Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Nüfus  ve Göç",
-        "unit": "Beşerî Sistemler",
-        "yearly": {
-          "2018": 1,
-          "2019": 2,
-          "2020": 1,
-          "2021": 1,
-          "2022": 0,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 9
-      },
-      {
-        "topic": "Ekonomik Faaliyetler",
-        "unit": "Beşerî Sistemler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Bölgeler",
-        "unit": "Küresel Ortam: Bölgeler ve Ülkeler",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 6
-      },
-      {
-        "topic": "Uluslararası Ulaşım Hatları",
-        "unit": "Küresel Ortam: Bölgeler ve Ülkeler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Afetler",
-        "unit": "Çevre ve Toplum",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 9
-      },
-      {
-        "topic": "Toplam",
-        "unit": "",
-        "yearly": {
-          "2018": 5,
-          "2019": 5,
-          "2020": 5,
-          "2021": 5,
-          "2022": 5,
-          "2023": 5,
-          "2024": 5,
-          "2025": 5,
-          "2026": 5
-        },
-        "total": 45
-      }
-    ]
-  },
-  {
-    "code": "tyt_felsefe",
-    "name": "Felsefe",
+    "name": "TYT Kimya",
     "exam": "TYT",
     "color": "#FBBF24",
     "years": [
@@ -2198,513 +820,156 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
       "2022",
       "2023",
       "2024",
-      "2025",
-      "2026"
+      "2025"
     ],
     "topics": [
       {
-        "topic": "Felsefenin Anlamı",
-        "unit": "Felsefenin Anlamı",
+        "topic": "Kimya Bilimi",
         "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 1,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Felsefi Düşüncenin Ortaya Çıkışı ve Özellikleri",
-        "unit": "Felsefenin Anlamı",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 2,
-          "2023": 2,
-          "2024": 1,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 6
-      },
-      {
-        "topic": "Felsefenin İnsan ve Toplum Hayatı Üzerindeki Rolü",
-        "unit": "Felsefenin Anlamı",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 2,
-          "2026": 0
-        },
-        "total": 4
-      },
-      {
-        "topic": "Düşünme ve Akıl Yürütmeye İlişkin Kavramlar",
-        "unit": "Felsefe ile Düşünme",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Düşünme ve Dil İlişkisi",
-        "unit": "Felsefe ile Düşünme",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Felsefi Bir Görüşü veya Argümanı Sorgulama",
-        "unit": "Felsefe ile Düşünme",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 1
-      },
-      {
-        "topic": "Varlık Felsefesinin Konusu ve Problemleri",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Evrende Amaçlılık ve Düzenlilik-Varlık Türlerinin Sınıflandırılması-Bir Konunun Varlık Felsefesi Açısından Değerlendirilmesi",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 0
-      },
-      {
-        "topic": "Varlık Felsefesi Alanındaki Çağdaş Yaklaşımlar",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Bilgi Felsefesinin Konusu ve Bilginin İmkânı Problemi",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Bilginin Kaynağı ile İlgili Görüşler",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 2,
-          "2023": 1,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 6
-      },
-      {
-        "topic": "Bilginin Sınırları, Ölçütü- Doğruluk ve Gerçeklik Bilginin Değeri ve Güvenirliği",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 2,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Bilimin Değeri-Bilim Felsefe İlişkisi-Bilim ve Hayat İlişkisi",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Ahlak Felsefesinin Konusu ve Temel Kavramları",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Ahlak Felsefesinde Özgürlük ve Sorumluluk",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 4
-      },
-      {
-        "topic": "Evrensel Ahlak Yasasını Reddeden Görüşler ve Filozoflar",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Ahlak Felsefesinde İyilik ve Mutluluk İlişkisi",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Din Felsefesinin Konusu ve Soruları",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "Siyaset Felsefesinin Konusu ve Problemleri",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "Sanat Felsefesinin Konusu ve Problemleri",
-        "unit": "Felsefenin Temel Konuları ve Problemleri",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 4
-      },
-      {
-        "topic": "İlk Medeniyetlerin Felsefenin Doğuşuna Etkisi Anadolu’da Yaşamış Filozoflar",
-        "unit": "İlk Neden (Arkhe) ve Değişim Problemi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 1
-      },
-      {
-        "topic": "İlk Neden (Arkhe) ve Değişim Problemi",
-        "unit": "İlk Neden (Arkhe) ve Değişim Problemi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Sofistler ile Sokrates’in Bilgi ve Değer Anlayışları",
-        "unit": "İlk Neden (Arkhe) ve Değişim Problemi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Platon ve Aristoteles’in Varlık, Bilgi ve Değer Anlayışı",
-        "unit": "İlk Neden (Arkhe) ve Değişim Problemi",
-        "yearly": {
-          "2018": 1,
-          "2019": 1,
-          "2020": 0,
-          "2021": 2,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 0
-        },
-        "total": 6
-      },
-      {
-        "topic": "MS 2.Yüzyıl-MS 15.Yüzyıl Felsefesinin Ortaya Çıkışı",
-        "unit": "Ms 2.Yüzyıl-Ms 15.Yüzyıl Felsefesinin Ortaya Çıkışı",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 1,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 5
-      },
-      {
-        "topic": "İslam Felsefesinin Özellikleri, İnanç Akıl İlişkisi ve Filozofların Görüşleri",
-        "unit": "Ms 2.Yüzyıl-Ms 15.Yüzyıl Felsefesinin Ortaya Çıkışı",
-        "yearly": {
-          "2018": 1,
+          "2018": 2,
           "2019": 0,
           "2020": 1,
           "2021": 1,
           "2022": 1,
           "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 6
-      },
-      {
-        "topic": "15-17. Yüzyıl Felsefesinde Öne Çıkan Görüşler",
-        "unit": "15 - 17. Yüzyıl Felsefesinde Öne Çıkan Görüşler",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 1,
-          "2021": 0,
-          "2022": 1,
-          "2023": 1,
           "2024": 1,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 7
-      },
-      {
-        "topic": "18-19. Yüzyıl Felsefesinde Öne Çıkan Problemler ve Görüşler",
-        "unit": "18-19. Yüzyıl Felsefesinde Öne Çıkan Problemler ve Görüşler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 2,
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 1,
-          "2026": 1
+          "2025": 1
         },
         "total": 8
       },
       {
-        "topic": "20. Yüzyıl Felsefesinde Bazı Ana Akımlar",
-        "unit": "20. Yüzyıl Felsefesinde Bazı Ana Akımlar",
+        "topic": "Atomun Yapısı",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 1,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 4
+      },
+      {
+        "topic": "Periyodik Tablo",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 5
+      },
+      {
+        "topic": "Maddenin Halleri",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Kimyasal Türler Arası Etkileşimler",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Kimyasal Hesaplamalar",
         "yearly": {
           "2018": 0,
           "2019": 0,
           "2020": 1,
           "2021": 1,
-          "2022": 1,
+          "2022": 0,
           "2023": 0,
           "2024": 1,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 5
-      },
-      {
-        "topic": "20. Yüzyıl Filozoflarının Görüşleri",
-        "unit": "20. Yüzyıl Felsefesinde Bazı Ana Akımlar",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 1,
-          "2026": 1
+          "2025": 0
         },
         "total": 3
       },
       {
-        "topic": "Toplam",
-        "unit": "",
+        "topic": "Kimyanın Temel Kanunları",
         "yearly": {
-          "2018": 10,
-          "2019": 10,
-          "2020": 10,
-          "2021": 10,
-          "2022": 10,
-          "2023": 10,
-          "2024": 10,
-          "2025": 10,
-          "2026": 10
+          "2018": 1,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
         },
-        "total": 90
+        "total": 3
+      },
+      {
+        "topic": "Asit, Baz ve Tuzlar",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 7
+      },
+      {
+        "topic": "Karışımlar",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 7
+      },
+      {
+        "topic": "Kimya Her Yerde",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 2
       }
     ]
   },
   {
-    "code": "tyt_din",
-    "name": "Din Kültürü",
+    "code": "tyt_biyo",
+    "name": "TYT Biyoloji",
     "exam": "TYT",
-    "color": "#EC4899",
+    "color": "#34D399",
     "years": [
       "2018",
       "2019",
@@ -2713,269 +978,53 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
       "2022",
       "2023",
       "2024",
-      "2025",
-      "2026"
+      "2025"
     ],
     "topics": [
       {
-        "topic": "İslam’da Bilgi Kaynakları",
-        "unit": "Bilgi ve İnanç",
+        "topic": "Canlıların Ortak Özellikleri",
         "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 2,
+          "2018": 0,
+          "2019": 1,
+          "2020": 0,
           "2021": 0,
           "2022": 1,
           "2023": 0,
+          "2024": 0,
+          "2025": 1
+        },
+        "total": 3
+      },
+      {
+        "topic": "Canlıların Temel Bileşenleri",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 0,
+          "2023": 1,
           "2024": 1,
-          "2025": 0,
-          "2026": 1
+          "2025": 0
         },
         "total": 6
       },
       {
-        "topic": "İslam İnancında İmanın Mahiyeti",
-        "unit": "Bilgi ve İnanç",
+        "topic": "Hücre ve Organelleri",
         "yearly": {
           "2018": 0,
           "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 2
-      },
-      {
-        "topic": "İnsan Doğası ve Din",
-        "unit": "Din ve İslam",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "İslam İnanç Esaslarının Özellikleri",
-        "unit": "Din ve İslam",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "İslam’da İbadet ve Kapsamı",
-        "unit": "İslam ve İbadet",
-        "yearly": {
-          "2018": 1,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "İslam’da İbadetin Amacı ve Önemi",
-        "unit": "İslam ve İbadet",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Temel Değerler",
-        "unit": "Gençlik ve Değerler",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 1,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "İslam Medeniyetinin Farklı Coğrafyalardaki İzleri",
-        "unit": "Gönül Coğrafyamız",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Allah’ın Varlığı ve Birliği",
-        "unit": "Allah İnsan İlişkisi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 1
-        },
-        "total": 2
-      },
-      {
-        "topic": "Allah’ın İsim ve Sıfatları",
-        "unit": "Allah İnsan İlişkisi",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 0,
-          "2021": 1,
-          "2022": 1,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 3
-      },
-      {
-        "topic": "İnsanın Allah ile İrtibatı",
-        "unit": "Allah İnsan İlişkisi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Kur’an’dan Mesajlar: Rum Suresi 18-27. Ayetler",
-        "unit": "Allah İnsan İlişkisi",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Bir Genç Olarak Hz. Muhammed",
-        "unit": "Hz. Muhammed ve Gençlik",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
           "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 1
-        },
-        "total": 3
-      },
-      {
-        "topic": "Hz. Muhammed ve Gençler",
-        "unit": "Hz. Muhammed ve Gençlik",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 1,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 1
-      },
-      {
-        "topic": "Din ve Sosyal Değişim",
-        "unit": "Din ve Hayat",
-        "yearly": {
-          "2018": 0,
-          "2019": 0,
-          "2020": 0,
-          "2021": 0,
-          "2022": 0,
+          "2021": 1,
+          "2022": 1,
           "2023": 1,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2024": 1,
+          "2025": 0
         },
-        "total": 1
+        "total": 5
       },
       {
-        "topic": "Din ve Sosyal Adalet",
-        "unit": "Din ve Hayat",
-        "yearly": {
-          "2018": 0,
-          "2019": 1,
-          "2020": 1,
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0,
-          "2026": 0
-        },
-        "total": 2
-      },
-      {
-        "topic": "İslam Ahlakının Konusu ve Gayesi",
-        "unit": "Ahlaki Tutum ve Davranışlar",
+        "topic": "Madde Geçişleri",
         "yearly": {
           "2018": 1,
           "2019": 0,
@@ -2984,30 +1033,286 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 1
+        },
+        "total": 2
+      },
+      {
+        "topic": "Canlıların Sınıflandırılması",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Hücre Bölünmeleri ve Üreme",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Ekosistem Ekolojisi",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 1,
+          "2022": 0,
+          "2023": 1,
+          "2024": 1,
+          "2025": 0
+        },
+        "total": 5
+      },
+      {
+        "topic": "Güncel Çevre Sorunları",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 1,
+          "2021": 0,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 1
+        },
+        "total": 4
+      },
+      {
+        "topic": "Kalıtım",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      }
+    ]
+  },
+  {
+    "code": "tyt_tarih",
+    "name": "TYT Tarih",
+    "exam": "TYT",
+    "color": "#A78BFA",
+    "years": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "topics": [
+      {
+        "topic": "Tarih ve Zaman",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 0
+      },
+      {
+        "topic": "İlk ve Orta Çağlarda Türk Dünyası",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "İslam Medeniyetinin Doğuşu",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
         },
         "total": 1
       },
       {
-        "topic": "İslam Ahlakında Yerilen Bazı Davranışlar",
-        "unit": "Ahlaki Tutum ve Davranışlar",
+        "topic": "Türklerin İslamiyet'i Kabulü ve İlk Türk İslam Devletleri",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Beylikten Devlete Osmanlı",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 1
+        },
+        "total": 4
+      },
+      {
+        "topic": "Dünya Gücü Osmanlı",
         "yearly": {
           "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 0
+        },
+        "total": 1
+      },
+      {
+        "topic": "Değişim Çağında Avrupa ve Osmanlı",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 0
+      },
+      {
+        "topic": "Uluslararası İlişkilerde Denge Stratejisi (1774-1914)",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 1,
+          "2021": 1,
+          "2022": 0,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 4
+      },
+      {
+        "topic": "XX. Yüzyıl Başlarında Osmanlı Devleti ve Dünya",
+        "yearly": {
+          "2018": 1,
           "2019": 0,
           "2020": 1,
           "2021": 0,
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
-        "total": 1
+        "total": 2
       },
       {
-        "topic": "Kur’an’dan Mesajlar: Hucurat Suresi 11-12. Ayetler",
-        "unit": "Ahlaki Tutum ve Davranışlar",
+        "topic": "Milli Mücadele",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 2,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Atatürkçülük ve Türk İnkılabı",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 5
+      }
+    ]
+  },
+  {
+    "code": "tyt_cog",
+    "name": "TYT Coğrafya",
+    "exam": "TYT",
+    "color": "#F472B6",
+    "years": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "topics": [
+      {
+        "topic": "Doğa ve İnsan",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 2
+      },
+      {
+        "topic": "Dünyanın Şekli ve Hareketleri",
         "yearly": {
           "2018": 0,
           "2019": 0,
@@ -3016,62 +1321,198 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
         "total": 1
       },
       {
-        "topic": "Dinî Yorum Farklılıklarının Sebepleri",
-        "unit": "İslam Düşüncesinde İtikadi, Siyasi ve Fıkhi Yorumlar",
+        "topic": "Coğrafi Konum",
         "yearly": {
           "2018": 0,
           "2019": 0,
           "2020": 0,
           "2021": 0,
           "2022": 0,
-          "2023": 1,
+          "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 1
+          "2025": 0
         },
-        "total": 2
+        "total": 0
       },
       {
-        "topic": "Varoluşun ve Hayatın Anlamı",
-        "unit": "Dünya ve Ahiret",
+        "topic": "Harita Bilgisi",
         "yearly": {
           "2018": 1,
+          "2019": 0,
+          "2020": 1,
+          "2021": 0,
+          "2022": 1,
+          "2023": 0,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 5
+      },
+      {
+        "topic": "İklim Bilgisi",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "İç ve Dış Kuvvetler",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 4
+      },
+      {
+        "topic": "Nüfus ve Yerleşme",
+        "yearly": {
+          "2018": 1,
+          "2019": 2,
+          "2020": 1,
+          "2021": 1,
+          "2022": 0,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Türkiye'nin Yer Şekilleri",
+        "yearly": {
+          "2018": 0,
           "2019": 0,
           "2020": 0,
           "2021": 0,
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
+        },
+        "total": 0
+      },
+      {
+        "topic": "Ekonomik Faaliyetler",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
         },
         "total": 1
       },
       {
-        "topic": "Hz. Muhammed’in Şahsiyeti",
-        "unit": "Kur’An’A Göre Hz. Muhammed",
+        "topic": "Bölgeler",
         "yearly": {
-          "2018": 1,
+          "2018": 0,
+          "2019": 0,
+          "2020": 1,
+          "2021": 1,
+          "2022": 0,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 5
+      },
+      {
+        "topic": "Uluslararası Ulaşım Hatları",
+        "yearly": {
+          "2018": 0,
           "2019": 0,
           "2020": 0,
           "2021": 0,
           "2022": 0,
-          "2023": 1,
+          "2023": 0,
           "2024": 0,
-          "2025": 1,
-          "2026": 0
+          "2025": 0
         },
-        "total": 3
+        "total": 0
       },
       {
-        "topic": "Hz. Muhammed’in Peygamberlik Yönü",
-        "unit": "Kur’An’A Göre Hz. Muhammed",
+        "topic": "Doğal Afetler",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 6
+      }
+    ]
+  },
+  {
+    "code": "tyt_felsefe",
+    "name": "TYT Felsefe",
+    "exam": "TYT",
+    "color": "#38BDF8",
+    "years": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "topics": [
+      {
+        "topic": "Felsefe Alanı",
+        "yearly": {
+          "2018": 0,
+          "2019": 1,
+          "2020": 0,
+          "2021": 2,
+          "2022": 1,
+          "2023": 2,
+          "2024": 1,
+          "2025": 0
+        },
+        "total": 7
+      },
+      {
+        "topic": "Bilgi Felsefesi",
+        "yearly": {
+          "2018": 2,
+          "2019": 1,
+          "2020": 1,
+          "2021": 0,
+          "2022": 2,
+          "2023": 2,
+          "2024": 1,
+          "2025": 3
+        },
+        "total": 12
+      },
+      {
+        "topic": "Bilim Felsefesi",
         "yearly": {
           "2018": 0,
           "2019": 1,
@@ -3080,30 +1521,68 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 1
         },
-        "total": 1
+        "total": 2
       },
       {
-        "topic": "Dinî Meselelerin Çözümünde Temel İlke ve Yöntemler",
-        "unit": "Güncel Dinî Meseleler",
+        "topic": "Varlık Felsefesi",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 1,
+          "2021": 1,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 0
+        },
+        "total": 4
+      },
+      {
+        "topic": "Ahlak Felsefesi",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 2,
+          "2021": 0,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 8
+      },
+      {
+        "topic": "Siyaset Felsefesi",
         "yearly": {
           "2018": 0,
-          "2019": 0,
+          "2019": 1,
           "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 3
+      },
+      {
+        "topic": "Din Felsefesi",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 1,
           "2021": 0,
           "2022": 0,
           "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
+          "2024": 1,
+          "2025": 0
         },
-        "total": 1
+        "total": 3
       },
       {
-        "topic": "Milletimizin İslam Anlayışının Oluşmasında Etkili Olan Bazı Şahsiyetler",
-        "unit": "Anadolu’da İslam",
+        "topic": "Sanat Felsefesi",
         "yearly": {
           "2018": 0,
           "2019": 0,
@@ -3112,42 +1591,153 @@ export const OSYM_QUESTION_DISTRIBUTION: OsymSubjectDistribution[] = [
           "2022": 0,
           "2023": 0,
           "2024": 0,
-          "2025": 0,
-          "2026": 0
+          "2025": 0
         },
         "total": 1
+      }
+    ]
+  },
+  {
+    "code": "tyt_din",
+    "name": "TYT Din Kültürü",
+    "exam": "TYT",
+    "color": "#10B981",
+    "years": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "topics": [
+      {
+        "topic": "Bilgi ve İnanç",
+        "yearly": {
+          "2018": 1,
+          "2019": 2,
+          "2020": 1,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 9
       },
       {
-        "topic": "Kültürümüzde Etkin Olan Tasavvufi Yorumlar",
-        "unit": "İslam Düşüncesinde Tasavvufi Yorumlar",
+        "topic": "Din ve İslam",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 4
+      },
+      {
+        "topic": "İslam ve İbadet",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 4
+      },
+      {
+        "topic": "Gençlik ve Değerler",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 1,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 4
+      },
+      {
+        "topic": "Allah İnsan İlişkisi",
+        "yearly": {
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 0,
+          "2022": 1,
+          "2023": 0,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 3
+      },
+      {
+        "topic": "Hz. Muhammed (S.A.V)",
+        "yearly": {
+          "2018": 1,
+          "2019": 1,
+          "2020": 1,
+          "2021": 0,
+          "2022": 0,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        },
+        "total": 6
+      },
+      {
+        "topic": "Vahiy ve Akıl",
+        "yearly": {
+          "2018": 1,
+          "2019": 0,
+          "2020": 2,
+          "2021": 1,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        },
+        "total": 4
+      },
+      {
+        "topic": "İslam Düşüncesinde Yorumlar, Mezhepler",
         "yearly": {
           "2018": 0,
           "2019": 0,
           "2020": 0,
           "2021": 0,
           "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 1,
-          "2026": 0
+          "2023": 1,
+          "2024": 1,
+          "2025": 0
         },
-        "total": 1
+        "total": 2
       },
       {
-        "topic": "Toplam",
-        "unit": "",
+        "topic": "Din, Kültür ve Medeniyet",
         "yearly": {
-          "2018": 5,
-          "2019": 5,
-          "2020": 5,
-          "2021": 5,
-          "2022": 5,
-          "2023": 5,
-          "2024": 5,
-          "2025": 5,
-          "2026": 5
+          "2018": 0,
+          "2019": 0,
+          "2020": 0,
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 1
         },
-        "total": 45
+        "total": 4
       }
     ]
   },

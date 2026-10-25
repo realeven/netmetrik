@@ -30,9 +30,6 @@ export function OsymDistributionView({
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsedSubjects, setCollapsedSubjects] = useState<Record<string, boolean>>({});
 
-  // 2018 - 2026 years
-  const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
-
   // Available subjects for the active exam category
   const examSubjects = useMemo(() => {
     return OSYM_QUESTION_DISTRIBUTION.filter((s) => s.exam === selectedExam);
@@ -105,10 +102,14 @@ export function OsymDistributionView({
                 letterSpacing: 0.5
               }}
             >
-              2018–2026 Çıkmış Sorular Tablosu
+              {selectedExam === 'TYT' ? 'MEB 2018–2025 Resmi TYT Soru Dağılımı' : '2018–2026 Çıkmış Sorular Tablosu'}
             </span>
             <a
-              href="https://ertansinansahin.com/yks-soru-dagilimi/"
+              href={
+                selectedExam === 'TYT'
+                  ? 'https://reyhanlisfkasml.meb.k12.tr/meb_iys_dosyalar/31/08/963209/dosyalar/2025_12/694bcadab4eec921652162_2025TYT_Y%C4%B1llara_Gore_Soru_Dag%C4%B1l%C4%B1m%C4%B1.pdf'
+                  : 'https://ertansinansahin.com/yks-soru-dagilimi/'
+              }
               target="_blank"
               rel="noreferrer"
               style={{
@@ -120,7 +121,7 @@ export function OsymDistributionView({
                 gap: 3
               }}
             >
-              <span>Kaynak: Ertan Sinan Şahin</span>
+              <span>Kaynak: {selectedExam === 'TYT' ? 'MEB Resmi TYT Analizi (PDF)' : 'Ertan Sinan Şahin'}</span>
               <ExternalLink size={11} />
             </a>
           </div>
@@ -289,9 +290,11 @@ export function OsymDistributionView({
             (t) => topicProgress[`${subject.code}_${t.topic}`] === 'completed'
           ).length;
 
+          const subjectYears = subject.years && subject.years.length > 0 ? subject.years : ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+
           // Compute column sums for this subject table
           const columnSums: Record<string, number> = {};
-          years.forEach((yr) => {
+          subjectYears.forEach((yr) => {
             columnSums[yr] = filteredTopics.reduce((sum, t) => sum + (t.yearly[yr] || 0), 0);
           });
           const totalTableSum = filteredTopics.reduce((sum, t) => sum + t.total, 0);
@@ -389,7 +392,7 @@ export function OsymDistributionView({
                       >
                         <th style={{ padding: '10px 12px', width: 44, textAlign: 'center' }}>Tik</th>
                         <th style={{ padding: '10px 14px' }}>Konu Adı</th>
-                        {years.map((yr) => (
+                        {subjectYears.map((yr) => (
                           <th key={yr} style={{ padding: '10px 8px', textAlign: 'center', width: 46 }}>
                             {yr}
                           </th>
@@ -410,7 +413,7 @@ export function OsymDistributionView({
                       {filteredTopics.length === 0 ? (
                         <tr>
                           <td
-                            colSpan={12}
+                            colSpan={subjectYears.length + 3}
                             style={{
                               padding: '24px',
                               textAlign: 'center',
@@ -507,8 +510,8 @@ export function OsymDistributionView({
                                 )}
                               </td>
 
-                              {/* Years 2018 - 2026 */}
-                              {years.map((yr) => {
+                              {/* Years based on subject */}
+                              {subjectYears.map((yr) => {
                                 const count = topicItem.yearly[yr] || 0;
                                 return (
                                   <td
@@ -563,7 +566,7 @@ export function OsymDistributionView({
                           <td style={{ padding: '12px 14px', color: '#FFFFFF' }}>
                             {subject.name} Toplam Soru Sayısı
                           </td>
-                          {years.map((yr) => (
+                          {subjectYears.map((yr) => (
                             <td
                               key={yr}
                               style={{
