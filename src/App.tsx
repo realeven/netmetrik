@@ -53,7 +53,7 @@ import {
   Settings
 } from 'lucide-react';
 import { AiTutorScreenView } from './components/AiTutorView';
-import { FlocusPomodoroView } from './components/FlocusPomodoroView';
+import { FlocusPomodoroView, type LiveFocusActivity } from './components/FlocusPomodoroView';
 import { OsymDistributionView } from './components/OsymDistributionView';
 import { OnboardingModal } from './components/OnboardingModal';
 import { WeeklyQuestionSchedule } from './components/WeeklyQuestionSchedule';
@@ -250,6 +250,9 @@ export default function App() {
   
   // Selected Feature Modal for Features (6, 7, 8, 21, 22, 26, 27)
   const [activeFeatureModal, setActiveFeatureModal] = useState<FeatureModalType>(null);
+
+  // Live Focus Activity from NetFocus (keeps running continuously in background)
+  const [liveFocusActivity, setLiveFocusActivity] = useState<LiveFocusActivity | null>(null);
 
   // Save to LocalStorage
   useEffect(() => {
@@ -1114,27 +1117,7 @@ export default function App() {
         />
       )}
 
-      {activeTab === 'pomodoro' && (
-        <FlocusPomodoroView
-          profile={profile}
-          tasks={tasks}
-          questionLogs={questionLogs}
-          onToggleTask={handleToggleTask}
-          onLogStudySession={(subject, minutes) => {
-            const autoLog: QuestionLog = {
-              id: `ql-flocus-${Date.now()}`,
-              date: todayStr,
-              subjectName: subject || 'Flocus Odak Seansı',
-              sourceBook: 'Flocus Pomodoro & Ambiyans',
-              count: 0,
-              durationMinutes: minutes
-            };
-            setQuestionLogs((prev) => [autoLog, ...prev]);
-          }}
-          isDesktop={isDesktop}
-          onExit={() => handleNavigateTab('home')}
-        />
-      )}
+      {/* NetFocus is mounted permanently at root level to prevent timer stoppage on navigation */}
     </div>
   );
 
@@ -2105,6 +2088,192 @@ export default function App() {
           await handleCloudLogin(email, pass);
         }}
       />
+
+      {/* ----------------------------------------------------------------------
+          🌟 PERSISTENT NETFOCUS COMPONENT
+          Mounted permanently so Pomodoro, Stopwatch & Ambience keep running uninterrupted
+      ---------------------------------------------------------------------- */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: activeTab === 'pomodoro' ? 1000 : -100,
+          opacity: activeTab === 'pomodoro' ? 1 : 0,
+          visibility: activeTab === 'pomodoro' ? 'visible' : 'hidden',
+          pointerEvents: activeTab === 'pomodoro' ? 'auto' : 'none',
+          transition: 'opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        <FlocusPomodoroView
+          profile={profile}
+          tasks={tasks}
+          questionLogs={questionLogs}
+          onToggleTask={handleToggleTask}
+          onLogStudySession={(subject, minutes) => {
+            const autoLog: QuestionLog = {
+              id: `ql-flocus-${Date.now()}`,
+              date: todayStr,
+              subjectName: subject || 'NetFocus Odak Seansı',
+              sourceBook: 'NetFocus Pomodoro & Kronometre',
+              count: 0,
+              durationMinutes: minutes
+            };
+            setQuestionLogs((prev) => [autoLog, ...prev]);
+          }}
+          onLiveActivityUpdate={(act) => setLiveFocusActivity(act)}
+          isDesktop={viewMode === 'desktop'}
+          onExit={() => handleNavigateTab('home')}
+        />
+      </div>
+
+      {/* ----------------------------------------------------------------------
+          🌟 FLOATING LIVE ACTIVITY WIDGET
+          Shows live ticking Pomodoro or Stopwatch anywhere in the app when running
+      ---------------------------------------------------------------------- */}
+      {activeTab !== 'pomodoro' && liveFocusActivity && (liveFocusActivity.isPomodoroRunning || liveFocusActivity.isStopwatchRunning) && (
+        <div
+          onClick={() => {
+            sounds.playClick();
+            handleNavigateTab('pomodoro');
+          }}
+          style={{
+            position: 'fixed',
+            bottom: viewMode === 'desktop' ? 24 : 88,
+            right: viewMode === 'desktop' ? 28 : '50%',
+            transform: viewMode === 'desktop' ? 'none' : 'translateX(50%)',
+            zIndex: 900,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '9px 16px 9px 14px',
+            borderRadius: 99,
+            background: 'rgba(12, 16, 24, 0.88)',
+            backdropFilter: 'blur(24px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.18)',
+            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.55), 0 0 20px rgba(212, 255, 0, 0.18)',
+            cursor: 'pointer',
+            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            maxWidth: 'calc(100vw - 32px)',
+            whiteSpace: 'nowrap'
+          }}
+          title="NetFocus'a geri dönmek için tıkla"
+        >
+          {/* Animated Pulsing Status Dot */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div
+              style={{
+                width: 9,
+                height: 9,
+                borderRadius: '50%',
+                background: liveFocusActivity.isStopwatchRunning ? '#10B981' : '#F97316'
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                background: liveFocusActivity.isStopwatchRunning ? 'rgba(16, 185, 129, 0.45)' : 'rgba(249, 115, 22, 0.45)',
+                animation: 'pulse 1.6s ease-in-out infinite'
+              }}
+            />
+          </div>
+
+          {/* Activity Labels & Numbers */}
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 900,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  color: liveFocusActivity.isStopwatchRunning ? '#34D399' : '#FB923C'
+                }}
+              >
+                {liveFocusActivity.isStopwatchRunning ? '⏱️ Kronometre' : '🍅 Pomodoro'}
+              </span>
+              <span style={{ fontSize: 9.5, color: 'rgba(255, 255, 255, 0.45)' }}>• Canlı Takip</span>
+            </div>
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 900,
+                color: '#FFFFFF',
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: '-0.3px',
+                marginTop: 2
+              }}
+            >
+              {liveFocusActivity.isStopwatchRunning
+                ? (() => {
+                    const hrs = Math.floor(liveFocusActivity.stopwatchSeconds / 3600);
+                    const mins = Math.floor((liveFocusActivity.stopwatchSeconds % 3600) / 60);
+                    const secs = liveFocusActivity.stopwatchSeconds % 60;
+                    return `${hrs > 0 ? `${hrs.toString().padStart(2, '0')}:` : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                  })()
+                : (() => {
+                    const m = Math.floor(liveFocusActivity.pomodoroTimeLeft / 60);
+                    const s = liveFocusActivity.pomodoroTimeLeft % 60;
+                    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                  })()}
+            </div>
+          </div>
+
+          {/* Mini Play/Pause Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              sounds.playClick();
+              if (liveFocusActivity.isStopwatchRunning && liveFocusActivity.onToggleStopwatch) {
+                liveFocusActivity.onToggleStopwatch();
+              } else if (liveFocusActivity.onTogglePomodoro) {
+                liveFocusActivity.onTogglePomodoro();
+              }
+            }}
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              color: '#FFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              marginLeft: 2,
+              transition: 'background 0.15s ease'
+            }}
+            title="Durdur / Devam Et"
+          >
+            <Pause size={13} fill="#FFF" />
+          </button>
+
+          {/* Return to NetFocus Button */}
+          <div
+            style={{
+              padding: '4px 10px',
+              borderRadius: 99,
+              background: 'rgba(212, 255, 0, 0.18)',
+              border: '1px solid rgba(212, 255, 0, 0.4)',
+              color: '#D4FF00',
+              fontSize: 11,
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <span>NetFocus'a Dön</span>
+            <ChevronRight size={13} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

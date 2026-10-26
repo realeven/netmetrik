@@ -37,15 +37,29 @@ import {
   User,
   HelpCircle,
   Rocket,
-  Zap
+  Zap,
+  Flag
 } from 'lucide-react';
 import { ambientEngine } from '../lib/ambientSoundEngine';
 import { sounds } from '../lib/sound';
 import type { DailyTask, StudentProfile, QuestionLog } from '../data/seedData';
 
-export type FlocusMode = 'focus' | 'clock' | 'ambient';
+export type FlocusMode = 'focus' | 'stopwatch' | 'clock' | 'ambient';
 export type TimerSubMode = 'pomodoro' | 'stopwatch' | 'countdown' | 'animedoro';
 export type PomodoroPhase = 'work' | 'short_break' | 'long_break';
+
+export interface LiveFocusActivity {
+  isPomodoroRunning: boolean;
+  pomodoroTimeLeft: number;
+  pomodoroPhase: PomodoroPhase;
+  pomodoroGoal: string;
+  isStopwatchRunning: boolean;
+  stopwatchSeconds: number;
+  stopwatchGoal: string;
+  activeMode: FlocusMode;
+  onTogglePomodoro?: () => void;
+  onToggleStopwatch?: () => void;
+}
 
 export type ClockFontStyle =
   | 'default-bold'
@@ -593,6 +607,7 @@ export function FlocusPomodoroView({
   questionLogs = [],
   onToggleTask,
   onLogStudySession,
+  onLiveActivityUpdate,
   isDesktop,
   onExit
 }: {
@@ -601,10 +616,11 @@ export function FlocusPomodoroView({
   questionLogs?: QuestionLog[];
   onToggleTask: (id: string) => void;
   onLogStudySession?: (subject: string, minutes: number) => void;
+  onLiveActivityUpdate?: (activity: LiveFocusActivity) => void;
   isDesktop?: boolean;
   onExit?: () => void;
 }) {
-  // 1. Navigation Mode: Focus | Clock | Ambient
+  // 1. Navigation Mode: Focus | Stopwatch | Clock | Ambient
   const [activeMode, setActiveMode] = useState<FlocusMode>('focus');
   const [timerSubMode, setTimerSubMode] = useState<TimerSubMode>('pomodoro');
 
@@ -623,6 +639,14 @@ export function FlocusPomodoroView({
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [completedRounds, setCompletedRounds] = useState<number>(0);
   const [totalFocusedSecondsToday, setTotalFocusedSecondsToday] = useState<number>(0);
+
+  // Serbest Kronometre (Stopwatch) State
+  const [stopwatchSeconds, setStopwatchSeconds] = useState<number>(0);
+  const [isStopwatchRunning, setIsStopwatchRunning] = useState<boolean>(false);
+  const [stopwatchGoal, setStopwatchGoal] = useState<string>('');
+  const [isEditingStopwatchGoal, setIsEditingStopwatchGoal] = useState<boolean>(false);
+  const [stopwatchLaps, setStopwatchLaps] = useState<{ id: string; lapNumber: number; lapTime: number; totalTime: number }[]>([]);
+  const [stopwatchSavedToast, setStopwatchSavedToast] = useState<string | null>(null);
 
   // 3. Theme & Aesthetics
   const [currentTheme, setCurrentTheme] = useState<FlocusTheme>(() => {
@@ -762,6 +786,51 @@ export function FlocusPomodoroView({
     return () => clearInterval(interval);
   }, [isRunning, timeLeft, pomodoroPhase, enableTickSound]);
 
+  // Serbest Kronometre Interval
+  useEffect(() => {
+    let interval: any = null;
+    if (isStopwatchRunning) {
+      interval = setInterval(() => {
+        setStopwatchSeconds((prev) => {
+          if (enableTickSound && (prev + 1) % 2 === 0) {
+            ambientEngine.playSoftTick();
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isStopwatchRunning, enableTickSound]);
+
+  // Synchronize Live Focus Activity to Parent (App.tsx)
+  useEffect(() => {
+    if (onLiveActivityUpdate) {
+      onLiveActivityUpdate({
+        isPomodoroRunning: isRunning,
+        pomodoroTimeLeft: timeLeft,
+        pomodoroPhase,
+        pomodoroGoal: mainFocusGoal,
+        isStopwatchRunning,
+        stopwatchSeconds,
+        stopwatchGoal,
+        activeMode,
+        onTogglePomodoro: handleToggleTimer,
+        onToggleStopwatch: handleToggleStopwatch
+      });
+    }
+  }, [
+    isRunning,
+    timeLeft,
+    pomodoroPhase,
+    mainFocusGoal,
+    isStopwatchRunning,
+    stopwatchSeconds,
+    stopwatchGoal,
+    activeMode
+  ]);
+
 
   // Handler on Phase Completion
   const handlePhaseComplete = () => {
@@ -823,6 +892,64 @@ export function FlocusPomodoroView({
       setTimeLeft(workDuration * 60);
     }
     setIsRunning(false);
+  };
+
+  // Stopwatch handlers
+  const handleToggleStopwatch = () => {
+    sounds.playClick();
+    setIsStopwatchRunning((prev) => !prev);
+  };
+
+  const handleResetStopwatch = () => {
+    sounds.playClick();
+    setIsStopwatchRunning(false);
+    setStopwatchSeconds(0);
+    setStopwatchLaps([]);
+  };
+
+  const handleAddLap = () => {
+    sounds.playClick();
+    if (stopwatchSeconds === 0) return;
+    const lastTotal = stopwatchLaps.length > 0 ? stopwatchLaps[0].totalTime : 0;
+    const lapTime = stopwatchSeconds - lastTotal;
+    const newLap = {
+      id: `lap-${Date.now()}-${stopwatchLaps.length + 1}`,
+      lapNumber: stopwatchLaps.length + 1,
+      lapTime: lapTime > 0 ? lapTime : stopwatchSeconds,
+      totalTime: stopwatchSeconds
+    };
+    setStopwatchLaps((prev) => [newLap, ...prev]);
+  };
+
+  const handleSaveStopwatchSession = () => {
+    sounds.playSuccess();
+    const minutes = Math.max(1, Math.round(stopwatchSeconds / 60));
+    const title = stopwatchGoal.trim() || 'Serbest Kronometre';
+    if (onLogStudySession) {
+      onLogStudySession(title, minutes);
+    }
+    confetti({
+      particleCount: 60,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+    setStopwatchSavedToast(`✅ ${minutes} dakikalık çalışma başarıyla kaydedildi!`);
+    setTimeout(() => setStopwatchSavedToast(null), 3500);
+  };
+
+  const formatStopwatch = (totalSec: number) => {
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    const hStr = hrs > 0 ? `${hrs.toString().padStart(2, '0')}:` : '';
+    const mStr = mins.toString().padStart(2, '0');
+    const sStr = secs.toString().padStart(2, '0');
+    return {
+      hrs,
+      mins,
+      secs,
+      full: `${hStr}${mStr}:${sStr}`
+    };
   };
 
   // Sound mixer adjustments
@@ -1172,6 +1299,25 @@ export function FlocusPomodoroView({
               }}
             >
               Odak
+            </button>
+            <button
+              onClick={() => {
+                sounds.playTabSwitch();
+                setActiveMode('stopwatch');
+              }}
+              style={{
+                padding: '4px 10px',
+                borderRadius: 99,
+                border: 'none',
+                background: activeMode === 'stopwatch' ? 'rgba(255, 255, 255, 0.22)' : 'transparent',
+                color: '#FFF',
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              Kronometre
             </button>
             <button
               onClick={() => {
@@ -1854,7 +2000,336 @@ export function FlocusPomodoroView({
           </div>
         )}
 
-        {/* B. AESTHETIC CLOCK MODE */}
+        {/* B. STOPWATCH MODE (Serbest Kronometre & Tur Takibi) */}
+        {activeMode === 'stopwatch' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              maxWidth: 720,
+              textAlign: 'center'
+            }}
+          >
+            {/* 1. Stopwatch Goal / Focus Subject Title */}
+            <div style={{ marginBottom: 16 }}>
+              {isEditingStopwatchGoal ? (
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Hangi derse / konuya çalışıyorsun?"
+                  value={stopwatchGoal}
+                  onChange={(e) => setStopwatchGoal(e.target.value)}
+                  onBlur={() => setIsEditingStopwatchGoal(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') setIsEditingStopwatchGoal(false);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.45)',
+                    color: '#FFFFFF',
+                    fontSize: isDesktop ? 22 : 18,
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    outline: 'none',
+                    minWidth: 280,
+                    textShadow: '0 2px 10px rgba(0, 0, 0, 0.7)'
+                  }}
+                />
+              ) : (
+                <div
+                  onClick={() => setIsEditingStopwatchGoal(true)}
+                  style={{
+                    fontSize: isDesktop ? 22 : 17,
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    cursor: 'pointer',
+                    textShadow: '0 2px 10px rgba(0, 0, 0, 0.75)',
+                    transition: 'opacity 0.2s ease',
+                    opacity: 0.95,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8
+                  }}
+                  title="Çalışma konusunu belirlemek için tıkla"
+                >
+                  <span>{stopwatchGoal || 'Serbest Çalışma Hedefi'}</span>
+                  <PenLine size={15} style={{ opacity: 0.6 }} />
+                </div>
+              )}
+            </div>
+
+            {/* Sub-label: SERBEST KRONOMETRE */}
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: currentTheme.clockColor,
+                opacity: 0.75,
+                marginBottom: 8,
+                textShadow: currentTheme.clockGlow
+              }}
+            >
+              SERBEST KRONOMETRE
+            </div>
+
+            {/* Giant Stopwatch Time Display */}
+            {(() => {
+              const sw = formatStopwatch(stopwatchSeconds);
+              const selectedFontStyle = CLOCK_FONT_STYLES[clockStyle]?.style || {};
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 0 24px' }}>
+                  <div
+                    style={{
+                      fontSize: getTimerSizeClamp('clamp(7.5rem, 18vw, 13rem)', 'clamp(4.8rem, 19vw, 7.5rem)'),
+                      color: currentTheme.clockColor,
+                      textShadow: currentTheme.clockGlow,
+                      lineHeight: 0.95,
+                      fontVariantNumeric: 'tabular-nums',
+                      ...selectedFontStyle
+                    }}
+                  >
+                    {sw.full}
+                  </div>
+
+                  {/* Elapsed / Lap Summary Pill */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginTop: 14,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      color: 'rgba(255, 255, 255, 0.75)',
+                      background: 'rgba(15, 20, 25, 0.45)',
+                      backdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      padding: '4px 14px',
+                      borderRadius: 99
+                    }}
+                  >
+                    <span>⏱️ {Math.floor(stopwatchSeconds / 60)} dakika çalışma</span>
+                    {stopwatchLaps.length > 0 && (
+                      <>
+                        <span style={{ opacity: 0.4 }}>•</span>
+                        <span style={{ color: currentTheme.accent }}>{stopwatchLaps.length} Tur Kaydedildi</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Success Toast when Saved */}
+            {stopwatchSavedToast && (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: '8px 18px',
+                  borderRadius: 99,
+                  background: 'rgba(16, 185, 129, 0.25)',
+                  border: '1px solid rgba(16, 185, 129, 0.5)',
+                  color: '#A7F3D0',
+                  fontSize: 13,
+                  fontWeight: 800,
+                  backdropFilter: 'blur(16px)',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                {stopwatchSavedToast}
+              </div>
+            )}
+
+            {/* Stopwatch Action Controls: [ Sıfırla ] [ Başlat/Durdur ] [ Tur Ekle ] [ Çalışmayı Kaydet ] */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+              {/* Reset */}
+              <button
+                onClick={handleResetStopwatch}
+                disabled={stopwatchSeconds === 0 && !isStopwatchRunning}
+                style={{
+                  width: 48,
+                  height: 44,
+                  borderRadius: 14,
+                  background: 'rgba(15, 20, 25, 0.55)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.14)',
+                  color: stopwatchSeconds === 0 ? 'rgba(255, 255, 255, 0.3)' : '#FFFFFF',
+                  cursor: stopwatchSeconds === 0 ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+                }}
+                title="Sıfırla"
+              >
+                <RotateCcw size={17} />
+              </button>
+
+              {/* Main Play / Pause */}
+              <button
+                onClick={handleToggleStopwatch}
+                style={{
+                  minWidth: 64,
+                  height: 48,
+                  padding: '0 20px',
+                  borderRadius: 14,
+                  background: isStopwatchRunning ? 'rgba(239, 68, 68, 0.75)' : 'rgba(16, 185, 129, 0.85)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  color: '#FFFFFF',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  fontSize: 14,
+                  fontWeight: 800,
+                  transition: 'all 0.15s ease',
+                  boxShadow: isStopwatchRunning
+                    ? '0 8px 24px rgba(239, 68, 68, 0.45)'
+                    : '0 8px 24px rgba(16, 185, 129, 0.45)'
+                }}
+                title={isStopwatchRunning ? 'Durdur' : 'Başlat'}
+              >
+                {isStopwatchRunning ? (
+                  <>
+                    <Pause size={18} fill="#FFF" />
+                    <span>Durdur</span>
+                  </>
+                ) : (
+                  <>
+                    <Play size={18} fill="#FFF" style={{ marginLeft: 2 }} />
+                    <span>Başlat</span>
+                  </>
+                )}
+              </button>
+
+              {/* Lap Button */}
+              <button
+                onClick={handleAddLap}
+                disabled={stopwatchSeconds === 0}
+                style={{
+                  padding: '0 16px',
+                  height: 44,
+                  borderRadius: 14,
+                  background: 'rgba(15, 20, 25, 0.55)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.14)',
+                  color: stopwatchSeconds === 0 ? 'rgba(255, 255, 255, 0.3)' : '#FFFFFF',
+                  cursor: stopwatchSeconds === 0 ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+                }}
+                title="Tur Kaydet (Lap)"
+              >
+                <Flag size={15} />
+                <span>Tur</span>
+              </button>
+
+              {/* Save Study Session to NetMetrik */}
+              <button
+                onClick={handleSaveStopwatchSession}
+                disabled={stopwatchSeconds < 30}
+                style={{
+                  padding: '0 18px',
+                  height: 44,
+                  borderRadius: 14,
+                  background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.75), rgba(99, 102, 241, 0.75))',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  color: stopwatchSeconds < 30 ? 'rgba(255, 255, 255, 0.4)' : '#FFFFFF',
+                  cursor: stopwatchSeconds < 30 ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  fontSize: 12.5,
+                  fontWeight: 800,
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 8px 24px rgba(124, 58, 237, 0.4)'
+                }}
+                title="Çalışma süresini günlük soru & çalışma defterine kaydet"
+              >
+                <CheckCircle2 size={16} />
+                <span>Çalışmayı Kaydet</span>
+              </button>
+            </div>
+
+            {/* Laps List Table */}
+            {stopwatchLaps.length > 0 && (
+              <div
+                style={{
+                  marginTop: 24,
+                  width: '100%',
+                  maxWidth: 420,
+                  maxHeight: 180,
+                  overflowY: 'auto',
+                  background: 'rgba(15, 20, 25, 0.55)',
+                  backdropFilter: 'blur(16px)',
+                  borderRadius: 16,
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  padding: '12px 16px',
+                  boxShadow: '0 8px 28px rgba(0, 0, 0, 0.4)'
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingBottom: 8,
+                    marginBottom: 8,
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em'
+                  }}
+                >
+                  <span>Tur #</span>
+                  <span>Tur Süresi</span>
+                  <span>Toplam Süre</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {stopwatchLaps.map((lap) => (
+                    <div
+                      key={lap.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        fontVariantNumeric: 'tabular-nums',
+                        color: '#FFFFFF'
+                      }}
+                    >
+                      <span style={{ color: currentTheme.accent }}>Tur {lap.lapNumber}</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
+                        +{formatStopwatch(lap.lapTime).full}
+                      </span>
+                      <span>{formatStopwatch(lap.totalTime).full}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* C. AESTHETIC CLOCK MODE */}
         {activeMode === 'clock' && (
           <div
             style={{
