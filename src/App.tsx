@@ -1118,6 +1118,7 @@ export default function App() {
         <FlocusPomodoroView
           profile={profile}
           tasks={tasks}
+          questionLogs={questionLogs}
           onToggleTask={handleToggleTask}
           onLogStudySession={(subject, minutes) => {
             const autoLog: QuestionLog = {

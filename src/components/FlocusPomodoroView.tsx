@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { ModernSlider } from './ModernSlider';
 import {
@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 import { ambientEngine } from '../lib/ambientSoundEngine';
 import { sounds } from '../lib/sound';
-import type { DailyTask, StudentProfile } from '../data/seedData';
+import type { DailyTask, StudentProfile, QuestionLog } from '../data/seedData';
 
 export type FlocusMode = 'focus' | 'clock' | 'ambient';
 export type TimerSubMode = 'pomodoro' | 'stopwatch' | 'countdown' | 'animedoro';
@@ -590,6 +590,7 @@ function FlocusSwitch({
 export function FlocusPomodoroView({
   profile,
   tasks,
+  questionLogs = [],
   onToggleTask,
   onLogStudySession,
   isDesktop,
@@ -597,6 +598,7 @@ export function FlocusPomodoroView({
 }: {
   profile: StudentProfile;
   tasks: DailyTask[];
+  questionLogs?: QuestionLog[];
   onToggleTask: (id: string) => void;
   onLogStudySession?: (subject: string, minutes: number) => void;
   isDesktop?: boolean;
@@ -643,7 +645,33 @@ export function FlocusPomodoroView({
   const [bgDimmer, setBgDimmer] = useState<number>(15); // subtle 15% so vivid wallpaper pops
   const [bgBlur, setBgBlur] = useState<number>(0); // 0 to 20px
   const [clockFont, setClockFont] = useState<'sans' | 'mono' | 'serif'>('sans');
-  const [is24Hour, setIs24Hour] = useState<boolean>(true);
+  const [is24Hour, setIs24Hour] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('netfocus_is_24hour');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+    return true;
+  });
+  const [clockTimerSize, setClockTimerSize] = useState<'small' | 'regular' | 'huge'>(() => {
+    try {
+      const saved = localStorage.getItem('netfocus_clock_timer_size');
+      if (saved === 'small' || saved === 'regular' || saved === 'huge') return saved;
+    } catch {}
+    return 'regular';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('netfocus_is_24hour', String(is24Hour));
+    } catch {}
+  }, [is24Hour]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('netfocus_clock_timer_size', clockTimerSize);
+    } catch {}
+  }, [clockTimerSize]);
+
   const [showSeconds, setShowSeconds] = useState<boolean>(true);
 
   // NetFocus Exact Flocus Settings State (100% Free & Unlocked)
@@ -867,6 +895,135 @@ export function FlocusPomodoroView({
   );
 
   const activeSoundCount = tracks.filter((t) => t.volume > 0).length;
+
+  // Timer & Clock font size clamp helper
+  const getTimerSizeClamp = (desktopDefault: string, mobileDefault: string) => {
+    if (clockTimerSize === 'small') {
+      return isDesktop ? 'clamp(5rem, 12vw, 8.5rem)' : 'clamp(3.5rem, 14vw, 5rem)';
+    }
+    if (clockTimerSize === 'huge') {
+      return isDesktop ? 'clamp(10rem, 24vw, 17rem)' : 'clamp(6.5rem, 25vw, 10rem)';
+    }
+    return isDesktop ? desktopDefault : mobileDefault;
+  };
+
+  // Real stats calculation from questionLogs + current active session
+  const dailyStatsMap = useMemo(() => {
+    const map: Record<string, { minutes: number; sessions: number }> = {};
+    (questionLogs || []).forEach((log) => {
+      if (!log.date) return;
+      if (!map[log.date]) {
+        map[log.date] = { minutes: 0, sessions: 0 };
+      }
+      const mins = log.durationMinutes || 0;
+      map[log.date].minutes += mins;
+      if (mins > 0 || log.count > 0) {
+        map[log.date].sessions += 1;
+      }
+    });
+
+    // Add current live session minutes for today
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const liveMins = Math.floor(totalFocusedSecondsToday / 60);
+    if (liveMins > 0) {
+      if (!map[todayStr]) {
+        map[todayStr] = { minutes: 0, sessions: 0 };
+      }
+      map[todayStr].minutes += liveMins;
+      if (map[todayStr].sessions === 0) {
+        map[todayStr].sessions = 1;
+      }
+    }
+
+    return map;
+  }, [questionLogs, totalFocusedSecondsToday]);
+
+  // Heatmap days generation for 6 months (26 weeks) or 1 year (44 weeks)
+  const heatmapDays = useMemo(() => {
+    const totalWeeks = statsTimeRange === '1year' ? 44 : 26;
+    const totalDays = totalWeeks * 7;
+    const daysArr: { dateStr: string; dateObj: Date; minutes: number; sessions: number }[] = [];
+    
+    for (let i = totalDays - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const entry = dailyStatsMap[dateStr] || { minutes: 0, sessions: 0 };
+      daysArr.push({
+        dateStr,
+        dateObj: d,
+        minutes: entry.minutes,
+        sessions: entry.sessions
+      });
+    }
+    return daysArr;
+  }, [dailyStatsMap, statsTimeRange]);
+
+  // Heatmap date range labels in Turkish
+  const heatmapDateRange = useMemo(() => {
+    if (heatmapDays.length === 0) return { start: '', end: '' };
+    const startObj = heatmapDays[0].dateObj;
+    const endObj = heatmapDays[heatmapDays.length - 1].dateObj;
+    return {
+      start: startObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
+      end: endObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })
+    };
+  }, [heatmapDays]);
+
+  // Real Trend Points (Last 6 days leading up to today)
+  const trendData = useMemo(() => {
+    const daysAgoList = [5, 4, 3, 2, 1, 0];
+    const points: { cx: number; cy: number; minutes: number; timeLabel: string; dateLabel: string }[] = [];
+    
+    const rawMinutesList = daysAgoList.map(dAgo => {
+      const d = new Date();
+      d.setDate(d.getDate() - dAgo);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return dailyStatsMap[dateStr]?.minutes || 0;
+    });
+
+    const maxMinutes = Math.max(60, ...rawMinutesList);
+
+    daysAgoList.forEach((dAgo, idx) => {
+      const d = new Date();
+      d.setDate(d.getDate() - dAgo);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const mins = dailyStatsMap[dateStr]?.minutes || 0;
+
+      const cx = 35 + idx * (530 / 5);
+      const cy = Math.round(135 - (mins / maxMinutes) * 105);
+
+      const timeLabel = mins >= 60
+        ? `${Math.floor(mins / 60)} sa ${mins % 60 > 0 ? (mins % 60) + ' dk' : ''}`.trim()
+        : mins > 0
+        ? `${mins} dk`
+        : '0 dk';
+
+      const dateLabel = dAgo === 0
+        ? 'Bugün'
+        : d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+
+      points.push({ cx, cy, minutes: mins, timeLabel, dateLabel });
+    });
+
+    // Build Bézier path
+    const curvePath = points.reduce((acc, pt, i, arr) => {
+      if (i === 0) return `M ${pt.cx},${pt.cy}`;
+      const prev = arr[i - 1];
+      const cpx1 = prev.cx + (pt.cx - prev.cx) / 2;
+      const cpy1 = prev.cy;
+      const cpx2 = prev.cx + (pt.cx - prev.cx) / 2;
+      const cpy2 = pt.cy;
+      return `${acc} C ${cpx1},${cpy1} ${cpx2},${cpy2} ${pt.cx},${pt.cy}`;
+    }, '');
+
+    const areaPath = points.length > 0
+      ? `${curvePath} L ${points[points.length - 1].cx},150 L ${points[0].cx},150 Z`
+      : '';
+
+    return { points, curvePath, areaPath };
+  }, [dailyStatsMap]);
 
   return (
     <div
@@ -1494,7 +1651,7 @@ export function FlocusPomodoroView({
                     </div>
                     <div
                       style={{
-                        fontSize: isDesktop ? 'clamp(5.5rem, 14vw, 9rem)' : 'clamp(4rem, 16vw, 6rem)',
+                        fontSize: getTimerSizeClamp('clamp(5.5rem, 14vw, 9rem)', 'clamp(4rem, 16vw, 6rem)'),
                         color: currentTheme.clockColor,
                         textShadow: currentTheme.clockGlow,
                         lineHeight: 0.95,
@@ -1522,7 +1679,7 @@ export function FlocusPomodoroView({
                     />
                     <div
                       style={{
-                        fontSize: isDesktop ? 'clamp(5.5rem, 14vw, 9rem)' : 'clamp(4rem, 16vw, 6rem)',
+                        fontSize: getTimerSizeClamp('clamp(5.5rem, 14vw, 9rem)', 'clamp(4rem, 16vw, 6rem)'),
                         color: currentTheme.clockColor,
                         textShadow: currentTheme.clockGlow,
                         lineHeight: 0.95,
@@ -1540,7 +1697,7 @@ export function FlocusPomodoroView({
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 0 24px', width: '100%' }}>
                     <div
                       style={{
-                        fontSize: isDesktop ? 'clamp(7rem, 17vw, 12rem)' : 'clamp(5rem, 20vw, 7.5rem)',
+                        fontSize: getTimerSizeClamp('clamp(7rem, 17vw, 12rem)', 'clamp(5rem, 20vw, 7.5rem)'),
                         color: currentTheme.clockColor,
                         textShadow: currentTheme.clockGlow,
                         lineHeight: 0.95,
@@ -1582,7 +1739,7 @@ export function FlocusPomodoroView({
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 0 24px' }}>
                   <div
                     style={{
-                      fontSize: isDesktop ? 'clamp(7.5rem, 18vw, 13.5rem)' : 'clamp(5rem, 20vw, 7.8rem)',
+                      fontSize: getTimerSizeClamp('clamp(7.5rem, 18vw, 13.5rem)', 'clamp(5rem, 20vw, 7.8rem)'),
                       color: currentTheme.clockColor,
                       textShadow: currentTheme.clockGlow,
                       lineHeight: 0.95,
@@ -1729,7 +1886,7 @@ export function FlocusPomodoroView({
             {/* Giant Clock */}
             <div
               style={{
-                fontSize: isDesktop ? '9rem' : '5.5rem',
+                fontSize: getTimerSizeClamp(isDesktop ? '9rem' : '5.5rem', isDesktop ? '9rem' : '5.5rem'),
                 fontFamily:
                   clockFont === 'mono'
                     ? 'var(--font-mono)'
@@ -2552,15 +2709,15 @@ export function FlocusPomodoroView({
                 {/* Navigation Items */}
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {[
-                    { id: 'themes' as const, label: 'Themes', icon: Palette, badge: 'NEW' },
-                    { id: 'clock' as const, label: 'Clock', icon: Clock, badge: 'NEW' },
-                    { id: 'focustimer' as const, label: 'Focus Timer', icon: Timer },
-                    { id: 'stats' as const, label: 'Stats', icon: BarChart2 },
-                    { id: 'quotes' as const, label: 'Quotes', icon: MessageSquareQuote },
-                    { id: 'extras' as const, label: 'Extras', icon: PartyPopper },
-                    { id: 'account' as const, label: 'Account', icon: User },
-                    { id: 'support' as const, label: 'Support', icon: HelpCircle },
-                    { id: 'whatsnew' as const, label: "What's New", icon: Rocket }
+                    { id: 'themes' as const, label: 'Temalar', icon: Palette, badge: 'YENİ' },
+                    { id: 'clock' as const, label: 'Saat', icon: Clock, badge: 'YENİ' },
+                    { id: 'focustimer' as const, label: 'Odak Zamanlayıcı', icon: Timer },
+                    { id: 'stats' as const, label: 'İstatistikler', icon: BarChart2 },
+                    { id: 'quotes' as const, label: 'Motivasyon Sözleri', icon: MessageSquareQuote },
+                    { id: 'extras' as const, label: 'Ekstralar', icon: PartyPopper },
+                    { id: 'account' as const, label: 'Hesap', icon: User },
+                    { id: 'support' as const, label: 'Destek', icon: HelpCircle },
+                    { id: 'whatsnew' as const, label: 'Yenilikler', icon: Rocket }
                   ].map((item) => {
                     const isActive = activeSettingsTab === item.id;
                     const Icon = item.icon;
@@ -2598,8 +2755,8 @@ export function FlocusPomodoroView({
                               fontWeight: 900,
                               padding: '2px 6px',
                               borderRadius: 6,
-                              background: item.badge === 'NEW' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(168, 85, 247, 0.25)',
-                              color: item.badge === 'NEW' ? '#4ADE80' : '#C084FC',
+                              background: item.badge === 'YENİ' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(168, 85, 247, 0.25)',
+                              color: item.badge === 'YENİ' ? '#4ADE80' : '#C084FC',
                               letterSpacing: '0.04em'
                             }}
                           >
@@ -2638,7 +2795,7 @@ export function FlocusPomodoroView({
                 title="Tüm NetFocus Plus özellikleri senin için ömür boyu ücretsiz ve aktif!"
               >
                 <Zap size={15} fill="#FFF" />
-                <span>Upgrade to Plus</span>
+                <span>NetFocus Plus'a Yükselt</span>
               </button>
             </aside>
 
@@ -2653,23 +2810,210 @@ export function FlocusPomodoroView({
                 gap: 22
               }}
             >
-              {/* TAB 1: CLOCK SETTINGS (Screenshot 1 Exact) */}
+              {/* TAB 1: CLOCK SETTINGS (Image 1 Exact) */}
               {activeSettingsTab === 'clock' && (
-                <div>
-                  {/* Top: Show greetings toggle */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  {/* Section 1: Clock Format (Image 1 Top Card) */}
+                  <div
+                    style={{
+                      background: '#13141C',
+                      borderRadius: 18,
+                      padding: 22,
+                      border: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}
+                  >
+                    <h3 style={{ fontSize: 16.5, fontWeight: 800, margin: '0 0 6px', color: '#FFF' }}>
+                      Saat Formatı
+                    </h3>
+                    <div style={{ fontSize: 12.5, color: 'rgba(255, 255, 255, 0.55)', marginBottom: 18 }}>
+                      12 saat veya 24 saat formatı arasında seçim yapın.
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+                      {/* 12-hour Clock */}
+                      <div
+                        onClick={() => {
+                          sounds.playClick();
+                          setIs24Hour(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '100%',
+                            height: 110,
+                            borderRadius: 16,
+                            background: 'radial-gradient(circle at 80% 90%, #F97316 0%, #A855F7 50%, #3B1C68 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: !is24Hour ? '2.5px solid #FFFFFF' : '1px solid rgba(255, 255, 255, 0.1)',
+                            boxShadow: !is24Hour ? '0 0 24px rgba(255, 255, 255, 0.25)' : 'none',
+                            transition: 'all 0.2s ease',
+                            boxSizing: 'border-box'
+                          }}
+                        >
+                          <span style={{ fontSize: 32, fontWeight: 900, color: '#FFFFFF', letterSpacing: -1, textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+                            2:24
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: !is24Hour ? '#FFFFFF' : 'rgba(255, 255, 255, 0.65)', marginTop: 10 }}>
+                          12 Saat Formatı
+                        </span>
+                      </div>
+
+                      {/* 24-hour Clock */}
+                      <div
+                        onClick={() => {
+                          sounds.playClick();
+                          setIs24Hour(true);
+                        }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '100%',
+                            height: 110,
+                            borderRadius: 16,
+                            background: 'radial-gradient(circle at 80% 90%, #F97316 0%, #A855F7 50%, #3B1C68 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: is24Hour ? '2.5px solid #FFFFFF' : '1px solid rgba(255, 255, 255, 0.1)',
+                            boxShadow: is24Hour ? '0 0 24px rgba(255, 255, 255, 0.25)' : 'none',
+                            transition: 'all 0.2s ease',
+                            boxSizing: 'border-box'
+                          }}
+                        >
+                          <span style={{ fontSize: 32, fontWeight: 900, color: '#FFFFFF', letterSpacing: -1, textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+                            14:24
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: is24Hour ? '#FFFFFF' : 'rgba(255, 255, 255, 0.65)', marginTop: 10 }}>
+                          24 Saat Formatı
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 2: Clock & Timer Size (Image 1 Bottom Card) */}
+                  <div
+                    style={{
+                      background: '#13141C',
+                      borderRadius: 18,
+                      padding: 22,
+                      border: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                      <h3 style={{ fontSize: 16.5, fontWeight: 800, margin: 0, color: '#FFF' }}>
+                        Saat & Zamanlayıcı Boyutu
+                      </h3>
+                      <span
+                        style={{
+                          fontSize: 9.5,
+                          fontWeight: 900,
+                          padding: '2px 7px',
+                          borderRadius: 6,
+                          background: 'rgba(34, 197, 94, 0.2)',
+                          color: '#4ADE80'
+                        }}
+                      >
+                        YENİ
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12.5, color: 'rgba(255, 255, 255, 0.55)', marginBottom: 18 }}>
+                      Saat ve zamanlayıcı ekranına uygulanır.
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+                      {[
+                        { id: 'small' as const, label: 'Küçük', fontSize: 18 },
+                        { id: 'regular' as const, label: 'Normal', fontSize: 28 },
+                        { id: 'huge' as const, label: 'Büyük', fontSize: 40 }
+                      ].map((item) => {
+                        const isSelected = clockTimerSize === item.id;
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => {
+                              sounds.playClick();
+                              setClockTimerSize(item.id);
+                            }}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: '100%',
+                                height: 110,
+                                borderRadius: 16,
+                                background: 'radial-gradient(circle at 80% 90%, #F97316 0%, #A855F7 50%, #3B1C68 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: isSelected ? '2.5px solid #FFFFFF' : '1px solid rgba(255, 255, 255, 0.1)',
+                                boxShadow: isSelected ? '0 0 24px rgba(255, 255, 255, 0.25)' : 'none',
+                                transition: 'all 0.2s ease',
+                                boxSizing: 'border-box'
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: item.fontSize,
+                                  fontWeight: 900,
+                                  color: '#FFFFFF',
+                                  letterSpacing: -1,
+                                  textShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                                }}
+                              >
+                                2:24
+                              </span>
+                            </div>
+                            <span
+                              style={{
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: isSelected ? '#FFFFFF' : 'rgba(255, 255, 255, 0.65)',
+                                marginTop: 10
+                              }}
+                            >
+                              {item.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 3: Show Greetings */}
                   <FlocusSwitch
                     checked={showGreetings}
                     onChange={setShowGreetings}
-                    label="Show greetings"
+                    label="Selamlama Metnini Göster"
                     plus
-                    description="Turn off to hide dashboard greetings."
+                    description="Ana ekrandaki selamlama mesajını gizlemek için kapatın."
                   />
 
-                  {/* Section: Clock & Timer Style */}
-                  <div style={{ marginTop: 24 }}>
+                  {/* Section 4: Clock & Timer Style */}
+                  <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                       <h3 style={{ fontSize: 16.5, fontWeight: 800, margin: 0, color: '#FFF' }}>
-                        Clock & Timer Style
+                        Saat & Zamanlayıcı Yazı Tipi
                       </h3>
                       <span
                         style={{
@@ -2687,21 +3031,9 @@ export function FlocusPomodoroView({
                       >
                         ⚡ PLUS
                       </span>
-                      <span
-                        style={{
-                          fontSize: 9.5,
-                          fontWeight: 900,
-                          padding: '2px 7px',
-                          borderRadius: 6,
-                          background: 'rgba(34, 197, 94, 0.2)',
-                          color: '#4ADE80'
-                        }}
-                      >
-                        NEW
-                      </span>
                     </div>
 
-                    {/* 12 Font Style Cards Grid (Screenshot 1) */}
+                    {/* 12 Font Style Cards Grid */}
                     <div
                       style={{
                         display: 'grid',
@@ -2748,7 +3080,7 @@ export function FlocusPomodoroView({
                                   letterSpacing: '0.05em'
                                 }}
                               >
-                                FREE
+                                ÜCRETSİZ
                               </span>
                             )}
 
@@ -2785,7 +3117,7 @@ export function FlocusPomodoroView({
                 <div>
                   {/* Top Link */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span style={{ fontSize: 14.5, fontWeight: 700, color: '#FFF' }}>Custom Timer Font</span>
+                    <span style={{ fontSize: 14.5, fontWeight: 700, color: '#FFF' }}>Özel Zamanlayıcı Yazı Tipi</span>
                     <span
                       style={{
                         fontSize: 9.5,
@@ -2800,21 +3132,21 @@ export function FlocusPomodoroView({
                     </span>
                   </div>
                   <div style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.55)', marginBottom: 20 }}>
-                    Go to{' '}
+                    Zamanlayıcı ve saat stilini özelleştirmek için{' '}
                     <span
                       onClick={() => setActiveSettingsTab('clock')}
                       style={{ color: '#C084FC', textDecoration: 'underline', cursor: 'pointer' }}
                     >
-                      Clock settings
-                    </span>{' '}
-                    to customize your timer and clock style.
+                      Saat ayarları
+                    </span>
+                    'na gidin.
                   </div>
 
                   {/* Section: Timer Style */}
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                       <h3 style={{ fontSize: 16.5, fontWeight: 800, margin: 0, color: '#FFF' }}>
-                        Timer Style
+                        Zamanlayıcı Görünümü
                       </h3>
                       <span
                         style={{
@@ -2838,14 +3170,14 @@ export function FlocusPomodoroView({
                           color: '#4ADE80'
                         }}
                       >
-                        NEW
+                        YENİ
                       </span>
                     </div>
                     <div style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.55)', marginBottom: 14 }}>
-                      Choose how the time remaining is displayed.
+                      Kalan sürenin ana ekranda nasıl görüntüleneceğini seçin.
                     </div>
 
-                    {/* 6 Visual Timer Cards (Screenshot 2) */}
+                    {/* 6 Visual Timer Cards */}
                     <div
                       style={{
                         display: 'grid',
@@ -2855,10 +3187,10 @@ export function FlocusPomodoroView({
                       }}
                     >
                       {[
-                        { id: 'default' as const, label: 'Default', preview: <span style={{ fontSize: 26, fontWeight: 800 }}>25:00</span> },
+                        { id: 'default' as const, label: 'Standart', preview: <span style={{ fontSize: 26, fontWeight: 800 }}>25:00</span> },
                         {
                           id: 'flip' as const,
-                          label: 'Flip Clock',
+                          label: 'Flip Saat',
                           preview: (
                             <div style={{ display: 'flex', gap: 6 }}>
                               <div style={{ padding: '6px 10px', background: '#20222C', borderRadius: 6, fontWeight: 900, fontSize: 18 }}>2</div>
@@ -2868,7 +3200,7 @@ export function FlocusPomodoroView({
                         },
                         {
                           id: 'progressbar' as const,
-                          label: 'Progress Bar',
+                          label: 'İlerleme Çubuğu',
                           preview: (
                             <div style={{ width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                               <span style={{ fontSize: 13, fontWeight: 800 }}>25:00</span>
@@ -2880,7 +3212,7 @@ export function FlocusPomodoroView({
                         },
                         {
                           id: 'gauge' as const,
-                          label: 'Gauge',
+                          label: 'Gösterge',
                           preview: (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                               <div style={{ width: 26, height: 26, borderRadius: '50%', border: '3px solid #FFF', borderTopColor: 'transparent' }} />
@@ -2890,12 +3222,12 @@ export function FlocusPomodoroView({
                         },
                         {
                           id: 'dots' as const,
-                          label: 'Dot Matrix',
+                          label: 'Nokta Matrisi',
                           preview: (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 3 }}>
                                 {Array.from({ length: 15 }).map((_, i) => (
-                                  <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: i < 8 ? '#FFF' : 'rgba(255,255,255,0.25)' }} />
+                                   <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: i < 8 ? '#FFF' : 'rgba(255,255,255,0.25)' }} />
                                 ))}
                               </div>
                               <span style={{ fontSize: 11, fontWeight: 700 }}>25:00</span>
@@ -2904,7 +3236,7 @@ export function FlocusPomodoroView({
                         },
                         {
                           id: 'pie' as const,
-                          label: 'Pie',
+                          label: 'Pasta Dilimi',
                           preview: (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                               <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'conic-gradient(#FFF 65%, rgba(255,255,255,0.2) 0)' }} />
@@ -2947,43 +3279,42 @@ export function FlocusPomodoroView({
                       })}
                     </div>
 
-                    {/* Screenshot 2 Toggles */}
                     <FlocusSwitch
                       checked={showTimerProgressBar}
                       onChange={setShowTimerProgressBar}
-                      label="Show timer progress bar"
+                      label="Zamanlayıcı İlerleme Çubuğunu Göster"
                       plus
-                      description="Display a visual progress bar beneath the timer."
+                      description="Zamanlayıcının hemen altında görsel bir ilerleme çubuğu görüntüler."
                     />
 
                     <FlocusSwitch
                       checked={showBrowserNotification}
                       onChange={setShowBrowserNotification}
-                      label="Show notification"
+                      label="Masaüstü Bildirimleri"
                       plus
-                      description="Beta feature: Show a browser notification when the timer ends."
+                      description="Odak veya mola süresi tamamlandığında sistem bildirimi gönderir."
                     />
 
                     <FlocusSwitch
                       checked={autoStartBreaks}
                       onChange={setAutoStartBreaks}
-                      label="Auto start timer on segment end"
-                      description="This will run through the full focus sequence automatically. For Countdown, this will auto restart your timer upon completion."
+                      label="Bölüm Bittiğinde Otomatik Başlat"
+                      description="Odak ve mola seansları arasında duraklatmadan otomatik olarak devam eder."
                     />
 
                     <FlocusSwitch
                       checked={showStreakCounter}
                       onChange={setShowStreakCounter}
-                      label="Show in-dashboard streak counter"
-                      description="Display the streak flame counter in the top bar."
+                      label="Seri Sayacını Göster"
+                      description="Üst gösterge çubuğunda aktif odaklanma serisi alev simgesini gösterir."
                     />
 
                     <FlocusSwitch
                       checked={showTaskInPip}
                       onChange={setShowTaskInPip}
-                      label="Show task in picture-in-picture"
+                      label="Görevi Resim-İçinde-Resim (PiP) Modunda Göster"
                       plus
-                      description="Keep your current task visible in a floating picture-in-picture window."
+                      description="Çalıştığınız görevi ekran üzerinde yüzen küçük bir pencerede açık tutar."
                     />
 
                     {/* Duration Sliders */}
@@ -3120,7 +3451,7 @@ export function FlocusPomodoroView({
                 </div>
               )}
 
-              {/* TAB 3: STATS SETTINGS (Screenshot 3 Exact - 100% UNBLURRED / UNLOCKED) */}
+              {/* TAB 3: STATS SETTINGS (Gerçek Veri Analitiği) */}
               {activeSettingsTab === 'stats' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                   {/* Card 1: Focus Calendar */}
@@ -3134,7 +3465,7 @@ export function FlocusPomodoroView({
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                       <h3 style={{ fontSize: 16.5, fontWeight: 800, margin: 0, color: '#FFF' }}>
-                        Focus Calendar
+                        Odaklanma Takvimi
                       </h3>
 
                       <div style={{ display: 'flex', gap: 12 }}>
@@ -3153,7 +3484,7 @@ export function FlocusPomodoroView({
                               cursor: 'pointer'
                             }}
                           >
-                            Hours
+                            Saat
                           </button>
                           <button
                             onClick={() => setStatsViewMode('sessions')}
@@ -3168,7 +3499,7 @@ export function FlocusPomodoroView({
                               cursor: 'pointer'
                             }}
                           >
-                            Sessions
+                            Seans
                           </button>
                         </div>
 
@@ -3187,7 +3518,7 @@ export function FlocusPomodoroView({
                               cursor: 'pointer'
                             }}
                           >
-                            6 months
+                            6 Ay
                           </button>
                           <button
                             onClick={() => setStatsTimeRange('1year')}
@@ -3202,13 +3533,13 @@ export function FlocusPomodoroView({
                               cursor: 'pointer'
                             }}
                           >
-                            1 year
+                            1 Yıl
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* Unblurred Heatmap (Previously paywalled in Flocus, now 100% unlocked in NetFocus) */}
+                    {/* Unblurred Heatmap (Gerçek Çalışma Verileriyle) */}
                     <div style={{ overflowX: 'auto', padding: '10px 0' }}>
                       <div
                         style={{
@@ -3219,18 +3550,29 @@ export function FlocusPomodoroView({
                           minWidth: 500
                         }}
                       >
-                        {Array.from({ length: 7 * (statsTimeRange === '1year' ? 44 : 26) }).map((_, idx) => {
-                          const seed = (idx * 37 + 13) % 100;
+                        {heatmapDays.map((day, idx) => {
                           let bg = 'rgba(255, 255, 255, 0.05)';
-                          if (seed > 75) bg = '#C084FC'; // high
-                          else if (seed > 50) bg = '#9333EA';
-                          else if (seed > 30) bg = '#6B21A8';
-                          else if (seed > 15) bg = '#3B1C68';
+                          if (statsViewMode === 'hours') {
+                            if (day.minutes > 120) bg = '#C084FC';
+                            else if (day.minutes > 60) bg = '#9333EA';
+                            else if (day.minutes > 30) bg = '#6B21A8';
+                            else if (day.minutes > 0) bg = '#3B1C68';
+                          } else {
+                            if (day.sessions >= 4) bg = '#C084FC';
+                            else if (day.sessions === 3) bg = '#9333EA';
+                            else if (day.sessions === 2) bg = '#6B21A8';
+                            else if (day.sessions >= 1) bg = '#3B1C68';
+                          }
+
+                          const formattedDate = day.dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+                          const tooltip = day.minutes > 0
+                            ? `${formattedDate}: ${day.minutes} dk (${(day.minutes / 60).toFixed(1)} sa) odaklanma • ${day.sessions} seans`
+                            : `${formattedDate}: Dinlenme`;
 
                           return (
                             <div
-                              key={idx}
-                              title={`${idx % 7 + 1}. gün: ${seed > 15 ? Math.floor(seed / 12) + ' saat odaklanma' : 'Dinlenme'}`}
+                              key={day.dateStr || idx}
+                              title={tooltip}
                               style={{
                                 width: 13,
                                 height: 13,
@@ -3249,21 +3591,21 @@ export function FlocusPomodoroView({
 
                     {/* Heatmap Legend */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, fontSize: 11, color: 'rgba(255, 255, 255, 0.5)' }}>
-                      <span>Apr 26, 2026</span>
+                      <span>{heatmapDateRange.start}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <span>Less</span>
+                        <span>Az</span>
                         <div style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(255, 255, 255, 0.05)' }} />
                         <div style={{ width: 10, height: 10, borderRadius: 2, background: '#3B1C68' }} />
                         <div style={{ width: 10, height: 10, borderRadius: 2, background: '#6B21A8' }} />
                         <div style={{ width: 10, height: 10, borderRadius: 2, background: '#9333EA' }} />
                         <div style={{ width: 10, height: 10, borderRadius: 2, background: '#C084FC' }} />
-                        <span>More</span>
+                        <span>Çok</span>
                       </div>
-                      <span>Oct 24, 2026</span>
+                      <span>{heatmapDateRange.end}</span>
                     </div>
                   </div>
 
-                  {/* Card 2: Focus Trend (Screenshot 3 Exact - 100% UNBLURRED / UNLOCKED) */}
+                  {/* Card 2: Focus Trend (Gerçek Odaklanma Eğrisi) */}
                   <div
                     style={{
                       background: '#13141C',
@@ -3274,7 +3616,7 @@ export function FlocusPomodoroView({
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                       <h3 style={{ fontSize: 16.5, fontWeight: 800, margin: 0, color: '#FFF' }}>
-                        Focus Trend
+                        Odaklanma Trendi
                       </h3>
                       <span
                         style={{
@@ -3301,53 +3643,50 @@ export function FlocusPomodoroView({
                         </defs>
 
                         {/* Area fill */}
-                        <path
-                          d="M 20,25 C 60,35 70,120 110,120 C 150,120 170,30 220,30 C 270,30 300,55 350,55 C 400,55 420,95 470,95 C 520,95 550,45 580,45 L 580,150 L 20,150 Z"
-                          fill="url(#trendGrad)"
-                        />
+                        {trendData.areaPath && (
+                          <path
+                            d={trendData.areaPath}
+                            fill="url(#trendGrad)"
+                          />
+                        )}
 
                         {/* Curve stroke */}
-                        <path
-                          d="M 20,25 C 60,35 70,120 110,120 C 150,120 170,30 220,30 C 270,30 300,55 350,55 C 400,55 420,95 470,95 C 520,95 550,45 580,45"
-                          fill="transparent"
-                          stroke="#7C3AED"
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                        />
+                        {trendData.curvePath && (
+                          <path
+                            d={trendData.curvePath}
+                            fill="transparent"
+                            stroke="#7C3AED"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                          />
+                        )}
 
-                        {/* Interactive Markers matching Screenshot 3 */}
-                        {[
-                          { cx: 20, cy: 25, label: '9h 17m', date: 'Oct 2' },
-                          { cx: 110, cy: 120, label: '45m', date: 'Oct 3' },
-                          { cx: 220, cy: 30, label: '8h 42m', date: 'Oct 6' },
-                          { cx: 350, cy: 55, label: '7h 5m', date: 'Oct 16' },
-                          { cx: 470, cy: 95, label: '5h 1m', date: 'Oct 24' },
-                          { cx: 580, cy: 45, label: '7h 45m', date: 'Oct 29' }
-                        ].map((pt, i) => (
+                        {/* Interactive Markers with Real Data */}
+                        {trendData.points.map((pt, i) => (
                           <g key={i}>
                             {/* Marker dot */}
                             <circle cx={pt.cx} cy={pt.cy} r="5" fill="#C084FC" stroke="#FFF" strokeWidth="2" />
                             {/* Text label above */}
                             <text
                               x={pt.cx}
-                              y={pt.cy - 10}
-                              fill="rgba(255, 255, 255, 0.85)"
+                              y={Math.max(16, pt.cy - 10)}
+                              fill="rgba(255, 255, 255, 0.9)"
                               fontSize="11"
                               fontWeight="700"
                               textAnchor="middle"
                             >
-                              {pt.label}
+                              {pt.timeLabel}
                             </text>
                             {/* Date below */}
                             <text
                               x={pt.cx}
                               y={150}
-                              fill="rgba(255, 255, 255, 0.45)"
-                              fontSize="10"
+                              fill="rgba(255, 255, 255, 0.55)"
+                              fontSize="10.5"
                               fontWeight="600"
                               textAnchor="middle"
                             >
-                              {pt.date}
+                              {pt.dateLabel}
                             </text>
                           </g>
                         ))}
