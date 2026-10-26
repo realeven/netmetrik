@@ -1168,5 +1168,114 @@ body.desktop-view-active .bottom-sheet {
   animation: typingPulse 1.2s infinite ease-in-out;
 }
 
+/* ==========================================================================
+   GLOBAL MODERN RANGE SLIDER STYLING (Apple / Spotify / Linear Aesthetics)
+   ========================================================================== */
+input[type="range"],
+.modern-range-slider {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  margin: 8px 0;
+  vertical-align: middle;
+  border: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
 
+input[type="range"]:focus-visible,
+.modern-range-slider:focus-visible {
+  outline: 2px solid var(--slider-accent, var(--color-accent, #00F0FF));
+  outline-offset: 4px;
+}
 
+/* WebKit / Chromium / Safari Track */
+input[type="range"]::-webkit-slider-runnable-track,
+.modern-range-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 999px;
+  border: none;
+}
+
+/* WebKit / Chromium / Safari Thumb */
+input[type="range"]::-webkit-slider-thumb,
+.modern-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  cursor: grab;
+  margin-top: -6px; /* (18px - 6px) / 2 to center thumb on 6px track */
+  border: 3px solid var(--slider-accent, var(--color-accent, #00F0FF));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 12px var(--slider-accent, rgba(0, 240, 255, 0.45));
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover,
+.modern-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.22);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 0 18px var(--slider-accent, rgba(0, 240, 255, 0.7));
+}
+
+input[type="range"]:active::-webkit-slider-thumb,
+.modern-range-slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.32);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 24px var(--slider-accent, rgba(0, 240, 255, 0.9));
+}
+
+/* Firefox Track */
+input[type="range"]::-moz-range-track,
+.modern-range-slider::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  border: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Firefox Thumb */
+input[type="range"]::-moz-range-thumb,
+.modern-range-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  cursor: grab;
+  border: 3px solid var(--slider-accent, var(--color-accent, #00F0FF));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 12px var(--slider-accent, rgba(0, 240, 255, 0.45));
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover,
+.modern-range-slider::-moz-range-thumb:hover {
+  transform: scale(1.22);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 0 18px var(--slider-accent, rgba(0, 240, 255, 0.7));
+}
+
+input[type="range"]:active::-moz-range-thumb,
+.modern-range-slider:active::-moz-range-thumb {
+  cursor: grabbing;
+  transform: scale(1.32);
+}
+
+/* Firefox Progress Fill */
+input[type="range"]::-moz-range-progress,
+.modern-range-slider::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--slider-accent, var(--color-accent, #00F0FF));
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import { ModernSlider } from './ModernSlider';
 import {
   Play,
   Pause,
@@ -2382,14 +2383,13 @@ export function FlocusPomodoroView({
                 <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255, 255, 255, 0.6)', marginBottom: 4 }}>
                   Ana Ses Düzeyi (%{Math.round(masterVolume * 100)})
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
+                <ModernSlider
+                  min={0}
+                  max={1}
+                  step={0.05}
                   value={masterVolume}
+                  accentColor="#00F0FF"
                   onChange={(e) => handleMasterVolumeChange(parseFloat(e.target.value))}
-                  style={{ width: '100%', accentColor: '#00F0FF', cursor: 'pointer' }}
                 />
               </div>
             </div>
@@ -2437,14 +2437,13 @@ export function FlocusPomodoroView({
                           {Math.round(track.volume * 100)}%
                         </span>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.05"
+                      <ModernSlider
+                        min={0}
+                        max={1}
+                        step={0.05}
                         value={track.volume}
+                        accentColor={currentTheme.accent}
                         onChange={(e) => handleTrackVolumeChange(track.id, parseFloat(e.target.value))}
-                        style={{ width: '100%', accentColor: currentTheme.accent, cursor: 'pointer' }}
                       />
                     </div>
                   </div>
@@ -2995,18 +2994,17 @@ export function FlocusPomodoroView({
                           <span>Odaklanma Süresi (Dakika)</span>
                           <span style={{ color: currentTheme.accent }}>{workDuration} dk</span>
                         </div>
-                        <input
-                          type="range"
-                          min="10"
-                          max="90"
-                          step="5"
+                        <ModernSlider
+                          min={10}
+                          max={90}
+                          step={5}
                           value={workDuration}
+                          accentColor={currentTheme.accent}
                           onChange={(e) => {
                             const v = parseInt(e.target.value);
                             setWorkDuration(v);
                             if (pomodoroPhase === 'work' && !isRunning) setTimeLeft(v * 60);
                           }}
-                          style={{ width: '100%', accentColor: currentTheme.accent, cursor: 'pointer' }}
                         />
                       </div>
 
@@ -3015,18 +3013,17 @@ export function FlocusPomodoroView({
                           <span>Kısa Mola (Dakika)</span>
                           <span style={{ color: '#00F0FF' }}>{shortBreakDuration} dk</span>
                         </div>
-                        <input
-                          type="range"
-                          min="2"
-                          max="20"
-                          step="1"
+                        <ModernSlider
+                          min={2}
+                          max={20}
+                          step={1}
                           value={shortBreakDuration}
+                          accentColor="#00F0FF"
                           onChange={(e) => {
                             const v = parseInt(e.target.value);
                             setShortBreakDuration(v);
                             if (pomodoroPhase === 'short_break' && !isRunning) setTimeLeft(v * 60);
                           }}
-                          style={{ width: '100%', accentColor: '#00F0FF', cursor: 'pointer' }}
                         />
                       </div>
 
@@ -3035,18 +3032,17 @@ export function FlocusPomodoroView({
                           <span>Uzun Mola (Dakika)</span>
                           <span style={{ color: '#A855F7' }}>{longBreakDuration} dk</span>
                         </div>
-                        <input
-                          type="range"
-                          min="10"
-                          max="45"
-                          step="5"
+                        <ModernSlider
+                          min={10}
+                          max={45}
+                          step={5}
                           value={longBreakDuration}
+                          accentColor="#A855F7"
                           onChange={(e) => {
                             const v = parseInt(e.target.value);
                             setLongBreakDuration(v);
                             if (pomodoroPhase === 'long_break' && !isRunning) setTimeLeft(v * 60);
                           }}
-                          style={{ width: '100%', accentColor: '#A855F7', cursor: 'pointer' }}
                         />
                       </div>
 
@@ -3055,14 +3051,13 @@ export function FlocusPomodoroView({
                           <span>Uzun Mola Sıklığı</span>
                           <span style={{ color: '#FFB800' }}>Her {longBreakInterval} seansta</span>
                         </div>
-                        <input
-                          type="range"
-                          min="2"
-                          max="8"
-                          step="1"
+                        <ModernSlider
+                          min={2}
+                          max={8}
+                          step={1}
                           value={longBreakInterval}
+                          accentColor="#FFB800"
                           onChange={(e) => setLongBreakInterval(parseInt(e.target.value))}
-                          style={{ width: '100%', accentColor: '#FFB800', cursor: 'pointer' }}
                         />
                       </div>
 
@@ -3505,13 +3500,12 @@ export function FlocusPomodoroView({
                         <span>Arka Plan Karartma (Dimmer)</span>
                         <span>%{bgDimmer}</span>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="80"
+                      <ModernSlider
+                        min={0}
+                        max={80}
                         value={bgDimmer}
+                        accentColor={currentTheme.accent}
                         onChange={(e) => setBgDimmer(parseInt(e.target.value))}
-                        style={{ width: '100%', accentColor: currentTheme.accent, cursor: 'pointer' }}
                       />
                     </div>
 
@@ -3520,13 +3514,12 @@ export function FlocusPomodoroView({
                         <span>Arka Plan Bulanıklığı (Blur)</span>
                         <span>{bgBlur}px</span>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="16"
+                      <ModernSlider
+                        min={0}
+                        max={16}
                         value={bgBlur}
+                        accentColor={currentTheme.accent}
                         onChange={(e) => setBgBlur(parseInt(e.target.value))}
-                        style={{ width: '100%', accentColor: currentTheme.accent, cursor: 'pointer' }}
                       />
                     </div>
                   </div>

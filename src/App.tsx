@@ -56,6 +56,8 @@ import { AiTutorScreenView } from './components/AiTutorView';
 import { FlocusPomodoroView } from './components/FlocusPomodoroView';
 import { OsymDistributionView } from './components/OsymDistributionView';
 import { OnboardingModal } from './components/OnboardingModal';
+import { WeeklyQuestionSchedule } from './components/WeeklyQuestionSchedule';
+import { ModernSlider } from './components/ModernSlider';
 import { OSYM_QUESTION_DISTRIBUTION } from './data/osymDistributionData';
 import { sounds } from './lib/sound';
 import {
@@ -243,7 +245,7 @@ export default function App() {
   // Modals State
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [showQuickModal, setShowQuickModal] = useState(false);
-  const [quickActionType, setQuickActionType] = useState<'question' | 'task' | 'exam'>('question');
+  const [quickActionType, setQuickActionType] = useState<'question' | 'study_time' | 'task' | 'exam'>('question');
   const [activeAnalizModal, setActiveAnalizModal] = useState<'trend' | 'exam_time' | 'question_count' | 'study_time' | null>(null);
   
   // Selected Feature Modal for Features (6, 7, 8, 21, 22, 26, 27)
@@ -635,20 +637,63 @@ export default function App() {
     setTopicProgress((prev) => ({ ...prev, [topicKey]: next }));
   };
 
-  // Add Question Log Handler
-  const handleAddQuestionLog = (subject: string, source: string, count: number, minutes: number) => {
+  // Add Question Log Handler (Flexible to handle topic, date, count, duration)
+  const handleAddQuestionLog = (
+    subject: string,
+    arg2?: string,
+    arg3?: string | number,
+    arg4?: number,
+    arg5?: number,
+    arg6?: string,
+    arg7?: number,
+    arg8?: number
+  ) => {
+    let topicName = 'Genel Soru Çözümü';
+    let sourceBook = 'Soru Bankası';
+    let count = 0;
+    let durationMinutes = 0;
+    let date = todayStr;
+    let correctCount: number | undefined;
+    let wrongCount: number | undefined;
+
+    if (typeof arg3 === 'number') {
+      // Called as: (subject, source, count, minutes)
+      sourceBook = arg2 || 'Soru Bankası';
+      count = arg3;
+      durationMinutes = arg4 || 0;
+    } else {
+      // Called as: (subject, topic, source, count, minutes, date, correct, wrong)
+      topicName = arg2 || 'Genel Soru Çözümü';
+      sourceBook = (arg3 as string) || 'Soru Bankası';
+      count = (arg4 as number) || 0;
+      durationMinutes = (arg5 as number) || 0;
+      if (arg6) date = arg6;
+      correctCount = arg7;
+      wrongCount = arg8;
+    }
+
     const newLog: QuestionLog = {
       id: `ql-${Date.now()}`,
-      date: todayStr,
+      date,
       subjectName: subject,
-      sourceBook: source,
+      topicName,
+      sourceBook,
       count: Number(count),
-      durationMinutes: Number(minutes)
+      durationMinutes: Number(durationMinutes),
+      correctCount,
+      wrongCount
     };
+
     setQuestionLogs((prev) => [newLog, ...prev]);
     sounds.playSuccess();
     confetti({ particleCount: 50, spread: 60 });
     setShowQuickModal(false);
+  };
+
+  // Delete Question Log Handler
+  const handleDeleteQuestionLog = (id: string) => {
+    setQuestionLogs((prev) => prev.filter((q) => q.id !== id));
+    sounds.playClick();
   };
 
   // Add Task Handler
@@ -936,6 +981,9 @@ export default function App() {
       {activeTab === 'calendar' && (
         <CalendarTasksView
           tasks={tasks}
+          questionLogs={questionLogs}
+          onAddQuestionLog={handleAddQuestionLog}
+          onDeleteQuestionLog={handleDeleteQuestionLog}
           onToggleTask={handleToggleTask}
           onOpenAddTask={() => {
             setQuickActionType('task');
@@ -1176,8 +1224,8 @@ export default function App() {
                   className={`desktop-nav-btn ${activeTab === 'calendar' ? 'active' : ''}`}
                   onClick={() => handleNavigateTab('calendar')}
                 >
-                  <CalendarIcon size={19} />
-                  <span>Plan & Takvim</span>
+                  <BarChart3 size={19} />
+                  <span>Haftalık Soru Çizelgesi</span>
                 </button>
 
                 <button
@@ -1331,7 +1379,7 @@ export default function App() {
                     <h2 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', margin: 0, letterSpacing: -0.2 }}>
                       {activeTab === 'home' && 'Bugün • Çalışma Özeti'}
                       {activeTab === 'ai' && 'NetMetrik AI • YKS Çalışma Koçu'}
-                      {activeTab === 'calendar' && 'Plan & Takvim • Haftalık Zaman Çizelgesi'}
+                      {activeTab === 'calendar' && 'Haftalık Soru Çizelgesi & Çalışma Planı'}
                       {activeTab === 'exams' && 'Denemeler & Karne • Net Analizleri'}
                       {activeTab === 'curriculum' && 'Konu Takip Çizelgesi • TYT & AYT'}
                       {activeTab === 'analytics' && 'Gelişmiş Analizler & Raporlar'}
@@ -1500,7 +1548,7 @@ export default function App() {
                   {activeTab === 'analytics' && 'Analiz & Rapor'}
                   {activeTab === 'home' && 'Bugün'}
                   {activeTab === 'ai' && 'NetMetrik AI'}
-                  {activeTab === 'calendar' && 'Plan & Takvim'}
+                  {activeTab === 'calendar' && 'Haftalık Soru Çizelgesi'}
                   {activeTab === 'exams' && 'Denemeler & Karne'}
                   {activeTab === 'curriculum' && 'Konu Takip'}
                   {activeTab === 'osym' && 'ÖSYM Soru Dağılımı'}
@@ -1644,11 +1692,11 @@ export default function App() {
                 <Home size={25} strokeWidth={activeTab === 'home' ? 2.5 : 2} />
               </button>
 
-              {/* Tab 2: Calendar / Plan */}
+              {/* Tab 2: Calendar / Haftalık Çizelge */}
               <button
                 className={`nav-item-icon-btn ${activeTab === 'calendar' ? 'active' : ''}`}
                 onClick={() => handleNavigateTab('calendar')}
-                title="Plan & Pomodoro"
+                title="Haftalık Soru Çizelgesi & Sayaç"
               >
                 <CalendarIcon size={25} strokeWidth={activeTab === 'calendar' ? 2.5 : 2} />
               </button>
@@ -1717,12 +1765,18 @@ export default function App() {
         <div className="modal-overlay" onClick={() => setShowQuickModal(false)}>
           <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <button
                   className={`btn-secondary ${quickActionType === 'question' ? 'active' : ''}`}
                   onClick={() => setQuickActionType('question')}
                 >
                   Soru Çözümü
+                </button>
+                <button
+                  className={`btn-secondary ${quickActionType === 'study_time' ? 'active' : ''}`}
+                  onClick={() => setQuickActionType('study_time')}
+                >
+                  Çalışma Süresi
                 </button>
                 <button
                   className={`btn-secondary ${quickActionType === 'task' ? 'active' : ''}`}
@@ -1741,6 +1795,13 @@ export default function App() {
 
             {quickActionType === 'question' ? (
               <QuickQuestionForm onSave={handleAddQuestionLog} />
+            ) : quickActionType === 'study_time' ? (
+              <QuickStudyTimeForm
+                onSave={(act, mins, d) => {
+                  handleAddQuestionLog(act, 'Genel Çalışma', 'Çalışma Seansı', 0, mins, d);
+                  setShowQuickModal(false);
+                }}
+              />
             ) : (
               <QuickTaskForm onSave={handleAddTask} />
             )}
@@ -2277,6 +2338,71 @@ function AnalyticsScreenView({
             />
           ))}
         </div>
+      </div>
+
+      {/* --------------------------------------------------------------------
+          Banner: Direct Link to Weekly Question Schedule (Ders & Konu Çizelgesi)
+      -------------------------------------------------------------------- */}
+      <div
+        onClick={() => {
+          sounds.playClick();
+          if (onNavigate) onNavigate('calendar');
+        }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(10, 132, 255, 0.16) 0%, rgba(0, 240, 255, 0.1) 100%)',
+          border: '1.5px solid rgba(10, 132, 255, 0.4)',
+          borderRadius: 18,
+          padding: '14px 18px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+          boxShadow: '0 6px 20px rgba(10, 132, 255, 0.15)',
+          transition: 'all 0.15s ease'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(10, 132, 255, 0.35)'
+            }}
+          >
+            <BarChart3 size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: 14.5, fontWeight: 900, color: '#FFFFFF' }}>
+              Haftalık Ders & Konu Soru Çizelgesi
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
+              Pazartesi–Pazar ders/konu soru matrisi, günlük çalışma süreleri ve NetFocus takibi
+            </div>
+          </div>
+        </div>
+
+        <button
+          style={{
+            padding: '7px 14px',
+            borderRadius: 99,
+            background: 'var(--color-accent)',
+            border: 'none',
+            color: '#FFFFFF',
+            fontSize: 12,
+            fontWeight: 800,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 3px 10px rgba(10, 132, 255, 0.3)'
+          }}
+        >
+          Çizelgeyi Aç →
+        </button>
       </div>
 
       {/* --------------------------------------------------------------------
@@ -3755,6 +3881,9 @@ function HomeScreenView({
 // ============================================================================
 function CalendarTasksView({
   tasks,
+  questionLogs = [],
+  onAddQuestionLog,
+  onDeleteQuestionLog,
   onToggleTask,
   onOpenAddTask,
   timerType,
@@ -3781,6 +3910,18 @@ function CalendarTasksView({
   isDesktop
 }: {
   tasks: DailyTask[];
+  questionLogs?: QuestionLog[];
+  onAddQuestionLog?: (
+    subject: string,
+    topic: string,
+    source: string,
+    count: number,
+    minutes: number,
+    date?: string,
+    correct?: number,
+    wrong?: number
+  ) => void;
+  onDeleteQuestionLog?: (id: string) => void;
   onToggleTask: (id: string) => void;
   onOpenAddTask: () => void;
   timerType: 'countdown' | 'stopwatch';
@@ -3806,6 +3947,7 @@ function CalendarTasksView({
   onOpenFlocus?: () => void;
   isDesktop?: boolean;
 }) {
+  const [calendarSubTab, setCalendarSubTab] = useState<'schedule' | 'timer' | 'tasks'>('schedule');
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
   const filteredTasks = tasks.filter((t) => {
@@ -3831,6 +3973,113 @@ function CalendarTasksView({
 
   return (
     <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 20 : 16 }}>
+      {/* Calendar Sub-Tabs: Haftalık Soru Çizelgesi (DEFAULT) | Odak & Sayaç | Görevler */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1.2fr 1fr 1fr',
+          gap: 6,
+          background: 'rgba(0, 0, 0, 0.35)',
+          padding: 4,
+          borderRadius: 14,
+          border: '1px solid rgba(255, 255, 255, 0.08)'
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            setCalendarSubTab('schedule');
+          }}
+          style={{
+            padding: '10px 8px',
+            borderRadius: 10,
+            fontSize: 12.5,
+            fontWeight: 800,
+            cursor: 'pointer',
+            border: 'none',
+            background: calendarSubTab === 'schedule' ? 'var(--color-accent)' : 'transparent',
+            color: calendarSubTab === 'schedule' ? '#FFFFFF' : 'var(--color-text-dim)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            boxShadow: calendarSubTab === 'schedule' ? '0 4px 14px rgba(10, 132, 255, 0.35)' : 'none',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <BarChart3 size={16} />
+          <span>Haftalık Soru Çizelgesi</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            setCalendarSubTab('timer');
+          }}
+          style={{
+            padding: '10px 8px',
+            borderRadius: 10,
+            fontSize: 12.5,
+            fontWeight: 800,
+            cursor: 'pointer',
+            border: 'none',
+            background: calendarSubTab === 'timer' ? 'var(--color-accent)' : 'transparent',
+            color: calendarSubTab === 'timer' ? '#FFFFFF' : 'var(--color-text-dim)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            boxShadow: calendarSubTab === 'timer' ? '0 4px 14px rgba(10, 132, 255, 0.35)' : 'none',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <Timer size={16} />
+          <span>Odak & Sayaç</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            setCalendarSubTab('tasks');
+          }}
+          style={{
+            padding: '10px 8px',
+            borderRadius: 10,
+            fontSize: 12.5,
+            fontWeight: 800,
+            cursor: 'pointer',
+            border: 'none',
+            background: calendarSubTab === 'tasks' ? 'var(--color-accent)' : 'transparent',
+            color: calendarSubTab === 'tasks' ? '#FFFFFF' : 'var(--color-text-dim)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            boxShadow: calendarSubTab === 'tasks' ? '0 4px 14px rgba(10, 132, 255, 0.35)' : 'none',
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <CheckCircle2 size={16} />
+          <span>Görevler ({tasks.length})</span>
+        </button>
+      </div>
+
+      {/* SUB-TAB 1: HAFTALIK SORU ÇİZELGESİ (MATRİS & DERS/KONU BAZLI) */}
+      {calendarSubTab === 'schedule' && (
+        <WeeklyQuestionSchedule
+          questionLogs={questionLogs}
+          onAddQuestionLog={onAddQuestionLog || (() => {})}
+          onDeleteQuestionLog={onDeleteQuestionLog || (() => {})}
+          isDesktop={isDesktop}
+        />
+      )}
+
+      {/* SUB-TAB 2: ODAK & KRONOMETRE & FLOCUS */}
+      {calendarSubTab === 'timer' && (
+        <>
       {/* Flocus Focus & Ambient Sounds Banner */}
       {onOpenFlocus && (
         <div
@@ -4220,8 +4469,11 @@ function CalendarTasksView({
           </div>
         </div>
       </div>
+      </>
+      )}
 
-      {/* Daily Tasks List */}
+      {/* SUB-TAB 3: GÜNLÜK GÖREVLER LİSTESİ */}
+      {calendarSubTab === 'tasks' && (
       <div className="app-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
@@ -4295,6 +4547,7 @@ function CalendarTasksView({
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -6723,14 +6976,13 @@ function ProfileScreenView({
                   <span>Günlük Soru Hedefi:</span>
                   <strong style={{ color: 'var(--color-accent)' }}>{dailyQGoal} Soru</strong>
                 </div>
-                <input
-                  type="range"
-                  min="50"
-                  max="400"
-                  step="10"
+                <ModernSlider
+                  min={50}
+                  max={400}
+                  step={10}
                   value={dailyQGoal}
+                  accentColor="var(--color-accent)"
                   onChange={(e) => setDailyQGoal(Number(e.target.value))}
-                  style={{ width: '100%', accentColor: 'var(--color-accent)' }}
                 />
               </div>
 
@@ -6739,14 +6991,13 @@ function ProfileScreenView({
                   <span>Günlük Çalışma Süresi:</span>
                   <strong style={{ color: '#30D158' }}>{dailyMGoal} Dakika ({Math.floor(dailyMGoal / 60)}s {dailyMGoal % 60}dk)</strong>
                 </div>
-                <input
-                  type="range"
-                  min="30"
-                  max="480"
-                  step="15"
+                <ModernSlider
+                  min={30}
+                  max={480}
+                  step={15}
                   value={dailyMGoal}
+                  accentColor="#30D158"
                   onChange={(e) => setDailyMGoal(Number(e.target.value))}
-                  style={{ width: '100%', accentColor: '#30D158' }}
                 />
               </div>
 
@@ -9419,14 +9670,13 @@ function RankSimulatorModal({
               <span>TYT Toplam Neti:</span>
               <strong style={{ color: 'var(--color-accent)' }}>{tytNet.toFixed(1)} Net</strong>
             </div>
-            <input
-              type="range"
-              min="20"
-              max="120"
-              step="0.5"
+            <ModernSlider
+              min={20}
+              max={120}
+              step={0.5}
               value={tytNet}
+              accentColor="var(--color-accent)"
               onChange={(e) => setTytNet(Number(e.target.value))}
-              style={{ width: '100%', accentColor: 'var(--color-accent)' }}
             />
           </div>
 
@@ -9435,14 +9685,13 @@ function RankSimulatorModal({
               <span>AYT Toplam Neti:</span>
               <strong style={{ color: '#38BDF8' }}>{aytNet.toFixed(1)} Net</strong>
             </div>
-            <input
-              type="range"
-              min="10"
-              max="80"
-              step="0.5"
+            <ModernSlider
+              min={10}
+              max={80}
+              step={0.5}
               value={aytNet}
+              accentColor="#38BDF8"
               onChange={(e) => setAytNet(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#38BDF8' }}
             />
           </div>
 
@@ -9451,14 +9700,13 @@ function RankSimulatorModal({
               <span>Diploma Notu (OBP):</span>
               <strong style={{ color: '#FFB800' }}>{obp.toFixed(1)}</strong>
             </div>
-            <input
-              type="range"
-              min="50"
-              max="100"
-              step="0.5"
+            <ModernSlider
+              min={50}
+              max={100}
+              step={0.5}
               value={obp}
+              accentColor="#FFB800"
               onChange={(e) => setObp(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#FFB800' }}
             />
           </div>
         </div>
@@ -10788,69 +11036,292 @@ function FlashcardsModal({
 function QuickQuestionForm({
   onSave
 }: {
-  onSave: (subject: string, source: string, count: number, minutes: number) => void;
+  onSave: (
+    subject: string,
+    topicOrSource: string,
+    sourceOrCount: string | number,
+    count?: number,
+    minutes?: number,
+    date?: string
+  ) => void;
 }) {
-  const [subject, setSubject] = useState('TYT Matematik');
+  const [subject, setSubject] = useState(YKS_SUBJECTS[0].name);
+  const currentSub = YKS_SUBJECTS.find((s) => s.name === subject) || YKS_SUBJECTS[0];
+  const [topic, setTopic] = useState(currentSub.topics[0] || 'Genel');
+  const [isCustomTopic, setIsCustomTopic] = useState(false);
+  const [customTopicText, setCustomTopicText] = useState('');
   const [source, setSource] = useState('');
   const [count, setCount] = useState(30);
-  const [minutes, setMinutes] = useState(40);
+  const [date, setDate] = useState(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  });
+
+  const handleSubjectChange = (newSub: string) => {
+    setSubject(newSub);
+    const found = YKS_SUBJECTS.find((s) => s.name === newSub);
+    if (found && found.topics.length > 0) {
+      setTopic(found.topics[0]);
+      setIsCustomTopic(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(subject, source || 'Soru Bankası', count, minutes);
+    const finalTopic = isCustomTopic
+      ? customTopicText.trim() || 'Özel Konu'
+      : topic;
+    onSave(subject, finalTopic, source || 'Soru Bankası', count, 0, date);
   };
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div>
-        <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>Ders Seçin</label>
+        <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>
+          Tarih
+        </label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          style={{ width: '100%', padding: 9, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', fontSize: 13 }}
+        />
+      </div>
+
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>
+          Ders Seçin
+        </label>
         <select
           value={subject}
-          onChange={(e) => setSubject(e.target.value)}
+          onChange={(e) => handleSubjectChange(e.target.value)}
           style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff' }}
         >
-          {YKS_SUBJECTS.map((s) => (
-            <option key={s.code} value={s.name}>{s.name}</option>
-          ))}
+          <optgroup label="TYT Dersleri">
+            {YKS_SUBJECTS.filter((s) => s.category === 'TYT').map((s) => (
+              <option key={s.code} value={s.name}>{s.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="AYT Dersleri">
+            {YKS_SUBJECTS.filter((s) => s.category === 'AYT').map((s) => (
+              <option key={s.code} value={s.name}>{s.name}</option>
+            ))}
+          </optgroup>
         </select>
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>Kaynak Kitap / Test</label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <label style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+            Konu Seçin
+          </label>
+          <button
+            type="button"
+            onClick={() => setIsCustomTopic(!isCustomTopic)}
+            style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', fontSize: 11, cursor: 'pointer', padding: 0 }}
+          >
+            {isCustomTopic ? 'Listeden Seç' : '+ Farklı Konu Yaz'}
+          </button>
+        </div>
+        {isCustomTopic ? (
+          <input
+            type="text"
+            placeholder="Konu adı yazın..."
+            value={customTopicText}
+            onChange={(e) => setCustomTopicText(e.target.value)}
+            required
+            style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff' }}
+          />
+        ) : (
+          <select
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff' }}
+          >
+            {currentSub.topics.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+            <option value="Genel Soru Çözümü">Genel / Karma Soru Çözümü</option>
+          </select>
+        )}
+      </div>
+
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>
+          Kaynak Kitap / Test (İsteğe Bağlı)
+        </label>
         <input
           type="text"
-          placeholder="Ör: 3D Soru Bankası Test 4"
+          placeholder="Ör: 3D Soru Bankası Test 4, Bilgi Sarmal..."
           value={source}
           onChange={(e) => setSource(e.target.value)}
           style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff' }}
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <div>
-          <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>Çözülen Soru</label>
-          <input
-            type="number"
-            min="1"
-            value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
-            style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff' }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>Harcanan Süre (dk)</label>
-          <input
-            type="number"
-            min="1"
-            value={minutes}
-            onChange={(e) => setMinutes(Number(e.target.value))}
-            style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff' }}
-          />
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>Çözülen Soru Sayısı</label>
+        <input
+          type="number"
+          min="1"
+          max="2000"
+          value={count}
+          onChange={(e) => setCount(Number(e.target.value))}
+          style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', fontSize: 14, fontWeight: 800 }}
+        />
+        <div style={{ display: 'flex', gap: 5, marginTop: 5 }}>
+          {[10, 20, 30, 50, 100].map((amt) => (
+            <button
+              key={amt}
+              type="button"
+              onClick={() => setCount((prev) => prev + amt)}
+              style={{ flex: 1, padding: '4px 0', borderRadius: 6, background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.08)', color: 'var(--color-text-dim)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+            >
+              +{amt}
+            </button>
+          ))}
         </div>
       </div>
 
       <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: 8 }}>
-        Kaydet ve Seriyi Güncelle
+        Çizelgeye Kaydet ve Seriyi Güncelle
+      </button>
+    </form>
+  );
+}
+
+function QuickStudyTimeForm({
+  onSave
+}: {
+  onSave: (activity: string, minutes: number, date: string) => void;
+}) {
+  const [date, setDate] = useState(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  });
+  const [activity, setActivity] = useState('Masa Başı Konu Çalışması');
+  const [customText, setCustomText] = useState('');
+  const [isCustom, setIsCustom] = useState(false);
+  const [minutes, setMinutes] = useState(60);
+
+  const activities = [
+    'Masa Başı Konu Çalışması',
+    'Video Ders İzleme',
+    'Genel Etüt',
+    'Kütüphane Çalışması',
+    'Deneme Analizi & Tekrar',
+    'Özet & Formül Tekrarı'
+  ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const finalAct = isCustom ? customText.trim() || 'Genel Çalışma' : activity;
+    onSave(finalAct, minutes, date);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4 }}>
+          Tarih
+        </label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          style={{ width: '100%', padding: 9, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', fontSize: 13 }}
+        />
+      </div>
+
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <label style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+            Çalışma Türü / Aktivite
+          </label>
+          <button
+            type="button"
+            onClick={() => setIsCustom(!isCustom)}
+            style={{ background: 'transparent', border: 'none', color: '#30D158', fontSize: 11, cursor: 'pointer', padding: 0 }}
+          >
+            {isCustom ? 'Önerilenlerden Seç' : '+ Farklı Başlık Yaz'}
+          </button>
+        </div>
+        {isCustom ? (
+          <input
+            type="text"
+            placeholder="Aktivite adı..."
+            value={customText}
+            onChange={(e) => setCustomText(e.target.value)}
+            required
+            style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff' }}
+          />
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {activities.map((act) => (
+              <button
+                key={act}
+                type="button"
+                onClick={() => setActivity(act)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: 8,
+                  fontSize: 11.5,
+                  fontWeight: activity === act ? 800 : 600,
+                  background: activity === act ? 'rgba(48, 209, 88, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                  border: activity === act ? '1px solid #30D158' : '1px solid rgba(255, 255, 255, 0.08)',
+                  color: activity === act ? '#30D158' : 'var(--color-text-dim)',
+                  cursor: 'pointer'
+                }}
+              >
+                {act}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <label style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>Çalışma Süresi (Dakika)</label>
+          <span style={{ fontSize: 12, fontWeight: 800, color: '#30D158' }}>
+            {minutes >= 60 ? `${Math.floor(minutes / 60)}s ${minutes % 60 > 0 ? `${minutes % 60}d` : ''}` : `${minutes} dk`}
+          </span>
+        </div>
+        <input
+          type="number"
+          min="5"
+          max="1440"
+          step="5"
+          value={minutes}
+          onChange={(e) => setMinutes(Number(e.target.value))}
+          style={{ width: '100%', padding: 10, borderRadius: 10, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', fontSize: 14, fontWeight: 800 }}
+        />
+        <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+          {[30, 45, 60, 90, 120].map((amt) => (
+            <button
+              key={amt}
+              type="button"
+              onClick={() => setMinutes(amt)}
+              style={{ flex: 1, padding: '4px 0', borderRadius: 6, background: minutes === amt ? 'rgba(48, 209, 88, 0.2)' : 'rgba(255, 255, 255, 0.05)', border: minutes === amt ? '1px solid #30D158' : '1px solid rgba(255, 255, 255, 0.08)', color: minutes === amt ? '#30D158' : 'var(--color-text-dim)', fontSize: 10.5, cursor: 'pointer' }}
+            >
+              {amt >= 60 ? `${amt / 60}s` : `${amt}d`}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ fontSize: 11, color: '#80BFFF', background: 'rgba(10, 132, 255, 0.08)', padding: '7px 10px', borderRadius: 8 }}>
+        💡 NetFocus Pomodoro seanslarınız otomatik olarak buraya eklenir.
+      </div>
+
+      <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: 4, background: 'linear-gradient(135deg, #30D158 0%, #248A3D 100%)' }}>
+        Çalışma Süresini Kaydet
       </button>
     </form>
   );

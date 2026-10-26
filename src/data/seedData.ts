@@ -49,9 +49,12 @@ export interface QuestionLog {
   id: string;
   date: string;
   subjectName: string;
-  sourceBook: string;
+  topicName?: string;
+  sourceBook?: string;
   count: number;
   durationMinutes: number;
+  correctCount?: number;
+  wrongCount?: number;
 }
 
 export type QuestionDifficulty = 'Kolay' | 'Orta' | 'Zor' | 'ÖSYM Seviyesi';
