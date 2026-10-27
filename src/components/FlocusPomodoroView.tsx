@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { ModernSlider } from './ModernSlider';
 import {
@@ -625,7 +625,6 @@ export function FlocusPomodoroView({
   const [timerSubMode, setTimerSubMode] = useState<TimerSubMode>('pomodoro');
 
   // 2. Pomodoro Config & Timing
-  const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>('work');
   const [workDuration, setWorkDuration] = useState<number>(30);
   const [shortBreakDuration, setShortBreakDuration] = useState<number>(5);
   const [longBreakDuration, setLongBreakDuration] = useState<number>(15);
@@ -634,19 +633,190 @@ export function FlocusPomodoroView({
   const [autoStartFocus, setAutoStartFocus] = useState<boolean>(false);
   const [enableTickSound, setEnableTickSound] = useState<boolean>(false);
 
-  // Active Timer state
-  const [timeLeft, setTimeLeft] = useState<number>(30 * 60);
-  const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [completedRounds, setCompletedRounds] = useState<number>(0);
+  // Active Timer state — hydrated with millisecond timestamps from localStorage
+  const initialPomState = (() => {
+    try {
+      const saved = localStorage.getItem('nf_pom_state');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.isRunning && s.targetEndTime) {
+          const rem = Math.round((s.targetEndTime - Date.now()) / 1000);
+          if (rem > 0) {
+            return {
+              isRunning: true,
+              targetEndTime: s.targetEndTime as number,
+              timeLeft: rem,
+              phase: (s.phase || 'work') as PomodoroPhase,
+              completedRounds: (s.completedRounds || 0) as number,
+              justCompleted: false
+            };
+          } else {
+            return {
+              isRunning: false,
+              targetEndTime: null,
+              timeLeft: 0,
+              phase: (s.phase || 'work') as PomodoroPhase,
+              completedRounds: ((s.completedRounds || 0) + 1) as number,
+              justCompleted: true
+            };
+          }
+        }
+        if (s.timeLeft != null) {
+          return {
+            isRunning: false,
+            targetEndTime: null,
+            timeLeft: s.timeLeft as number,
+            phase: (s.phase || 'work') as PomodoroPhase,
+            completedRounds: (s.completedRounds || 0) as number,
+            justCompleted: false
+          };
+        }
+      }
+    } catch {}
+    return {
+      isRunning: false,
+      targetEndTime: null,
+      timeLeft: 30 * 60,
+      phase: 'work' as PomodoroPhase,
+      completedRounds: 0,
+      justCompleted: false
+    };
+  })();
+
+  const initialSwState = (() => {
+    try {
+      const saved = localStorage.getItem('nf_sw_state');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.isRunning && s.startTime) {
+          const elapsed = Math.max(0, Math.floor((Date.now() - s.startTime) / 1000));
+          return {
+            isRunning: true,
+            startTime: s.startTime as number,
+            seconds: elapsed,
+            goal: (s.goal || '') as string
+          };
+        }
+        if (s.seconds != null) {
+          return {
+            isRunning: false,
+            startTime: null,
+            seconds: s.seconds as number,
+            goal: (s.goal || '') as string
+          };
+        }
+      }
+    } catch {}
+    return {
+      isRunning: false,
+      startTime: null,
+      seconds: 0,
+      goal: ''
+    };
+  })();
+
+  const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>(initialPomState.phase);
+  const [timeLeft, setTimeLeft] = useState<number>(initialPomState.timeLeft);
+  const [isRunning, setIsRunning] = useState<boolean>(initialPomState.isRunning);
+  const [completedRounds, setCompletedRounds] = useState<number>(initialPomState.completedRounds);
   const [totalFocusedSecondsToday, setTotalFocusedSecondsToday] = useState<number>(0);
 
-  // Serbest Kronometre (Stopwatch) State
-  const [stopwatchSeconds, setStopwatchSeconds] = useState<number>(0);
-  const [isStopwatchRunning, setIsStopwatchRunning] = useState<boolean>(false);
-  const [stopwatchGoal, setStopwatchGoal] = useState<string>('');
+  // Exact timestamp refs for background/tab-independent time tracking
+  const pomodoroTargetEndRef = useRef<number | null>(initialPomState.targetEndTime);
+  const stopwatchStartTsRef = useRef<number | null>(initialSwState.startTime);
+
+  // Serbest Kronometre (Stopwatch) State — hydrated from localStorage timestamps on mount
+  const [stopwatchSeconds, setStopwatchSeconds] = useState<number>(initialSwState.seconds);
+  const [isStopwatchRunning, setIsStopwatchRunning] = useState<boolean>(initialSwState.isRunning);
+  const [stopwatchGoal, setStopwatchGoal] = useState<string>(initialSwState.goal);
   const [isEditingStopwatchGoal, setIsEditingStopwatchGoal] = useState<boolean>(false);
   const [stopwatchLaps, setStopwatchLaps] = useState<{ id: string; lapNumber: number; lapTime: number; totalTime: number }[]>([]);
   const [stopwatchSavedToast, setStopwatchSavedToast] = useState<string | null>(null);
+
+  // Helper refs to avoid stale closures in background tickers and handlers
+  const pomodoroPhaseRef = useRef(pomodoroPhase);
+  pomodoroPhaseRef.current = pomodoroPhase;
+  const completedRoundsRef = useRef(completedRounds);
+  completedRoundsRef.current = completedRounds;
+  const workDurationRef = useRef(workDuration);
+  workDurationRef.current = workDuration;
+  const shortBreakDurationRef = useRef(shortBreakDuration);
+  shortBreakDurationRef.current = shortBreakDuration;
+  const longBreakDurationRef = useRef(longBreakDuration);
+  longBreakDurationRef.current = longBreakDuration;
+  const longBreakIntervalRef = useRef(longBreakInterval);
+  longBreakIntervalRef.current = longBreakInterval;
+  const autoStartBreaksRef = useRef(autoStartBreaks);
+  autoStartBreaksRef.current = autoStartBreaks;
+  const autoStartFocusRef = useRef(autoStartFocus);
+  autoStartFocusRef.current = autoStartFocus;
+  const enableTickSoundRef = useRef(enableTickSound);
+  enableTickSoundRef.current = enableTickSound;
+
+  // ── Persist Pomodoro state to localStorage ──
+  const savePomodoroState = (
+    running: boolean,
+    targetEndTime: number | null,
+    tLeft: number,
+    phase: PomodoroPhase,
+    rounds: number
+  ) => {
+    try {
+      localStorage.setItem('nf_pom_state', JSON.stringify({
+        isRunning: running,
+        targetEndTime,
+        timeLeft: tLeft,
+        phase,
+        completedRounds: rounds
+      }));
+    } catch {}
+  };
+
+  // ── Persist Stopwatch state to localStorage ──
+  const saveStopwatchState = (
+    running: boolean,
+    startTime: number | null,
+    seconds: number,
+    goal: string
+  ) => {
+    try {
+      localStorage.setItem('nf_sw_state', JSON.stringify({
+        isRunning: running,
+        startTime,
+        seconds,
+        goal
+      }));
+    } catch {}
+  };
+
+  // If completed while closed, notify user on mount
+  useEffect(() => {
+    if (initialPomState.justCompleted) {
+      ambientEngine.playZenChime();
+      if (onLogStudySession) {
+        onLogStudySession('Pomodoro Seansı (Arka Planda)', workDuration);
+      }
+      setPomodoroPhase('short_break');
+      setTimeLeft(shortBreakDuration * 60);
+      savePomodoroState(false, null, shortBreakDuration * 60, 'short_break', initialPomState.completedRounds);
+      setStopwatchSavedToast('🎉 Tebrikler! Sekme kapalıyken Pomodoro seansın tamamlandı ve kaydedildi.');
+      setTimeout(() => setStopwatchSavedToast(null), 5000);
+    }
+  }, []);
+
+  // ── beforeunload: snapshot current state before tab closes ──
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isRunning && pomodoroTargetEndRef.current != null) {
+        savePomodoroState(true, pomodoroTargetEndRef.current, timeLeft, pomodoroPhase, completedRounds);
+      }
+      if (isStopwatchRunning && stopwatchStartTsRef.current != null) {
+        saveStopwatchState(true, stopwatchStartTsRef.current, stopwatchSeconds, stopwatchGoal);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isRunning, timeLeft, pomodoroPhase, completedRounds, isStopwatchRunning, stopwatchSeconds, stopwatchGoal]);
 
   // 3. Theme & Aesthetics
   const [currentTheme, setCurrentTheme] = useState<FlocusTheme>(() => {
@@ -750,59 +920,138 @@ export function FlocusPomodoroView({
     return () => clearInterval(timer);
   }, []);
 
-  // Sync Timer duration when phase or settings change
+  // Sync Timer duration when phase or settings change (skips initial mount to preserve hydrated timeLeft)
+  const hasMountedDurationSyncRef = useRef(false);
   useEffect(() => {
+    if (!hasMountedDurationSyncRef.current) {
+      hasMountedDurationSyncRef.current = true;
+      return;
+    }
     if (!isRunning) {
       if (timerSubMode === 'animedoro') {
-        setTimeLeft(pomodoroPhase === 'work' ? 45 * 60 : 20 * 60);
+        const d = pomodoroPhase === 'work' ? 45 * 60 : 20 * 60;
+        setTimeLeft(d);
+        savePomodoroState(false, null, d, pomodoroPhase, completedRounds);
       } else {
-        if (pomodoroPhase === 'work') setTimeLeft(workDuration * 60);
-        else if (pomodoroPhase === 'short_break') setTimeLeft(shortBreakDuration * 60);
-        else setTimeLeft(longBreakDuration * 60);
+        const d = (pomodoroPhase === 'work' ? workDuration : pomodoroPhase === 'short_break' ? shortBreakDuration : longBreakDuration) * 60;
+        setTimeLeft(d);
+        savePomodoroState(false, null, d, pomodoroPhase, completedRounds);
       }
     }
   }, [pomodoroPhase, workDuration, shortBreakDuration, longBreakDuration, timerSubMode]);
 
-  // Main Pomodoro Timer Countdown Loop
+  // ── High-Precision Web Worker & Background Ticker ──
+  // Web Workers run in a dedicated OS thread and are NOT throttled in background tabs like window.setInterval!
   useEffect(() => {
-    let interval: any = null;
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            handlePhaseComplete();
-            return 0;
-          }
-          if (enableTickSound && prev % 2 === 0) {
+    let worker: Worker | null = null;
+    let fallbackInterval: any = null;
+
+    const performTick = () => {
+      const now = Date.now();
+
+      // 1. Pomodoro Ticking & Expiry Check
+      if (pomodoroTargetEndRef.current != null) {
+        const rem = Math.round((pomodoroTargetEndRef.current - now) / 1000);
+        if (rem <= 0) {
+          pomodoroTargetEndRef.current = null;
+          setTimeLeft(0);
+          handlePhaseComplete();
+        } else {
+          setTimeLeft(rem);
+          if (enableTickSoundRef.current && rem % 2 === 0) {
             ambientEngine.playSoftTick();
           }
-          if (pomodoroPhase === 'work') {
+          if (pomodoroPhaseRef.current === 'work') {
             setTotalFocusedSecondsToday((sec) => sec + 1);
           }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft, pomodoroPhase, enableTickSound]);
+        }
+      }
 
-  // Serbest Kronometre Interval
+      // 2. Stopwatch Ticking
+      if (stopwatchStartTsRef.current != null) {
+        const elapsed = Math.max(0, Math.floor((now - stopwatchStartTsRef.current) / 1000));
+        setStopwatchSeconds(elapsed);
+        if (enableTickSoundRef.current && (elapsed + 1) % 2 === 0) {
+          ambientEngine.playSoftTick();
+        }
+      }
+    };
+
+    try {
+      const workerBlob = new Blob([
+        `let id = null;
+         self.onmessage = function(e) {
+           if (e.data === 'start') {
+             if (id) clearInterval(id);
+             id = setInterval(function() {
+               self.postMessage('tick');
+             }, 1000);
+           } else if (e.data === 'stop') {
+             if (id) clearInterval(id);
+             id = null;
+           }
+         };`
+      ], { type: 'application/javascript' });
+      const workerUrl = URL.createObjectURL(workerBlob);
+      worker = new Worker(workerUrl);
+      worker.onmessage = () => {
+        performTick();
+      };
+      worker.postMessage('start');
+    } catch {
+      fallbackInterval = setInterval(performTick, 1000);
+    }
+
+    // Instant resync whenever the tab becomes visible, window gains focus, or is restored from cache
+    const syncImmediately = () => {
+      performTick();
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        syncImmediately();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', syncImmediately);
+    window.addEventListener('pageshow', syncImmediately);
+
+    return () => {
+      if (worker) {
+        worker.postMessage('stop');
+        worker.terminate();
+      }
+      if (fallbackInterval) {
+        clearInterval(fallbackInterval);
+      }
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', syncImmediately);
+      window.removeEventListener('pageshow', syncImmediately);
+    };
+  }, []);
+
+  // ── Dynamic Browser Tab Title (Shows live countdown / stopwatch directly on the tab) ──
   useEffect(() => {
-    let interval: any = null;
-    if (isStopwatchRunning) {
-      interval = setInterval(() => {
-        setStopwatchSeconds((prev) => {
-          if (enableTickSound && (prev + 1) % 2 === 0) {
-            ambientEngine.playSoftTick();
-          }
-          return prev + 1;
-        });
-      }, 1000);
+    const defaultTitle = 'NetMetrik - YKS & LGS Hazırlık Asistanı';
+    if (isRunning) {
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      const phaseLabel = pomodoroPhase === 'work' ? 'Odak' : pomodoroPhase === 'long_break' ? 'Uzun Mola' : 'Mola';
+      document.title = `⏱️ (${m}:${s}) ${phaseLabel} | NetFocus`;
+    } else if (isStopwatchRunning) {
+      const hrs = Math.floor(stopwatchSeconds / 3600);
+      const mins = Math.floor((stopwatchSeconds % 3600) / 60).toString().padStart(2, '0');
+      const secs = (stopwatchSeconds % 60).toString().padStart(2, '0');
+      const timeStr = hrs > 0 ? `${hrs}:${mins}:${secs}` : `${mins}:${secs}`;
+      document.title = `⏱️ (${timeStr}) Kronometre | NetFocus`;
+    } else {
+      document.title = defaultTitle;
     }
     return () => {
-      if (interval) clearInterval(interval);
+      document.title = defaultTitle;
     };
-  }, [isStopwatchRunning, enableTickSound]);
+  }, [isRunning, timeLeft, pomodoroPhase, isStopwatchRunning, stopwatchSeconds]);
 
   // Synchronize Live Focus Activity to Parent (App.tsx)
   useEffect(() => {
@@ -835,76 +1084,141 @@ export function FlocusPomodoroView({
   // Handler on Phase Completion
   const handlePhaseComplete = () => {
     setIsRunning(false);
+    pomodoroTargetEndRef.current = null;
     ambientEngine.playZenChime();
     confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
 
-    if (pomodoroPhase === 'work') {
-      const nextRounds = completedRounds + 1;
+    const currentPhase = pomodoroPhaseRef.current;
+    const currentRounds = completedRoundsRef.current;
+    const wDur = workDurationRef.current;
+    const sDur = shortBreakDurationRef.current;
+    const lDur = longBreakDurationRef.current;
+    const lInt = longBreakIntervalRef.current;
+
+    // Browser Notification
+    if ('Notification' in window && Notification.permission === 'granted' && showBrowserNotification) {
+      try {
+        new Notification(
+          currentPhase === 'work' ? '🎉 Pomodoro Tamamlandı!' : '⚡ Mola Bitti!',
+          {
+            body: currentPhase === 'work'
+              ? 'Harika odaklandın! Şimdi dinlenme zamanı.'
+              : 'Mola süresi bitti. Yeni odak seansına geçebilirsin.',
+            icon: '/favicon.ico'
+          }
+        );
+      } catch {}
+    }
+
+    if (currentPhase === 'work') {
+      const nextRounds = currentRounds + 1;
       setCompletedRounds(nextRounds);
 
       if (onLogStudySession) {
-        onLogStudySession('Pomodoro Seansı', workDuration);
+        onLogStudySession('Pomodoro Seansı', wDur);
       }
 
       // Check if long break interval reached
-      if (nextRounds % longBreakInterval === 0) {
-        setPomodoroPhase('long_break');
-        setTimeLeft(longBreakDuration * 60);
-      } else {
-        setPomodoroPhase('short_break');
-        setTimeLeft(shortBreakDuration * 60);
-      }
+      const nextPhase: PomodoroPhase = (nextRounds % lInt === 0) ? 'long_break' : 'short_break';
+      const nextSecs = (nextPhase === 'long_break' ? lDur : sDur) * 60;
+      setPomodoroPhase(nextPhase);
+      setTimeLeft(nextSecs);
 
-      if (autoStartBreaks) {
-        setTimeout(() => setIsRunning(true), 1200);
+      if (autoStartBreaksRef.current) {
+        setTimeout(() => {
+          const target = Date.now() + nextSecs * 1000;
+          pomodoroTargetEndRef.current = target;
+          setIsRunning(true);
+          savePomodoroState(true, target, nextSecs, nextPhase, nextRounds);
+        }, 1200);
+      } else {
+        savePomodoroState(false, null, nextSecs, nextPhase, nextRounds);
       }
     } else {
       // Break completed, back to work
       setPomodoroPhase('work');
-      setTimeLeft(workDuration * 60);
+      const nextSecs = wDur * 60;
+      setTimeLeft(nextSecs);
 
-      if (autoStartFocus) {
-        setTimeout(() => setIsRunning(true), 1200);
+      if (autoStartFocusRef.current) {
+        setTimeout(() => {
+          const target = Date.now() + nextSecs * 1000;
+          pomodoroTargetEndRef.current = target;
+          setIsRunning(true);
+          savePomodoroState(true, target, nextSecs, 'work', currentRounds);
+        }, 1200);
+      } else {
+        savePomodoroState(false, null, nextSecs, 'work', currentRounds);
       }
     }
   };
 
   const handleToggleTimer = () => {
     sounds.playClick();
-    setIsRunning(!isRunning);
+
+    // Request notification permission if not asked yet
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
+    }
+
+    if (!isRunning) {
+      // Starting
+      const target = Date.now() + timeLeft * 1000;
+      pomodoroTargetEndRef.current = target;
+      setIsRunning(true);
+      savePomodoroState(true, target, timeLeft, pomodoroPhase, completedRounds);
+    } else {
+      // Pausing
+      pomodoroTargetEndRef.current = null;
+      setIsRunning(false);
+      savePomodoroState(false, null, timeLeft, pomodoroPhase, completedRounds);
+    }
   };
 
   const handleResetTimer = () => {
     sounds.playClick();
+    pomodoroTargetEndRef.current = null;
     setIsRunning(false);
-    if (pomodoroPhase === 'work') setTimeLeft(workDuration * 60);
-    else if (pomodoroPhase === 'short_break') setTimeLeft(shortBreakDuration * 60);
-    else setTimeLeft(longBreakDuration * 60);
+    const resetSecs = (pomodoroPhase === 'work' ? workDuration : pomodoroPhase === 'short_break' ? shortBreakDuration : longBreakDuration) * 60;
+    setTimeLeft(resetSecs);
+    savePomodoroState(false, null, resetSecs, pomodoroPhase, completedRounds);
   };
 
   const handleSkipPhase = () => {
     sounds.playClick();
-    if (pomodoroPhase === 'work') {
-      setPomodoroPhase('short_break');
-      setTimeLeft(shortBreakDuration * 60);
-    } else {
-      setPomodoroPhase('work');
-      setTimeLeft(workDuration * 60);
-    }
+    pomodoroTargetEndRef.current = null;
     setIsRunning(false);
+    const nextPhase: PomodoroPhase = pomodoroPhase === 'work' ? 'short_break' : 'work';
+    const nextSecs = (nextPhase === 'work' ? workDuration : shortBreakDuration) * 60;
+    setPomodoroPhase(nextPhase);
+    setTimeLeft(nextSecs);
+    savePomodoroState(false, null, nextSecs, nextPhase, completedRounds);
   };
 
   // Stopwatch handlers
   const handleToggleStopwatch = () => {
     sounds.playClick();
-    setIsStopwatchRunning((prev) => !prev);
+    if (!isStopwatchRunning) {
+      // Starting
+      const startTs = Date.now() - stopwatchSeconds * 1000;
+      stopwatchStartTsRef.current = startTs;
+      setIsStopwatchRunning(true);
+      saveStopwatchState(true, startTs, stopwatchSeconds, stopwatchGoal);
+    } else {
+      // Pausing
+      stopwatchStartTsRef.current = null;
+      setIsStopwatchRunning(false);
+      saveStopwatchState(false, null, stopwatchSeconds, stopwatchGoal);
+    }
   };
 
   const handleResetStopwatch = () => {
     sounds.playClick();
+    stopwatchStartTsRef.current = null;
     setIsStopwatchRunning(false);
     setStopwatchSeconds(0);
     setStopwatchLaps([]);
+    saveStopwatchState(false, null, 0, stopwatchGoal);
   };
 
   const handleAddLap = () => {
