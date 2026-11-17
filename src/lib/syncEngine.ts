@@ -23,7 +23,7 @@ export interface SyncPayload {
   questionVault: QuestionVaultItem[];
   books: BookTrackerItem[];
   topicProgress: Record<string, TopicStatus>;
-  flashcards: FlashcardItem[];
+  flashcards?: FlashcardItem[];
 }
 
 export interface CloudUser {

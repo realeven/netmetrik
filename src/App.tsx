@@ -19,7 +19,6 @@ import {
   PenTool,
   Timer,
   ChevronRight,
-  Palette,
   Volume2,
   VolumeX,
   BookOpen,
@@ -28,7 +27,6 @@ import {
   Flame,
   Shield,
   ShieldCheck,
-  Zap,
   Printer,
   Smartphone,
   Camera,
@@ -37,14 +35,12 @@ import {
   Award,
   Download,
   Upload,
-  Brain,
   ArrowLeft,
   ArrowRight,
   Cloud,
   CloudOff,
   LogOut,
   Monitor,
-  Bot,
   Image as ImageIcon,
   XCircle,
   Eye,
@@ -52,12 +48,13 @@ import {
   Maximize2,
   Settings
 } from 'lucide-react';
-import { AiTutorScreenView } from './components/AiTutorView';
 import { FlocusPomodoroView, type LiveFocusActivity } from './components/FlocusPomodoroView';
 import { OsymDistributionView } from './components/OsymDistributionView';
 import { OnboardingModal } from './components/OnboardingModal';
 import { WeeklyQuestionSchedule } from './components/WeeklyQuestionSchedule';
 import { ModernSlider } from './components/ModernSlider';
+import { YksCountdownCard } from './components/YksCountdownCard';
+import { YksRankCalculatorModal } from './components/YksRankCalculatorModal';
 import { OSYM_QUESTION_DISTRIBUTION } from './data/osymDistributionData';
 import { sounds } from './lib/sound';
 import {
@@ -80,11 +77,8 @@ import {
   INITIAL_QUESTION_LOGS,
   INITIAL_QUESTION_VAULT,
   INITIAL_BOOKS,
-  INITIAL_FLASHCARDS,
-  YOK_ATLAS_BENCHMARKS,
   MOTIVATIONAL_QUOTES
 } from './data/seedData';
-import { YOK_ATLAS_DATASET_2025 } from './data/yokAtlasDataset';
 import type {
   Exam,
   DailyTask,
@@ -93,32 +87,22 @@ import type {
   TopicStatus,
   QuestionVaultItem,
   QuestionDifficulty,
-  BookTrackerItem,
-  FlashcardItem,
-  DepartmentBenchmark
+  BookTrackerItem
 } from './data/seedData';
 
-type ThemeId = 'theme-blue' | 'theme-graphite' | 'theme-indigo' | 'theme-amber' | 'theme-mint' | 'theme-cyan' | 'theme-lime' | 'theme-purple' | 'theme-emerald';
+type ThemeId = 'theme-obsidian';
 
-const THEME_PRESETS: { id: ThemeId; name: string; color: string; desc: string }[] = [
-  { id: 'theme-blue', name: 'Cupertino Blue', color: '#0A84FF', desc: 'Apple Sistem Mavisi (Önerilen)' },
-  { id: 'theme-graphite', name: 'Space Gray', color: '#E5E5EA', desc: 'Doğal Titanyum & Nötr Gri' },
-  { id: 'theme-indigo', name: 'Deep Indigo', color: '#5E5CE6', desc: 'Apple Koyu İndigo' },
-  { id: 'theme-amber', name: 'Sunset Amber', color: '#FF9F0A', desc: 'Apple Doğal Turuncu' },
-  { id: 'theme-mint', name: 'Activity Mint', color: '#63E6E2', desc: 'Apple Sağlık & Fitness Nane' }
-];
-
-type FeatureModalType = 'vault' | 'speed' | 'books' | 'rank' | 'benchmark' | 'report' | 'widget' | 'flashcards' | null;
+type FeatureModalType = 'vault' | 'rank' | 'books' | 'report' | 'widget' | null;
 
 // ============================================================================
 // Main Application Component
 // ============================================================================
 export default function App() {
-  // Navigation Tabs: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro' | 'osym'
-  const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro' | 'osym'>(() => {
+  // Navigation Tabs: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym'
+  const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym'>(() => {
     try {
       const saved = localStorage.getItem('netmetrik_active_tab');
-      if (saved && ['home', 'calendar', 'analytics', 'profile', 'exams', 'curriculum', 'ai', 'pomodoro', 'osym'].includes(saved)) {
+      if (saved && ['home', 'calendar', 'analytics', 'profile', 'exams', 'curriculum', 'pomodoro', 'osym'].includes(saved)) {
         return saved as any;
       }
     } catch {}
@@ -134,7 +118,7 @@ export default function App() {
     }
   };
 
-  const handleNavigateTab = (tab: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'ai' | 'pomodoro' | 'osym') => {
+  const handleNavigateTab = (tab: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym') => {
     if (tab !== activeTab) {
       sounds.playTabSwitch();
       setActiveTab(tab);
@@ -206,12 +190,6 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_BOOKS;
   });
 
-  // Feature 9: Flashcards (Hap Bilgi / Formül Kartları) State
-  const [flashcards, setFlashcards] = useState<FlashcardItem[]>(() => {
-    const saved = localStorage.getItem('netmetrik_flashcards');
-    return saved ? JSON.parse(saved) : INITIAL_FLASHCARDS;
-  });
-
   // Topic Progress Map: topicKey -> TopicStatus
   const [topicProgress, setTopicProgress] = useState<Record<string, TopicStatus>>(() => {
     const pSaved = localStorage.getItem('netmetrik_student_profile');
@@ -221,14 +199,9 @@ export default function App() {
     return {};
   });
 
-  // Theme State (Apple System Presets - Cupertino Blue as primary)
-  const [currentTheme, setCurrentTheme] = useState<ThemeId>(() => {
-    const saved = localStorage.getItem('netmetrik_theme') as ThemeId;
-    if (!saved || saved === 'theme-lime' || saved === 'theme-cyan') {
-      return 'theme-blue';
-    }
-    return saved;
-  });
+  // Theme State (Permanently Locked to Obsidian Titanium & Liquid Glass)
+  const currentTheme: ThemeId = 'theme-obsidian';
+
   // View Mode: 'desktop' (Widescreen PC Browser Dashboard) vs 'mobile' (Native Phone Shell)
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>(() => {
     const saved = localStorage.getItem('netmetrik_view_mode') as 'desktop' | 'mobile';
@@ -243,7 +216,6 @@ export default function App() {
   }, [currentTheme, viewMode]);
 
   // Modals State
-  const [showThemePicker, setShowThemePicker] = useState(false);
   const [showQuickModal, setShowQuickModal] = useState(false);
   const [quickActionType, setQuickActionType] = useState<'question' | 'study_time' | 'task' | 'exam'>('question');
   const [activeAnalizModal, setActiveAnalizModal] = useState<'trend' | 'exam_time' | 'question_count' | 'study_time' | null>(null);
@@ -283,10 +255,6 @@ export default function App() {
     localStorage.setItem('netmetrik_topic_progress', JSON.stringify(topicProgress));
   }, [topicProgress]);
 
-  useEffect(() => {
-    localStorage.setItem('netmetrik_flashcards', JSON.stringify(flashcards));
-  }, [flashcards]);
-
   // Cloud Sync & Guest Mode State
   const [cloudUser, setCloudUser] = useState<CloudUser | null>(null);
   const [lastSyncedTime, setLastSyncedTime] = useState<string | null>(null);
@@ -312,7 +280,6 @@ export default function App() {
             if (Array.isArray(cloudData.questionVault)) setQuestionVault(cloudData.questionVault);
             if (Array.isArray(cloudData.books)) setBooks(cloudData.books);
             if (cloudData.topicProgress) setTopicProgress(cloudData.topicProgress);
-            if (Array.isArray(cloudData.flashcards)) setFlashcards(cloudData.flashcards);
             setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
           }
         } catch (err) {
@@ -341,7 +308,6 @@ export default function App() {
             if (Array.isArray(cloudData.questionVault)) setQuestionVault(cloudData.questionVault);
             if (Array.isArray(cloudData.books)) setBooks(cloudData.books);
             if (cloudData.topicProgress) setTopicProgress(cloudData.topicProgress);
-            if (Array.isArray(cloudData.flashcards)) setFlashcards(cloudData.flashcards);
             setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
           }
         } catch (err) {
@@ -366,8 +332,7 @@ export default function App() {
         questionLogs,
         questionVault,
         books,
-        topicProgress,
-        flashcards
+        topicProgress
       }).then((ok) => {
         if (ok) {
           setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
@@ -376,7 +341,7 @@ export default function App() {
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [cloudUser, profile, exams, tasks, questionLogs, questionVault, books, topicProgress, flashcards]);
+  }, [cloudUser, profile, exams, tasks, questionLogs, questionVault, books, topicProgress]);
 
   const handleCloudLogin = async (email: string, pass: string) => {
     const user = await loginCloudUser(email, pass);
@@ -394,7 +359,6 @@ export default function App() {
       if (Array.isArray(cloudData.questionVault)) setQuestionVault(cloudData.questionVault);
       if (Array.isArray(cloudData.books)) setBooks(cloudData.books);
       if (cloudData.topicProgress) setTopicProgress(cloudData.topicProgress);
-      if (Array.isArray(cloudData.flashcards)) setFlashcards(cloudData.flashcards);
     } else {
       await pushPayloadToCloud({
         version: 1,
@@ -405,8 +369,7 @@ export default function App() {
         questionLogs,
         questionVault,
         books,
-        topicProgress,
-        flashcards
+        topicProgress
       });
     }
     setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
@@ -442,8 +405,7 @@ export default function App() {
       questionLogs,
       questionVault,
       books,
-      topicProgress,
-      flashcards
+      topicProgress
     });
     setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
   };
@@ -571,11 +533,11 @@ export default function App() {
     alert(`🎉 ${mins} dakikalık serbest çalışma oturumu başarıyla kaydedildi!`);
   };
 
-  // YKS Countdown Logic
-  const [countdown, setCountdown] = useState({ days: 236, hours: 14, mins: 28, secs: 40 });
+  // YKS Countdown Logic (TYT: 20 Haziran 2027, AYT: 21 Haziran 2027)
+  const [countdown, setCountdown] = useState({ days: 216, hours: 11, mins: 24, secs: 34 });
 
   useEffect(() => {
-    const yksDate = new Date('2027-06-19T10:15:00+03:00').getTime();
+    const yksDate = new Date('2027-06-20T10:15:00+03:00').getTime();
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const distance = yksDate - now;
@@ -822,50 +784,6 @@ export default function App() {
     );
   };
 
-  // Feature 9: Flashcards Handler
-  const handleToggleMasteredFlashcard = (id: string) => {
-    setFlashcards((prev) =>
-      prev.map((fc) => {
-        if (fc.id === id) {
-          const next = !fc.isMastered;
-          if (next) {
-            sounds.playSuccess();
-            confetti({ particleCount: 40, spread: 50 });
-          } else {
-            sounds.playClick();
-          }
-          return { ...fc, isMastered: next };
-        }
-        return fc;
-      })
-    );
-  };
-
-  // Feature 4: AI Koç Task Handler
-  const handleAddTaskFromAi = (suggestion: {
-    subjectCode: string;
-    subjectName: string;
-    topicName: string;
-    targetQuestions: number;
-    targetMinutes: number;
-  }) => {
-    const newTask: DailyTask = {
-      id: `task-ai-${Date.now()}`,
-      subjectCode: suggestion.subjectCode,
-      subjectName: suggestion.subjectName,
-      topicName: suggestion.topicName,
-      targetQuestions: suggestion.targetQuestions,
-      solvedQuestions: 0,
-      targetMinutes: suggestion.targetMinutes,
-      spentMinutes: 0,
-      isCompleted: false,
-      date: todayStr
-    };
-    setTasks((prev) => [newTask, ...prev]);
-    sounds.playSuccess();
-    confetti({ particleCount: 45, spread: 55 });
-  };
-
   // Feature 2: Data Backup & Restore (JSON Export/Import)
   const handleExportBackup = () => {
     const backupData = {
@@ -878,8 +796,7 @@ export default function App() {
       questionLogs,
       questionVault,
       books,
-      topicProgress,
-      flashcards
+      topicProgress
     };
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -905,7 +822,6 @@ export default function App() {
         if (Array.isArray(data.questionVault)) setQuestionVault(data.questionVault);
         if (Array.isArray(data.books)) setBooks(data.books);
         if (data.topicProgress) setTopicProgress(data.topicProgress);
-        if (Array.isArray(data.flashcards)) setFlashcards(data.flashcards);
         sounds.playSuccess();
         confetti({ particleCount: 90, spread: 65, origin: { y: 0.6 } });
         alert('Yedek başarıyla yüklendi! Tüm çalışma ve sınav kayıtlarınız geri getirildi.');
@@ -967,8 +883,6 @@ export default function App() {
           questionVault={questionVault}
           books={books}
           topicProgress={topicProgress}
-          flashcards={flashcards}
-          onAddTaskFromAi={handleAddTaskFromAi}
           onToggleTask={handleToggleTask}
           onActivateFreeze={handleActivateStreakFreeze}
           onOpenFeatureModal={(feat) => setActiveFeatureModal(feat)}
@@ -1071,7 +985,6 @@ export default function App() {
           exams={exams}
           questionLogs={questionLogs}
           topicProgress={topicProgress}
-          currentTheme={currentTheme}
           isMuted={isMuted}
           cloudUser={cloudUser}
           lastSyncedTime={lastSyncedTime}
@@ -1080,39 +993,12 @@ export default function App() {
           onCloudLogout={handleCloudLogout}
           onToggleMute={handleToggleMute}
           onActivateFreeze={handleActivateStreakFreeze}
-          onSelectTheme={(t) => {
-            setCurrentTheme(t);
-            sounds.playThemeSwitch();
-          }}
           onUpdateProfile={(updated) => setProfile(updated)}
           onExportBackup={handleExportBackup}
           onImportBackup={handleImportBackup}
-          onOpenFeatureModal={(feat) => setActiveFeatureModal(feat)}
           onResetAllData={handleResetAllData}
           viewMode={viewMode}
           onToggleViewMode={(mode) => setViewMode(mode)}
-          isDesktop={isDesktop}
-        />
-      )}
-
-      {activeTab === 'ai' && (
-        <AiTutorScreenView
-          profile={profile}
-          onAddTask={(code, name, topic, count, mins) => handleAddTask(code, name, topic, count, mins)}
-          onAddVaultItem={(qText, subName, topName, sol) => {
-            handleAddVaultItem({
-              id: 'vault-' + Date.now(),
-              subjectCode: 'ayt_mat',
-              subjectName: subName,
-              topicName: topName,
-              correctAnswer: 'C',
-              difficulty: 'Orta',
-              note: `${qText}\n\nÇözüm Özeti: ${sol}`,
-              reason: 'bilgi',
-              date: '2026-10-20',
-              isResolved: false
-            });
-          }}
           isDesktop={isDesktop}
         />
       )}
@@ -1173,14 +1059,6 @@ export default function App() {
                 >
                   <Home size={19} />
                   <span>Bugün (Ana Sayfa)</span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'ai' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('ai')}
-                >
-                  <Bot size={18} />
-                  <span>Akıllı Koç (AI)</span>
                 </button>
 
                 <button
@@ -1291,28 +1169,16 @@ export default function App() {
                 <span>📱 Mobil Görünüme Geç</span>
               </button>
 
-              {/* Tema & Ses Kontrolleri */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <button
-                  onClick={() => setShowThemePicker(true)}
-                  className="btn-secondary"
-                  style={{ padding: '8px 10px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                  title="Tema Değiştir"
-                >
-                  <Palette size={14} />
-                  <span>Tema</span>
-                </button>
-
-                <button
-                  onClick={handleToggleMute}
-                  className="btn-secondary"
-                  style={{ padding: '8px 10px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                  title={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
-                >
-                  {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                  <span>{isMuted ? 'Sessiz' : 'Ses'}</span>
-                </button>
-              </div>
+              {/* Ses Kontrolü */}
+              <button
+                onClick={handleToggleMute}
+                className="btn-secondary"
+                style={{ width: '100%', padding: '8px 10px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                title={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
+              >
+                {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                <span>{isMuted ? 'Sessiz Mod (Aç)' : 'Efekt Sesleri Açık'}</span>
+              </button>
 
               {/* Bulut Senkronizasyon Durumu */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
@@ -1354,107 +1220,6 @@ export default function App() {
             className="desktop-main-viewport"
             style={activeTab === 'pomodoro' ? { padding: 0, margin: 0, width: '100vw', height: '100vh', overflow: 'hidden' } : undefined}
           >
-            {/* Desktop Top Header (Emil Kowalski / Linear Glass Navigation Bar) */}
-            {activeTab !== 'pomodoro' && (
-              <header className="desktop-top-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-accent)' }} />
-                  <div>
-                    <h2 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', margin: 0, letterSpacing: -0.2 }}>
-                      {activeTab === 'home' && 'Bugün • Çalışma Özeti'}
-                      {activeTab === 'ai' && 'NetMetrik AI • YKS Çalışma Koçu'}
-                      {activeTab === 'calendar' && 'Haftalık Soru Çizelgesi & Çalışma Planı'}
-                      {activeTab === 'exams' && 'Denemeler & Karne • Net Analizleri'}
-                      {activeTab === 'curriculum' && 'Konu Takip Çizelgesi • TYT & AYT'}
-                      {activeTab === 'analytics' && 'Gelişmiş Analizler & Raporlar'}
-                      {activeTab === 'profile' && 'Öğrenci Profili & Bulut Hesabı'}
-                    </h2>
-                    <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                      YKS 2027 Hazırlığı • Canlı Takip
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {/* Streak Pill */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      padding: '5px 12px',
-                      borderRadius: 99,
-                      background: 'rgba(255, 159, 10, 0.12)',
-                      border: '1px solid rgba(255, 159, 10, 0.25)',
-                      color: '#FF9F0A',
-                      fontSize: 12,
-                      fontWeight: 600
-                    }}
-                    title="Aktif Çalışma Serisi"
-                  >
-                    <Flame size={14} color="#FF9F0A" />
-                    <span>{profile.currentStreak} Gün Seri</span>
-                  </div>
-
-                  {/* Theme Button */}
-                  <button
-                    onClick={() => setShowThemePicker(true)}
-                    className="btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: 12 }}
-                    title="Renk Temasını Değiştir"
-                  >
-                    <Palette size={13} color="var(--color-accent)" />
-                    <span>Tema</span>
-                  </button>
-
-                  {/* Sound Button */}
-                  <button
-                    onClick={handleToggleMute}
-                    className="btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: 12 }}
-                    title={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
-                  >
-                    {isMuted ? <VolumeX size={13} color="#FF453A" /> : <Volume2 size={13} color="#30D158" />}
-                    <span>{isMuted ? 'Sessiz' : 'Ses'}</span>
-                  </button>
-
-                  {/* Switch to Mobile Button */}
-                  <button
-                    onClick={() => setViewMode('mobile')}
-                    className="btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: 12 }}
-                    title="Mobil Telefon Görünümüne Geç"
-                  >
-                    <Smartphone size={13} />
-                    <span>Mobil Mod</span>
-                  </button>
-
-                  {/* Student Avatar */}
-                  <div
-                    onClick={() => handleNavigateTab('profile')}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: '50%',
-                      background: 'var(--color-surface-elevated)',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#FFFFFF',
-                      fontWeight: 600,
-                      fontSize: 12,
-                      cursor: 'pointer',
-                      marginLeft: 2
-                    }}
-                    title={`${profile.name} Profili`}
-                  >
-                    {profile.name ? profile.name.charAt(0).toUpperCase() : 'B'}
-                  </div>
-                </div>
-              </header>
-            )}
-
             {/* Desktop Content Body */}
             <div
               className="desktop-content-body"
@@ -1531,7 +1296,6 @@ export default function App() {
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, marginTop: 2, letterSpacing: -0.3 }}>
                   {activeTab === 'analytics' && 'Analiz & Rapor'}
                   {activeTab === 'home' && 'Bugün'}
-                  {activeTab === 'ai' && 'NetMetrik AI'}
                   {activeTab === 'calendar' && 'Haftalık Soru Çizelgesi'}
                   {activeTab === 'exams' && 'Denemeler & Karne'}
                   {activeTab === 'curriculum' && 'Konu Takip'}
@@ -1584,30 +1348,6 @@ export default function App() {
               >
                 <Timer size={13} />
                 <span>Odak</span>
-              </button>
-
-              {/* NetMetrik AI Mobile Quick Access Button */}
-              <button
-                onClick={() => handleNavigateTab('ai')}
-                style={{
-                  background: activeTab === 'ai' ? 'linear-gradient(135deg, #A855F7, #7C3AED)' : 'rgba(168, 85, 247, 0.16)',
-                  border: activeTab === 'ai' ? '1px solid #C084FC' : '1px solid rgba(168, 85, 247, 0.4)',
-                  color: activeTab === 'ai' ? '#FFF' : '#C084FC',
-                  borderRadius: 11,
-                  padding: '6px 11px',
-                  fontSize: 11,
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  cursor: 'pointer',
-                  boxShadow: activeTab === 'ai' ? '0 0 14px rgba(168, 85, 247, 0.55)' : 'none',
-                  transition: 'transform 140ms var(--ease-out)'
-                }}
-                title="NetMetrik AI YKS Koçu"
-              >
-                <Bot size={13} />
-                <span>AI</span>
               </button>
 
               {/* Switch to Desktop PC Mode Button */}
@@ -1794,75 +1534,6 @@ export default function App() {
       )}
 
       {/* ----------------------------------------------------------------------
-          Apple HIG System Theme Picker Modal
-      ---------------------------------------------------------------------- */}
-      {showThemePicker && (
-        <div className="modal-overlay" onClick={() => setShowThemePicker(false)}>
-          <div className="bottom-sheet" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '82vh' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div>
-                <h3 style={{ fontSize: 17, fontWeight: 700, margin: 0, color: 'var(--color-text)' }}>
-                  Arayüz Teması
-                </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: 13, color: 'var(--color-text-muted)' }}>
-                  Apple Human Interface Guidelines uyumlu 5 rafine renk seçeneği
-                </p>
-              </div>
-              <button
-                onClick={() => setShowThemePicker(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8, marginTop: 12 }}>
-              {THEME_PRESETS.map((t) => {
-                const isSelected = currentTheme === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => {
-                      setCurrentTheme(t.id);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '12px 16px',
-                      borderRadius: 14,
-                      background: isSelected ? 'rgba(255, 255, 255, 0.08)' : 'var(--color-surface)',
-                      border: isSelected ? `1.5px solid ${t.color}` : '1px solid rgba(255, 255, 255, 0.08)',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <span style={{ width: 14, height: 14, borderRadius: '50%', background: t.color, flexShrink: 0 }} />
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#FFFFFF' }}>{t.name}</div>
-                        <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>{t.desc}</div>
-                      </div>
-                    </div>
-                    {isSelected && <CheckCircle2 size={18} color={t.color} />}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              className="btn-primary"
-              style={{ marginTop: 18, width: '100%', padding: '14px' }}
-              onClick={() => setShowThemePicker(false)}
-            >
-              Tamamla
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ----------------------------------------------------------------------
           2x2 Analiz Action Modal
       ---------------------------------------------------------------------- */}
       {activeAnalizModal && (
@@ -1994,10 +1665,11 @@ export default function App() {
         />
       )}
 
-      {/* 2. Feature 7: Speed Meter (Hız Sayacı) Modal */}
-      {activeFeatureModal === 'speed' && (
-        <SpeedMeterModal
-          onSaveLog={handleAddQuestionLog}
+      {/* 2. ÖSYM 2026-YKS Puan ve Sıralama Hesaplama Modalı */}
+      {activeFeatureModal === 'rank' && (
+        <YksRankCalculatorModal
+          profile={profile}
+          latestExam={exams[0]}
           onClose={() => setActiveFeatureModal(null)}
         />
       )}
@@ -2012,37 +1684,7 @@ export default function App() {
         />
       )}
 
-      {/* 4. Feature 21: YKS Rank Simulator Modal */}
-      {activeFeatureModal === 'rank' && (
-        <RankSimulatorModal
-          profile={profile}
-          latestExam={exams[0]}
-          onClose={() => setActiveFeatureModal(null)}
-        />
-      )}
-
-      {/* 5. Feature 22: Benchmark Comparator (YÖK Atlas) Modal */}
-      {activeFeatureModal === 'benchmark' && (
-        <BenchmarkModal
-          exams={exams}
-          profile={profile}
-          onUpdateTarget={(bm) => {
-            setProfile((prev) => ({
-              ...prev,
-              targetUniversity: bm.university,
-              targetDepartment: bm.department,
-              targetTytNet: bm.tytTotal,
-              targetAytNet: bm.aytTotal,
-              fieldTrack: bm.track
-            }));
-            sounds.playSuccess();
-            confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
-          }}
-          onClose={() => setActiveFeatureModal(null)}
-        />
-      )}
-
-      {/* 6. Feature 26: Printable PDF Report Modal */}
+      {/* 4. Feature 26: Printable PDF Report Modal */}
       {activeFeatureModal === 'report' && (
         <PrintableReportModal
           profile={profile}
@@ -2053,7 +1695,7 @@ export default function App() {
         />
       )}
 
-      {/* 7. Feature 27: Screen Widget Simulator Modal */}
+      {/* 5. Feature 27: Screen Widget Simulator Modal */}
       {activeFeatureModal === 'widget' && (
         <WidgetSimulatorModal
           countdown={countdown}
@@ -2065,16 +1707,7 @@ export default function App() {
         />
       )}
 
-      {/* 8. Feature 9: Flashcards (Hap Bilgi / Formül Kartları) Modal */}
-      {activeFeatureModal === 'flashcards' && (
-        <FlashcardsModal
-          flashcards={flashcards}
-          onToggleMastered={handleToggleMasteredFlashcard}
-          onClose={() => setActiveFeatureModal(null)}
-        />
-      )}
-
-      {/* 9. First-Time User Onboarding & Cloud Registration Modal */}
+      {/* 6. First-Time User Onboarding & Cloud Registration Modal */}
       <OnboardingModal
         isOpen={showOnboardingModal}
         onClose={() => {
@@ -2795,12 +2428,9 @@ function AnalyticsScreenView({
           <div
             className="app-card"
             style={{
-              padding: '20px 22px',
+              padding: '22px 24px',
               maxWidth: 960,
-              margin: '0 auto',
-              borderRadius: 'var(--radius-card)',
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-border)'
+              margin: '0 auto'
             }}
           >
             {/* Top Bar: Title + Metric Switcher */}
@@ -2859,9 +2489,11 @@ function AnalyticsScreenView({
                   flexWrap: 'wrap',
                   gap: 12,
                   padding: '12px 14px',
-                  borderRadius: 12,
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: 14,
+                  background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.16)',
+                  borderTop: '1.8px solid rgba(255, 255, 255, 0.38)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.18)',
                   marginBottom: 14
                 }}
               >
@@ -3016,10 +2648,12 @@ function AnalyticsScreenView({
                   <div
                     style={{
                       marginTop: 12,
-                      padding: '10px 14px',
-                      borderRadius: 12,
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      padding: '12px 16px',
+                      borderRadius: 14,
+                      background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
+                      border: '1.5px solid rgba(255, 255, 255, 0.16)',
+                      borderTop: '1.8px solid rgba(255, 255, 255, 0.38)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.18)',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
@@ -3083,61 +2717,11 @@ function AnalyticsScreenView({
       </div>
 
       {/* --------------------------------------------------------------------
-          Section: GELİŞMİŞ SİMÜLASYON & RAPORLAR (FEATURES 21, 22, 26)
+          Section: GELİŞMİŞ RAPOR & ÇIKTI (FEATURE 26)
       -------------------------------------------------------------------- */}
       <div>
-        <div className="section-label">GELİŞMİŞ SİMÜLASYON & RAPORLAR</div>
+        <div className="section-label">GELİŞMİŞ RAPOR & ÇIKTI</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Feature 21: Rank Simulator */}
-          <div
-            onClick={() => onOpenFeatureModal('rank')}
-            className="app-card"
-            style={{
-              cursor: 'pointer',
-              border: '1px solid var(--color-accent-border)',
-              background: 'linear-gradient(135deg, var(--color-accent-dim) 0%, rgba(24, 25, 30, 1) 100%)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 12, background: 'var(--color-accent-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Target size={20} color="var(--color-accent)" />
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 800 }}>YKS Sıralama Simülatörü</div>
-                <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>TYT, AYT ve OBP ile 2024/2025 ÖSYM yığılma hesabı</div>
-              </div>
-            </div>
-            <ChevronRight size={18} color="var(--color-text-muted)" />
-          </div>
-
-          {/* Feature 22: Benchmark Comparator */}
-          <div
-            onClick={() => onOpenFeatureModal('benchmark')}
-            className="app-card"
-            style={{
-              cursor: 'pointer',
-              border: '1px solid rgba(0, 240, 255, 0.25)',
-              background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.05) 0%, rgba(24, 25, 30, 1) 100%)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0, 240, 255, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Award size={20} color="#00F0FF" />
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 800 }}>Hedef Bölüm Kıyaslayıcısı</div>
-                <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>YÖK Atlas Boğaziçi, ODTÜ, Hacettepe taban netleri</div>
-              </div>
-            </div>
-            <ChevronRight size={18} color="var(--color-text-muted)" />
-          </div>
-
           {/* Feature 26: Printable PDF Report */}
           <div
             onClick={() => onOpenFeatureModal('report')}
@@ -3185,24 +2769,28 @@ function AnalyticsScreenView({
               key={exam.id}
               onClick={() => onNavigate('exams')}
               style={{
-                background: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 18,
+                background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
+                border: '1.5px solid rgba(255, 255, 255, 0.16)',
+                borderTop: '1.8px solid rgba(255, 255, 255, 0.40)',
+                borderBottom: '1.5px solid rgba(255, 255, 255, 0.10)',
+                borderRadius: 16,
                 padding: '14px 16px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.18)'
               }}
+              className="clickable-card"
             >
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{exam.title}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF' }}>{exam.title}</div>
                 <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
                   {exam.publisher} • {exam.date}
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--color-accent)' }}>
+                <span style={{ fontSize: 16, fontWeight: 800, color: '#FFFFFF' }}>
                   {exam.totalNet.toFixed(2)} Net
                 </span>
                 <ChevronRight size={16} color="var(--color-text-muted)" />
@@ -3294,8 +2882,6 @@ function HomeScreenView({
   questionVault,
   books,
   topicProgress: _topicProgress,
-  flashcards,
-  onAddTaskFromAi,
   onToggleTask,
   onActivateFreeze,
   onOpenFeatureModal,
@@ -3312,14 +2898,6 @@ function HomeScreenView({
   questionVault: QuestionVaultItem[];
   books: BookTrackerItem[];
   topicProgress?: Record<string, TopicStatus>;
-  flashcards?: FlashcardItem[];
-  onAddTaskFromAi?: (suggestion: {
-    subjectCode: string;
-    subjectName: string;
-    topicName: string;
-    targetQuestions: number;
-    targetMinutes: number;
-  }) => void;
   onToggleTask: (id: string) => void;
   onActivateFreeze: () => void;
   onOpenFeatureModal: (feat: FeatureModalType) => void;
@@ -3338,20 +2916,17 @@ function HomeScreenView({
     <div
       className="app-card"
       style={{
-        background: 'var(--color-surface)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: 18,
         padding: '22px 24px',
         position: 'relative'
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
         <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 99, background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.08)', fontSize: 11, fontWeight: 600, color: 'var(--color-accent)', marginBottom: 12 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-accent)' }} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 99, background: 'linear-gradient(180deg, #2A2D3A 0%, #151722 50%, #0C0E14 100%)', border: '1.5px solid rgba(255, 255, 255, 0.22)', borderTop: '1.8px solid rgba(255, 255, 255, 0.55)', fontSize: 11, fontWeight: 700, color: '#FFFFFF', marginBottom: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 0 6px #FFFFFF' }} />
             <span>2026-2027 HAZIRLIK SEZONU</span>
           </div>
-          <h1 style={{ fontSize: isDesktop ? 24 : 20, fontWeight: 700, color: '#FFFFFF', margin: 0, letterSpacing: -0.3 }}>
+          <h1 style={{ fontSize: isDesktop ? 24 : 20, fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: -0.4 }}>
             Hoş geldin{profile.name ? `, ${profile.name}` : ''} 👋
           </h1>
           <p style={{ margin: '6px 0 0 0', fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>
@@ -3363,37 +2938,15 @@ function HomeScreenView({
               <span>Hedef: <em style={{ color: 'var(--color-text-dim)' }}>Henüz hedef bölüm seçilmedi</em></span>
             )}
           </p>
-          <div style={{ marginTop: 8 }}>
-            <button
-              onClick={() => onOpenFeatureModal('benchmark')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '5px 12px',
-                borderRadius: 99,
-                background: 'rgba(10, 132, 255, 0.12)',
-                border: '1px solid rgba(10, 132, 255, 0.3)',
-                color: '#0A84FF',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Target size={13} />
-              <span>Hedef Değiştir & Net Açığını Gör (YÖK Atlas) ➔</span>
-            </button>
-          </div>
         </div>
 
         {/* Quick status metrics group */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 99, background: 'rgba(255, 159, 10, 0.12)', border: '1px solid rgba(255, 159, 10, 0.25)', color: '#FF9F0A', fontSize: 12, fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 99, background: 'linear-gradient(180deg, #2A251D 0%, #1A1612 50%, #0E0C0A 100%)', border: '1.5px solid rgba(255, 159, 10, 0.35)', borderTop: '1.8px solid rgba(255, 159, 10, 0.65)', color: '#FF9F0A', fontSize: 12, fontWeight: 700, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)' }}>
             <Flame size={15} color="#FF9F0A" />
             <span>{profile.currentStreak} Gün Seri</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 99, background: 'rgba(48, 209, 88, 0.12)', border: '1px solid rgba(48, 209, 88, 0.25)', color: '#30D158', fontSize: 12, fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 99, background: 'linear-gradient(180deg, #1C2A20 0%, #111A13 50%, #0A0F0B 100%)', border: '1.5px solid rgba(48, 209, 88, 0.35)', borderTop: '1.8px solid rgba(48, 209, 88, 0.65)', color: '#30D158', fontSize: 12, fontWeight: 700, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)' }}>
             <Target size={15} color="#30D158" />
             <span>%{questionPct} Tamamlandı</span>
           </div>
@@ -3403,96 +2956,21 @@ function HomeScreenView({
   );
 
   const countdownCard = (
-    <div
-      className="app-card"
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: 18,
-        padding: '20px 22px',
-        position: 'relative'
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <Sparkles size={15} color="var(--color-accent)" />
-          </div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', letterSpacing: -0.2 }}>YKS 2027 Geri Sayım</div>
-            <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>TYT (20 Haziran 2027) & AYT (21 Haziran 2027)</div>
-          </div>
-        </div>
-        <span style={{ fontSize: 11.5, fontWeight: 600, padding: '4px 10px', borderRadius: 99, background: 'rgba(255, 255, 255, 0.08)', color: 'var(--color-accent)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-          {countdown.days} Gün Kaldı
-        </span>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, textAlign: 'center' }}>
-        {[
-          { val: countdown.days, label: 'GÜN' },
-          { val: String(countdown.hours).padStart(2, '0'), label: 'SAAT' },
-          { val: String(countdown.mins).padStart(2, '0'), label: 'DAKİKA' },
-          { val: String(countdown.secs).padStart(2, '0'), label: 'SANİYE' }
-        ].map((item, idx) => (
-          <div
-            key={idx}
-            style={{
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              padding: '12px 6px',
-              borderRadius: 14
-            }}
-          >
-            <div
-              className="tabular-nums"
-              style={{
-                fontSize: 25,
-                fontWeight: 700,
-                color: idx === 0 ? 'var(--color-accent)' : '#FFFFFF',
-                fontFamily: 'var(--font-mono)',
-                lineHeight: 1
-              }}
-            >
-              {item.val}
-            </div>
-            <div style={{ fontSize: 10, color: 'var(--color-text-muted)', fontWeight: 600, marginTop: 6, letterSpacing: 0.5 }}>
-              {item.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Progress Line */}
-      <div style={{ marginTop: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>
-          <span>Yıllık Hazırlık İlerlemesi</span>
-          <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>%64</span>
-        </div>
-        <div style={{ height: 5, background: 'rgba(255, 255, 255, 0.08)', borderRadius: 99, overflow: 'hidden' }}>
-          <div style={{ width: '64%', height: '100%', background: 'var(--color-accent)', borderRadius: 99 }} />
-        </div>
-      </div>
-
-      {/* Motivational Quote Strip */}
-      <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-text-muted)', fontSize: 11.5, fontStyle: 'italic' }}>
-        <Sparkles size={13} color="var(--color-accent)" style={{ flexShrink: 0 }} />
-        <span>"{MOTIVATIONAL_QUOTES[0] || 'Bugünün teri, yarının başarısıdır.'}"</span>
-      </div>
-    </div>
+    <YksCountdownCard
+      countdown={countdown}
+      progressPercent={64}
+      quote={MOTIVATIONAL_QUOTES[0] || 'Her gün çözdüğün fazladan 1 soru, sınav günü binlerce rakibinin önüne geçmeni sağlar.'}
+    />
   );
 
   const streakCard = (
     <div
       className="app-card"
       style={{
-        background: 'var(--color-surface)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '16px 18px',
-        borderRadius: 18
+        padding: '18px 20px'
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -3571,157 +3049,6 @@ function HomeScreenView({
     </div>
   );
 
-  const aiCoachCard = (
-    <div
-      className="app-card"
-      style={{
-        background: 'var(--color-surface)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: 18,
-        padding: '20px 22px'
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <Sparkles size={16} color="var(--color-accent)" />
-          </div>
-          <div>
-            <div style={{ fontSize: 14.5, fontWeight: 700, color: '#FFFFFF' }}>Akıllı Çalışma Koçu</div>
-            <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>Zayıf alanlarına ve hata defterine göre hedefler</div>
-          </div>
-        </div>
-        <button
-          onClick={() => onNavigate('ai')}
-          className="btn-secondary"
-          style={{
-            fontSize: 12,
-            padding: '6px 12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5
-          }}
-          title="Koç ile Sohbet Et"
-        >
-          <Bot size={14} color="var(--color-accent)" />
-          <span>Koça Danış</span>
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {[
-          {
-            id: 'ai-1',
-            subjectCode: 'ayt_fizik',
-            subjectName: 'AYT Fizik',
-            topicName: 'Vektörler ve Bağıl Hareket',
-            badge: 'Hata Tekrarı',
-            badgeColor: '#FF9F0A',
-            reason: 'Hata defterinde 2 yanlış soru birikti. 20 soruyla pekiştir.',
-            targetQuestions: 20,
-            targetMinutes: 35
-          },
-          {
-            id: 'ai-2',
-            subjectCode: 'tyt_mat',
-            subjectName: 'TYT Matematik',
-            topicName: 'Basit Eşitsizlikler',
-            badge: 'Net Artışı',
-            badgeColor: '#0A84FF',
-            reason: 'Müfredatta çalışılıyor durumunda. Sınavda garanti 1 net kazandırır.',
-            targetQuestions: 25,
-            targetMinutes: 40
-          },
-          {
-            id: 'ai-3',
-            subjectCode: 'tyt_turkce',
-            subjectName: 'TYT Türkçe',
-            topicName: 'Paragrafta Anlam',
-            badge: 'Tempo Antrenmanı',
-            badgeColor: '#5E5CE6',
-            reason: 'Soru başına 65 saniye ortalamayı korumak için 20 soru hız antrenmanı.',
-            targetQuestions: 20,
-            targetMinutes: 22
-          }
-        ].map((sug) => {
-          const alreadyAdded = tasks.some((t) => t.topicName === sug.topicName && t.date === '2026-10-20');
-          return (
-            <div
-              key={sug.id}
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-                borderRadius: 12,
-                padding: '12px 14px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 12
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                  <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 6, background: `${sug.badgeColor}20`, color: sug.badgeColor }}>
-                    {sug.badge}
-                  </span>
-                  <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>
-                    {sug.subjectName}
-                  </span>
-                </div>
-                <div style={{ fontSize: 13.5, fontWeight: 600, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sug.topicName}</div>
-                <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>{sug.reason}</div>
-                <div style={{ fontSize: 10.5, color: 'var(--color-accent)', fontWeight: 600, marginTop: 4 }}>
-                  Hedef: {sug.targetQuestions} Soru • ⏱️ {sug.targetMinutes} dk
-                </div>
-              </div>
-
-              <button
-                disabled={alreadyAdded}
-                onClick={() => {
-                  if (onAddTaskFromAi) {
-                    onAddTaskFromAi({
-                      subjectCode: sug.subjectCode,
-                      subjectName: sug.subjectName,
-                      topicName: sug.topicName,
-                      targetQuestions: sug.targetQuestions,
-                      targetMinutes: sug.targetMinutes
-                    });
-                  }
-                }}
-                style={{
-                  padding: '8px 13px',
-                  borderRadius: 11,
-                  background: alreadyAdded ? 'rgba(0, 229, 153, 0.15)' : 'rgba(212, 255, 0, 0.15)',
-                  border: alreadyAdded ? '1px solid #00E599' : '1px solid var(--color-accent)',
-                  color: alreadyAdded ? '#00E599' : 'var(--color-accent)',
-                  fontSize: 11.5,
-                  fontWeight: 800,
-                  cursor: alreadyAdded ? 'default' : 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 5
-                }}
-              >
-                {alreadyAdded ? (
-                  <>
-                    <Check size={14} />
-                    <span>Eklendi</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus size={14} />
-                    <span>Göreve Ekle</span>
-                  </>
-                )}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-
   const quickToolsCard = (
     <div>
       <div className="section-label">HIZLI ARAÇLAR & YARDIMCILAR</div>
@@ -3732,41 +3059,41 @@ function HomeScreenView({
           className="quick-tool-card"
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--color-accent-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <BookOpen size={18} color="var(--color-accent)" />
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BookOpen size={18} color="#FFFFFF" />
             </div>
             {pendingVaultCount > 0 ? (
-              <span style={{ fontSize: 10, padding: '3px 7px', borderRadius: 99, background: 'rgba(255, 80, 80, 0.18)', color: '#FF5050', fontWeight: 800, border: '1px solid rgba(255, 80, 80, 0.25)' }}>
+              <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 99, background: 'rgba(255, 80, 80, 0.18)', color: '#FF5050', fontWeight: 800, border: '1px solid rgba(255, 80, 80, 0.3)' }}>
                 {pendingVaultCount} Bekliyor
               </span>
             ) : (
-              <span style={{ fontSize: 10, padding: '3px 7px', borderRadius: 99, background: 'rgba(255, 255, 255, 0.05)', color: 'var(--color-text-dim)', fontWeight: 700 }}>
+              <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 99, background: 'rgba(255, 255, 255, 0.06)', color: 'var(--color-text-dim)', fontWeight: 700, border: '1px solid rgba(255, 255, 255, 0.08)' }}>
                 0 Bekleyen
               </span>
             )}
           </div>
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--color-text)' }}>Hata Defteri</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#FFFFFF' }}>Hata Defteri</div>
             <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Aralıklı tekrar algoritması</div>
           </div>
         </div>
 
-        {/* Tool 2: Speed Meter (Feature 7) */}
+        {/* Tool 2: YKS Puan & Sıralama (ÖSYM Probit Modeli) */}
         <div
-          onClick={() => onOpenFeatureModal('speed')}
+          onClick={() => onOpenFeatureModal('rank')}
           className="quick-tool-card"
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(10, 132, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={17} color="#0A84FF" />
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(0, 240, 255, 0.14)', border: '1px solid rgba(0, 240, 255, 0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Target size={17} color="var(--color-accent)" />
             </div>
-            <span style={{ fontSize: 10, padding: '3px 7px', borderRadius: 99, background: 'rgba(10, 132, 255, 0.12)', color: '#0A84FF', fontWeight: 600 }}>
-              Kronometre
+            <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 99, background: 'rgba(0, 240, 255, 0.14)', color: 'var(--color-accent)', fontWeight: 800, border: '1px solid rgba(0, 240, 255, 0.25)' }}>
+              ÖSYM 2026
             </span>
           </div>
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: '#FFFFFF' }}>Hız Sayacı</div>
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Soru tempo analizi</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#FFFFFF' }}>Puan & Sıralama</div>
+            <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>YKS Yığınsal Dağılım</div>
           </div>
         </div>
 
@@ -3776,15 +3103,15 @@ function HomeScreenView({
           className="quick-tool-card"
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(191, 90, 242, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(191, 90, 242, 0.14)', border: '1px solid rgba(191, 90, 242, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <BookOpen size={17} color="#BF5AF2" />
             </div>
-            <span style={{ fontSize: 10, padding: '3px 7px', borderRadius: 99, background: 'rgba(191, 90, 242, 0.12)', color: '#BF5AF2', fontWeight: 600 }}>
+            <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 99, background: 'rgba(191, 90, 242, 0.14)', color: '#BF5AF2', fontWeight: 700, border: '1px solid rgba(191, 90, 242, 0.25)' }}>
               %{bookCompletionPct} Bitti
             </span>
           </div>
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: '#FFFFFF' }}>Kaynak Kitaplar</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#FFFFFF' }}>Kaynak Kitaplar</div>
             <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{books.length} Test kitabı takipte</div>
           </div>
         </div>
@@ -3795,76 +3122,16 @@ function HomeScreenView({
           className="quick-tool-card"
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(99, 230, 226, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(99, 230, 226, 0.14)', border: '1px solid rgba(99, 230, 226, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Smartphone size={17} color="#63E6E2" />
             </div>
-            <span style={{ fontSize: 10, padding: '3px 7px', borderRadius: 99, background: 'rgba(99, 230, 226, 0.12)', color: '#63E6E2', fontWeight: 600 }}>
+            <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 99, background: 'rgba(99, 230, 226, 0.14)', color: '#63E6E2', fontWeight: 700, border: '1px solid rgba(99, 230, 226, 0.25)' }}>
               Önizleme
             </span>
           </div>
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: '#FFFFFF' }}>Ekran Widget'ı</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: '#FFFFFF' }}>Ekran Widget'ı</div>
             <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Kilit & ana ekran</div>
-          </div>
-        </div>
-
-        {/* Tool 5: Flashcards (Feature 9) */}
-        <div
-          onClick={() => onOpenFeatureModal('flashcards')}
-          className="quick-tool-card quick-tool-card-wide"
-          style={{
-            background: 'var(--color-surface)',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-            <div style={{ width: 34, height: 34, minWidth: 34, borderRadius: 10, background: 'rgba(94, 92, 230, 0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Brain size={18} color="#5E5CE6" />
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                Hap Bilgi & Formüller
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                Kritik formül ezber kartları
-              </div>
-            </div>
-          </div>
-          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 10.5, fontWeight: 600, padding: '3px 8px', borderRadius: 99, background: 'rgba(48, 209, 88, 0.14)', color: '#30D158', whiteSpace: 'nowrap' }}>
-              {flashcards ? flashcards.filter((f) => f.isMastered).length : 0}/{flashcards?.length || 6} Ezber
-            </span>
-            <ChevronRight size={14} color="var(--color-text-dim)" />
-          </div>
-        </div>
-
-        {/* Tool 6: YÖK Atlas Hedef & Net Açığı (Feature 22) */}
-        <div
-          onClick={() => onOpenFeatureModal('benchmark')}
-          className="quick-tool-card quick-tool-card-wide"
-          style={{
-            background: 'var(--color-surface)',
-            border: '1px solid rgba(10, 132, 255, 0.25)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-            <div style={{ width: 34, height: 34, minWidth: 34, borderRadius: 10, background: 'rgba(10, 132, 255, 0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Target size={18} color="#0A84FF" />
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                YÖK Atlas Hedef & Net Açığı
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {profile.targetUniversity} • {profile.targetDepartment}
-              </div>
-            </div>
-          </div>
-          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 10.5, fontWeight: 600, padding: '3px 8px', borderRadius: 99, background: 'rgba(10, 132, 255, 0.14)', color: '#0A84FF', whiteSpace: 'nowrap' }}>
-              Hedef Analizi ➔
-            </span>
-            <ChevronRight size={14} color="var(--color-text-dim)" />
           </div>
         </div>
       </div>
@@ -3873,40 +3140,40 @@ function HomeScreenView({
 
   const goalsCard = (
     <div className="app-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--color-accent-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Target size={16} color="var(--color-accent)" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(180deg, #2A2D3A 0%, #141620 50%, #0B0D13 100%)', border: '1.5px solid rgba(255, 255, 255, 0.22)', borderTop: '1.8px solid rgba(255, 255, 255, 0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)' }}>
+            <Target size={17} color="#FFFFFF" />
           </div>
           <div>
-            <div style={{ fontWeight: 900, fontSize: 15, color: '#FFFFFF' }}>Günün Çalışma Özeti</div>
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>Hedefe göre anlık durum</div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: '#FFFFFF', letterSpacing: -0.2 }}>Günün Çalışma Özeti</div>
+            <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>Hedefe göre anlık durum</div>
           </div>
         </div>
-        <span style={{ fontSize: 12, color: 'var(--color-accent)', fontWeight: 800, padding: '4px 10px', borderRadius: 99, background: 'var(--color-accent-dim)', border: '1px solid var(--color-accent-border)' }}>
+        <span style={{ fontSize: 12, color: '#FFFFFF', fontWeight: 800, padding: '5px 12px', borderRadius: 99, background: 'linear-gradient(180deg, #2A2D3A 0%, #151722 50%, #0C0E14 100%)', border: '1.5px solid rgba(255, 255, 255, 0.22)', borderTop: '1.8px solid rgba(255, 255, 255, 0.55)', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.4)' }}>
           %{questionPct} Tamamlandı
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-        <div style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)', padding: '14px 16px', borderRadius: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-text-muted)', fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
-            <Target size={14} color="var(--color-accent)" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        <div style={{ background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)', border: '1.5px solid rgba(255, 255, 255, 0.16)', borderTop: '1.8px solid rgba(255, 255, 255, 0.40)', borderBottom: '1.5px solid rgba(255, 255, 255, 0.10)', padding: '16px 18px', borderRadius: 16, boxShadow: '0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.20)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-text-muted)', fontSize: 12, marginBottom: 6, fontWeight: 600 }}>
+            <Target size={14} color="#FFFFFF" />
             <span>Çözülen Soru</span>
           </div>
-          <div className="tabular-nums" style={{ fontSize: 24, fontWeight: 700, color: '#FFFFFF', letterSpacing: -0.3 }}>
-            {todaySolvedQuestions} <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 400 }}>/ {profile.dailyQuestionGoal}</span>
+          <div className="tabular-nums" style={{ fontSize: 26, fontWeight: 800, color: '#FFFFFF', letterSpacing: -0.4 }}>
+            {todaySolvedQuestions} <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>/ {profile.dailyQuestionGoal}</span>
           </div>
         </div>
 
-        <div style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)', padding: '14px 16px', borderRadius: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-text-muted)', fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
-            <Clock size={14} color="var(--color-accent)" />
+        <div style={{ background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)', border: '1.5px solid rgba(255, 255, 255, 0.16)', borderTop: '1.8px solid rgba(255, 255, 255, 0.40)', borderBottom: '1.5px solid rgba(255, 255, 255, 0.10)', padding: '16px 18px', borderRadius: 16, boxShadow: '0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.20)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-text-muted)', fontSize: 12, marginBottom: 6, fontWeight: 600 }}>
+            <Clock size={14} color="#FFFFFF" />
             <span>Çalışma Süresi</span>
           </div>
-          <div className="tabular-nums" style={{ fontSize: 24, fontWeight: 700, color: '#FFFFFF', letterSpacing: -0.3 }}>
+          <div className="tabular-nums" style={{ fontSize: 26, fontWeight: 800, color: '#FFFFFF', letterSpacing: -0.4 }}>
             {Math.floor(todayStudyMinutes / 60)}s {todayStudyMinutes % 60}d{' '}
-            <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 400 }}>/ {Math.floor(profile.dailyStudyMinutesGoal / 60)}s</span>
+            <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>/ {Math.floor(profile.dailyStudyMinutesGoal / 60)}s</span>
           </div>
         </div>
       </div>
@@ -3924,14 +3191,14 @@ function HomeScreenView({
 
   const tasksCard = (
     <div className="app-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(212, 255, 0, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CalendarIcon size={16} color="var(--color-accent)" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(180deg, #2A2D3A 0%, #141620 50%, #0B0D13 100%)', border: '1.5px solid rgba(255, 255, 255, 0.22)', borderTop: '1.8px solid rgba(255, 255, 255, 0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)' }}>
+            <CalendarIcon size={17} color="#FFFFFF" />
           </div>
           <div>
-            <div style={{ fontWeight: 900, fontSize: 15, color: '#FFFFFF' }}>Bugünün Görevleri</div>
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>
+            <div style={{ fontWeight: 800, fontSize: 15, color: '#FFFFFF', letterSpacing: -0.2 }}>Bugünün Görevleri</div>
+            <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)' }}>
               {tasks.filter((t) => t.isCompleted).length}/{tasks.length} Görev Tamamlandı
             </div>
           </div>
@@ -3939,7 +3206,7 @@ function HomeScreenView({
         <button
           onClick={() => onNavigate('calendar')}
           className="btn-secondary"
-          style={{ padding: '6px 12px', fontSize: 11.5 }}
+          style={{ padding: '6px 14px', fontSize: 12 }}
         >
           <span>Tümünü Gör</span>
           <ChevronRight size={13} />
@@ -3958,15 +3225,19 @@ function HomeScreenView({
               display: 'flex',
               alignItems: 'center',
               gap: 12,
-              padding: '12px 14px',
+              padding: '13px 15px',
               borderRadius: 14,
-              background: 'rgba(255, 255, 255, 0.03)',
+              background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
               border: task.isCompleted
-                ? '1px solid rgba(48, 209, 88, 0.25)'
-                : '1px solid rgba(255, 255, 255, 0.06)',
+                ? '1.5px solid rgba(48, 209, 88, 0.35)'
+                : '1.5px solid rgba(255, 255, 255, 0.16)',
+              borderTop: task.isCompleted
+                ? '1.8px solid rgba(48, 209, 88, 0.65)'
+                : '1.8px solid rgba(255, 255, 255, 0.40)',
+              borderBottom: '1.5px solid rgba(255, 255, 255, 0.10)',
               cursor: 'pointer',
               transition: 'transform 120ms var(--ease-out), border-color 120ms ease',
-              boxShadow: 'var(--shadow-sm)'
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.18)'
             }}
             className="clickable-card"
           >
@@ -3982,11 +3253,12 @@ function HomeScreenView({
                 <span
                   style={{
                     fontSize: 10,
-                    fontWeight: 600,
-                    padding: '2px 7px',
-                    borderRadius: 6,
-                    background: task.isCompleted ? 'rgba(48, 209, 88, 0.12)' : 'rgba(255, 255, 255, 0.07)',
-                    color: task.isCompleted ? '#30D158' : 'var(--color-text-muted)'
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: 99,
+                    background: task.isCompleted ? 'rgba(48, 209, 88, 0.14)' : 'rgba(255, 255, 255, 0.08)',
+                    border: task.isCompleted ? '1px solid rgba(48, 209, 88, 0.3)' : '1px solid rgba(255, 255, 255, 0.14)',
+                    color: task.isCompleted ? '#30D158' : '#FFFFFF'
                   }}
                 >
                   {task.subjectName}
@@ -4006,7 +3278,7 @@ function HomeScreenView({
                 </span>
               </div>
               <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                Hedef: <strong style={{ color: 'var(--color-accent)' }}>{task.targetQuestions} soru</strong> • ⏱️ {task.targetMinutes} dakika
+                Hedef: <strong style={{ color: '#FFFFFF' }}>{task.targetQuestions} soru</strong> • ⏱️ {task.targetMinutes} dakika
               </div>
             </div>
           </div>
@@ -4019,9 +3291,8 @@ function HomeScreenView({
     return (
       <div className="desktop-home-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          {heroGreetingBanner}
           {countdownCard}
-          {aiCoachCard}
+          {heroGreetingBanner}
           {goalsCard}
           {tasksCard}
         </div>
@@ -4035,10 +3306,9 @@ function HomeScreenView({
 
   return (
     <div style={{ padding: '0 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {heroGreetingBanner}
       {countdownCard}
+      {heroGreetingBanner}
       {streakCard}
-      {aiCoachCard}
       {quickToolsCard}
       {goalsCard}
       {tasksCard}
@@ -4149,10 +3419,12 @@ function CalendarTasksView({
           display: 'grid',
           gridTemplateColumns: '1.2fr 1fr 1fr',
           gap: 6,
-          background: 'rgba(0, 0, 0, 0.35)',
-          padding: 4,
-          borderRadius: 14,
-          border: '1px solid rgba(255, 255, 255, 0.08)'
+          background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
+          padding: 5,
+          borderRadius: 16,
+          border: '1.5px solid rgba(255, 255, 255, 0.16)',
+          borderTop: '1.8px solid rgba(255, 255, 255, 0.38)',
+          boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.5)'
         }}
       >
         <button
@@ -4163,18 +3435,18 @@ function CalendarTasksView({
           }}
           style={{
             padding: '10px 8px',
-            borderRadius: 10,
+            borderRadius: 12,
             fontSize: 12.5,
             fontWeight: 800,
             cursor: 'pointer',
-            border: 'none',
-            background: calendarSubTab === 'schedule' ? 'var(--color-accent)' : 'transparent',
-            color: calendarSubTab === 'schedule' ? '#FFFFFF' : 'var(--color-text-dim)',
+            border: calendarSubTab === 'schedule' ? '1px solid #FFFFFF' : '1px solid transparent',
+            background: calendarSubTab === 'schedule' ? 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)' : 'transparent',
+            color: calendarSubTab === 'schedule' ? '#060709' : 'var(--color-text-muted)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            boxShadow: calendarSubTab === 'schedule' ? '0 4px 14px rgba(10, 132, 255, 0.35)' : 'none',
+            boxShadow: calendarSubTab === 'schedule' ? '0 4px 14px rgba(255, 255, 255, 0.25), inset 0 1px 0 #FFFFFF' : 'none',
             transition: 'all 0.15s ease'
           }}
         >
@@ -4190,18 +3462,18 @@ function CalendarTasksView({
           }}
           style={{
             padding: '10px 8px',
-            borderRadius: 10,
+            borderRadius: 12,
             fontSize: 12.5,
             fontWeight: 800,
             cursor: 'pointer',
-            border: 'none',
-            background: calendarSubTab === 'timer' ? 'var(--color-accent)' : 'transparent',
-            color: calendarSubTab === 'timer' ? '#FFFFFF' : 'var(--color-text-dim)',
+            border: calendarSubTab === 'timer' ? '1px solid #FFFFFF' : '1px solid transparent',
+            background: calendarSubTab === 'timer' ? 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)' : 'transparent',
+            color: calendarSubTab === 'timer' ? '#060709' : 'var(--color-text-muted)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            boxShadow: calendarSubTab === 'timer' ? '0 4px 14px rgba(10, 132, 255, 0.35)' : 'none',
+            boxShadow: calendarSubTab === 'timer' ? '0 4px 14px rgba(255, 255, 255, 0.25), inset 0 1px 0 #FFFFFF' : 'none',
             transition: 'all 0.15s ease'
           }}
         >
@@ -4217,18 +3489,18 @@ function CalendarTasksView({
           }}
           style={{
             padding: '10px 8px',
-            borderRadius: 10,
+            borderRadius: 12,
             fontSize: 12.5,
             fontWeight: 800,
             cursor: 'pointer',
-            border: 'none',
-            background: calendarSubTab === 'tasks' ? 'var(--color-accent)' : 'transparent',
-            color: calendarSubTab === 'tasks' ? '#FFFFFF' : 'var(--color-text-dim)',
+            border: calendarSubTab === 'tasks' ? '1px solid #FFFFFF' : '1px solid transparent',
+            background: calendarSubTab === 'tasks' ? 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)' : 'transparent',
+            color: calendarSubTab === 'tasks' ? '#060709' : 'var(--color-text-muted)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            boxShadow: calendarSubTab === 'tasks' ? '0 4px 14px rgba(10, 132, 255, 0.35)' : 'none',
+            boxShadow: calendarSubTab === 'tasks' ? '0 4px 14px rgba(255, 255, 255, 0.25), inset 0 1px 0 #FFFFFF' : 'none',
             transition: 'all 0.15s ease'
           }}
         >
@@ -4258,38 +3530,41 @@ function CalendarTasksView({
             onOpenFlocus();
           }}
           style={{
-            background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.18) 0%, rgba(0, 240, 255, 0.18) 100%)',
-            border: '1px solid rgba(212, 255, 0, 0.45)',
-            borderRadius: 18,
-            padding: '14px 18px',
+            background: 'linear-gradient(180deg, #242733 0%, #161822 36%, #0F1015 75%, #08090C 100%)',
+            border: '1.5px solid rgba(255, 255, 255, 0.20)',
+            borderTop: '2.2px solid rgba(255, 255, 255, 0.55)',
+            borderBottom: '1.5px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 20,
+            padding: '16px 20px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             cursor: 'pointer',
-            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)',
+            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.7), inset 0 2px 2px rgba(255, 255, 255, 0.35)',
             transition: 'all 0.2s ease'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div
               style={{
-                width: 42,
-                height: 42,
+                width: 44,
+                height: 44,
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, #D4FF00 0%, #00F0FF 100%)',
+                background: 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)',
                 color: '#080B10',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontWeight: 900
+                fontWeight: 900,
+                boxShadow: '0 4px 12px rgba(255, 255, 255, 0.25)'
               }}
             >
-              <Timer size={22} />
+              <Timer size={22} color="#080B10" />
             </div>
             <div>
               <div style={{ fontSize: 14.5, fontWeight: 800, color: '#FFF', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span>NetFocus Odaklanma Alanı</span>
-                <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 99, background: '#D4FF00', color: '#000', fontWeight: 900 }}>YENİ</span>
+                <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 99, background: 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)', color: '#000', fontWeight: 900 }}>YENİ</span>
               </div>
               <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
                 Ambiyans sesleri (yağmur, şömine, lo-fi), estetik saat & temalar
@@ -4297,15 +3572,10 @@ function CalendarTasksView({
             </div>
           </div>
           <button
+            className="btn-primary"
             style={{
               padding: '8px 16px',
-              borderRadius: 99,
-              background: '#D4FF00',
-              border: 'none',
-              color: '#080B10',
               fontSize: 12,
-              fontWeight: 800,
-              cursor: 'pointer',
               whiteSpace: 'nowrap'
             }}
           >
@@ -4344,12 +3614,8 @@ function CalendarTasksView({
       <div
         className="app-card"
         style={{
-          background: 'linear-gradient(180deg, rgba(20, 26, 38, 0.9) 0%, rgba(12, 16, 24, 0.96) 100%)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          borderRadius: 22,
           textAlign: 'center',
-          position: 'relative',
-          boxShadow: 'var(--shadow-card)'
+          position: 'relative'
         }}
       >
         {timerType === 'countdown' ? (
@@ -6320,7 +5586,6 @@ function ProfileScreenView({
   exams = [],
   questionLogs = [],
   topicProgress = {},
-  currentTheme = 'theme-blue',
   isMuted = false,
   cloudUser = null,
   lastSyncedTime = null,
@@ -6329,11 +5594,9 @@ function ProfileScreenView({
   onCloudLogout,
   onToggleMute,
   onActivateFreeze,
-  onSelectTheme,
   onUpdateProfile,
   onExportBackup,
   onImportBackup,
-  onOpenFeatureModal,
   onResetAllData,
   viewMode = 'desktop',
   onToggleViewMode,
@@ -6343,7 +5606,6 @@ function ProfileScreenView({
   exams?: Exam[];
   questionLogs?: QuestionLog[];
   topicProgress?: Record<string, TopicStatus>;
-  currentTheme?: ThemeId;
   isMuted?: boolean;
   cloudUser?: CloudUser | null;
   lastSyncedTime?: string | null;
@@ -6352,11 +5614,9 @@ function ProfileScreenView({
   onCloudLogout?: () => Promise<void>;
   onToggleMute?: () => void;
   onActivateFreeze?: () => void;
-  onSelectTheme?: (t: ThemeId) => void;
   onUpdateProfile: (p: StudentProfile) => void;
   onExportBackup?: () => void;
   onImportBackup?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onOpenFeatureModal?: (feat: FeatureModalType) => void;
   onResetAllData?: () => void;
   viewMode?: 'desktop' | 'mobile';
   onToggleViewMode?: (mode: 'desktop' | 'mobile') => void;
@@ -6906,71 +6166,6 @@ function ProfileScreenView({
             )}
           </div>
 
-          {/* TARGET DEPARTMENT & YOK ATLAS SHORTCUT CARD */}
-          <div
-            className="app-card"
-            style={{
-              background: 'linear-gradient(135deg, rgba(10, 132, 255, 0.08) 0%, rgba(28, 28, 30, 0.7) 100%)',
-              border: '1px solid rgba(10, 132, 255, 0.25)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Target size={18} color="var(--color-accent)" />
-                <span style={{ fontWeight: 800, fontSize: 14.5, color: '#FFFFFF' }}>YKS Hedefim & YÖK Atlas Uyumu</span>
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: 'rgba(10, 132, 255, 0.15)', color: '#0A84FF' }}>
-                {profile.fieldTrack.toUpperCase()}
-              </span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr', gap: 10 }}>
-              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginBottom: 2 }}>Hedef Program</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF' }}>{profile.targetDepartment || 'Tıp Fakültesi'}</div>
-                <div style={{ fontSize: 12, color: 'var(--color-accent)', marginTop: 2 }}>{profile.targetUniversity || 'Hacettepe Üniversitesi'}</div>
-              </div>
-
-              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginBottom: 2 }}>Hedef Netler</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#30D158' }}>
-                  TYT: {profile.targetTytNet} • AYT: {profile.targetAytNet}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                  Toplam Hedef: {(profile.targetTytNet + profile.targetAytNet).toFixed(1)} Net
-                </div>
-              </div>
-            </div>
-
-            {onOpenFeatureModal && (
-              <button
-                onClick={() => onOpenFeatureModal('benchmark')}
-                style={{
-                  width: '100%',
-                  padding: '11px 16px',
-                  borderRadius: 12,
-                  background: 'rgba(10, 132, 255, 0.15)',
-                  border: '1px solid rgba(10, 132, 255, 0.35)',
-                  color: '#0A84FF',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Target size={16} />
-                <span>🏛️ YÖK Atlas'tan Bölüm Seç & Net Açığını Gör ➔</span>
-              </button>
-            )}
-          </div>
-
           {/* CUMULATIVE STATS CARDS */}
           <div style={{ display: 'grid', gridTemplateColumns: isDesktop ? 'repeat(4, 1fr)' : '1fr 1fr', gap: 10 }}>
             <div className="app-card" style={{ padding: 14 }}>
@@ -7013,71 +6208,6 @@ function ProfileScreenView({
       {activeSubTab === 'settings' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           
-          {/* THEME PRESET SELECTION (Apple 5 Curated Themes) */}
-          <div className="app-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <Palette size={18} color="var(--color-accent)" />
-              <span style={{ fontWeight: 800, fontSize: 14.5, color: '#FFFFFF' }}>Görünüm & Renk Teması</span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
-              {THEME_PRESETS.map((t) => {
-                const isSelected = currentTheme === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => {
-                      if (onSelectTheme) onSelectTheme(t.id);
-                      confetti({ particleCount: 25, spread: 50, origin: { y: 0.8 } });
-                    }}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 6,
-                      padding: '10px 4px',
-                      borderRadius: 12,
-                      background: isSelected ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                      border: isSelected ? `2px solid ${t.color}` : '1px solid rgba(255, 255, 255, 0.06)',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                    title={t.name}
-                  >
-                    <div
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        backgroundColor: t.color,
-                        boxShadow: isSelected ? `0 0 10px ${t.color}` : 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 12,
-                        fontWeight: 900,
-                        color: '#000'
-                      }}
-                    >
-                      {isSelected ? '✓' : ''}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 10.5,
-                        fontWeight: isSelected ? 800 : 500,
-                        color: isSelected ? '#FFFFFF' : 'var(--color-text-muted)',
-                        textAlign: 'center',
-                        lineHeight: 1.1
-                      }}
-                    >
-                      {t.name.split(' ')[0]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* VIEW MODE TOGGLE (DESKTOP VS MOBILE) */}
           {onToggleViewMode && (
             <div className="app-card">
@@ -7455,7 +6585,7 @@ function ProfileScreenView({
                           value={cfgUrl}
                           onChange={(e) => setCfgUrl(e.target.value)}
                           required
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: '#fff', fontSize: 11 }}
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: 8, color: '#fff', fontSize: 11 }}
                         />
                       </div>
                       <div>
@@ -7465,7 +6595,7 @@ function ProfileScreenView({
                           value={cfgKey}
                           onChange={(e) => setCfgKey(e.target.value)}
                           required
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: '#fff', fontSize: 11 }}
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: 8, color: '#fff', fontSize: 11 }}
                         />
                       </div>
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -7947,9 +7077,11 @@ function QuestionVaultModal({
                 style={{
                   textAlign: 'center',
                   padding: '40px 20px',
-                  background: 'var(--color-surface)',
+                  background: 'linear-gradient(180deg, #1F222C 0%, #13151D 50%, #0C0D12 100%)',
                   borderRadius: 18,
-                  border: '1px solid var(--color-border)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.16)',
+                  borderTop: '1.8px solid rgba(255, 255, 255, 0.40)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.20)',
                   marginTop: 10
                 }}
               >
@@ -7980,10 +7112,12 @@ function QuestionVaultModal({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    background: 'var(--color-surface)',
+                    background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
                     borderRadius: 14,
-                    padding: '10px 14px',
-                    border: '1px solid var(--color-border)'
+                    padding: '12px 16px',
+                    border: '1.5px solid rgba(255, 255, 255, 0.16)',
+                    borderTop: '1.8px solid rgba(255, 255, 255, 0.40)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.18)'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -8350,7 +7484,7 @@ function QuestionVaultModal({
                       </button>
                     )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 8 }}>
                     {(['A', 'B', 'C', 'D', 'E'] as const).map((opt) => {
                       const isChosen = selectedOption === opt;
                       const isCorrectAnswer = currentQuestion.correctAnswer === opt;
@@ -8590,10 +7724,12 @@ function QuestionVaultModal({
                     <div
                       key={item.id}
                       style={{
-                        background: 'var(--color-surface)',
+                        background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
                         borderRadius: 14,
                         padding: 12,
-                        border: item.isResolved ? '1px solid rgba(48, 209, 88, 0.3)' : '1px solid var(--color-border)',
+                        border: item.isResolved ? '1.5px solid rgba(48, 209, 88, 0.4)' : '1.5px solid rgba(255, 255, 255, 0.16)',
+                        borderTop: item.isResolved ? '1.8px solid rgba(48, 209, 88, 0.7)' : '1.8px solid rgba(255, 255, 255, 0.40)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.18)',
                         display: 'flex',
                         gap: 12,
                         alignItems: 'center'
@@ -8962,7 +8098,7 @@ function QuestionVaultModal({
                   </button>
                 )}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: 8 }}>
                 {(['A', 'B', 'C', 'D', 'E'] as const).map((opt) => {
                   const isSelected = formCorrectAnswer === opt;
                   return (
@@ -9103,389 +8239,6 @@ function QuestionVaultModal({
                   boxShadow: '0 8px 32px rgba(0,0,0,0.6)'
                 }}
               />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------------------
-// Feature 7: Speed Meter Modal (Soru Çözüm Hızı & Tek Tuşla Tempo Hesaplayıcı)
-// ----------------------------------------------------------------------------
-function SpeedMeterModal({
-  onSaveLog,
-  onClose
-}: {
-  onSaveLog?: (subject: string, source: string, count: number, minutes: number) => void;
-  onClose: () => void;
-}) {
-  const [selectedSubject, setSelectedSubject] = useState('TYT Matematik');
-  const [solvedQuestions, setSolvedQuestions] = useState(20);
-  const [targetSecPerQ, setTargetSecPerQ] = useState(60);
-
-  const [isRunning, setIsRunning] = useState(false);
-  const [totalSeconds, setTotalSeconds] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-
-  // Suggested targets per course
-  const coursePresets: Record<string, number> = {
-    'TYT Matematik': 75,
-    'TYT Türkçe': 65,
-    'TYT Fen Bilimleri': 45,
-    'TYT Sosyal Bilimler': 40,
-    'AYT Matematik': 110,
-    'AYT Fizik': 90,
-    'AYT Kimya': 70,
-    'AYT Biyoloji': 60
-  };
-
-  const handleSelectSubject = (sub: string) => {
-    setSelectedSubject(sub);
-    if (coursePresets[sub]) {
-      setTargetSecPerQ(coursePresets[sub]);
-    }
-  };
-
-  useEffect(() => {
-    let interval: any;
-    if (isRunning && !isFinished) {
-      interval = setInterval(() => {
-        setTotalSeconds((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning, isFinished]);
-
-  const handleToggleRunning = () => {
-    sounds.playClick();
-    setIsRunning(!isRunning);
-  };
-
-  const handleFinishTest = () => {
-    if (totalSeconds < 5) {
-      alert('Hız hesaplayabilmek için test süresi en az 5 saniye olmalıdır.');
-      return;
-    }
-    sounds.playSuccess();
-    confetti({ particleCount: 70, spread: 70 });
-    setIsRunning(false);
-    setIsFinished(true);
-  };
-
-  const handleReset = () => {
-    sounds.playClick();
-    setIsRunning(false);
-    setIsFinished(false);
-    setTotalSeconds(0);
-    setIsSaved(false);
-  };
-
-  // Calculations
-  const validQuestions = Math.max(1, solvedQuestions);
-  const averageSecondsPerQuestion = Math.round(totalSeconds / validQuestions);
-  const avgMins = Math.floor(averageSecondsPerQuestion / 60);
-  const avgSecsRemainder = averageSecondsPerQuestion % 60;
-
-  const totalMinutesDisplay = Math.floor(totalSeconds / 60);
-  const totalSecondsRemainder = totalSeconds % 60;
-
-  const isFast = averageSecondsPerQuestion <= targetSecPerQ;
-  const speedDiff = targetSecPerQ - averageSecondsPerQuestion;
-
-  const handleSaveToDailyLog = () => {
-    if (!onSaveLog) return;
-    const durationMinutes = Math.max(1, Math.round(totalSeconds / 60));
-    onSaveLog(selectedSubject, 'Hız Sayacı Testi', validQuestions, durationMinutes);
-    setIsSaved(true);
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="bottom-sheet" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '88vh' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--color-text)' }}>
-              ⚡ Soru Çözüm Hızı & Tempo Sayacı
-            </h3>
-            <p style={{ margin: '4px 0 0 0', fontSize: 12, color: 'var(--color-text-muted)' }}>
-              Testi bir kez başlat, bitirince durdur ve soru başına düşen süreni gör
-            </p>
-          </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-            <X size={22} />
-          </button>
-        </div>
-
-        {!isFinished ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {/* Settings Card: Active before starting or while running */}
-            <div style={{ background: '#1F2027', padding: 14, borderRadius: 14, border: '1px solid var(--color-border)' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10, marginBottom: 10 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 4 }}>Ders</label>
-                  <select
-                    disabled={isRunning}
-                    value={selectedSubject}
-                    onChange={(e) => handleSelectSubject(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: '#121316', border: '1px solid var(--color-border)', color: '#fff', fontSize: 12 }}
-                  >
-                    {YKS_SUBJECTS.map((s) => (
-                      <option key={s.code} value={s.name}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 4 }}>Hedef Tempo (sn/soru)</label>
-                  <input
-                    disabled={isRunning}
-                    type="number"
-                    min="10"
-                    max="300"
-                    value={targetSecPerQ}
-                    onChange={(e) => setTargetSecPerQ(Number(e.target.value))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, background: '#121316', border: '1px solid var(--color-border)', color: '#fff', fontSize: 12 }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <label style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Çözülecek / Çözülen Soru Sayısı</label>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#00F0FF' }}>{solvedQuestions} Soru</span>
-                </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {[10, 15, 20, 30, 40].map((count) => (
-                    <button
-                      key={count}
-                      type="button"
-                      disabled={isRunning}
-                      onClick={() => setSolvedQuestions(count)}
-                      style={{
-                        flex: 1,
-                        padding: '6px 0',
-                        borderRadius: 8,
-                        background: solvedQuestions === count ? 'rgba(0, 240, 255, 0.2)' : '#121316',
-                        border: solvedQuestions === count ? '1.5px solid #00F0FF' : '1px solid var(--color-border)',
-                        color: solvedQuestions === count ? '#00F0FF' : 'var(--color-text-muted)',
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: isRunning ? 'default' : 'pointer'
-                      }}
-                    >
-                      {count}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Big Stopwatch Display */}
-            <div
-              style={{
-                textAlign: 'center',
-                padding: '24px 0',
-                background: 'linear-gradient(145deg, #18191E 0%, #121316 100%)',
-                borderRadius: 20,
-                border: isRunning ? '1.5px solid #00F0FF' : '1px solid var(--color-border)',
-                boxShadow: isRunning ? '0 0 24px rgba(0, 240, 255, 0.15)' : 'none',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              <div style={{ fontSize: 12, color: isRunning ? '#00F0FF' : 'var(--color-text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>
-                {isRunning ? '⚡ TEST SÜRESİ AKIYOR' : totalSeconds > 0 ? '⏸️ DURAKLATILDI' : 'TEST BAŞLAMAYA HAZIR'}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 56,
-                  fontWeight: 900,
-                  fontFamily: 'var(--font-mono)',
-                  letterSpacing: '-0.02em',
-                  color: '#FFFFFF',
-                  margin: '8px 0'
-                }}
-              >
-                {String(totalMinutesDisplay).padStart(2, '0')}:{String(totalSecondsRemainder).padStart(2, '0')}
-              </div>
-
-              <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
-                {totalSeconds > 0 ? (
-                  <span>
-                    Şu anki Canlı Ortalama: <strong style={{ color: isFast ? 'var(--color-accent)' : '#FFB800' }}>
-                      ~{averageSecondsPerQuestion} saniye / soru
-                    </strong>
-                  </span>
-                ) : (
-                  <span>{solvedQuestions} soru için testi başlatın</span>
-                )}
-              </div>
-            </div>
-
-            {/* Action Buttons: Start / Pause / Finish */}
-            <div style={{ display: 'flex', gap: 10 }}>
-              {!isRunning && totalSeconds === 0 ? (
-                <button
-                  className="btn-primary"
-                  onClick={handleToggleRunning}
-                  style={{ flex: 1, padding: '14px', backgroundColor: '#00F0FF', color: '#000', fontSize: 15 }}
-                >
-                  <Play size={18} />
-                  <span>Testi Başlat</span>
-                </button>
-              ) : (
-                <>
-                  <button
-                    className="btn-secondary"
-                    onClick={handleToggleRunning}
-                    style={{ flex: 1, padding: '14px', fontSize: 14, fontWeight: 700 }}
-                  >
-                    {isRunning ? <Pause size={18} /> : <Play size={18} />}
-                    <span>{isRunning ? 'Duraklat' : 'Devam Et'}</span>
-                  </button>
-
-                  <button
-                    className="btn-primary"
-                    onClick={handleFinishTest}
-                    style={{ flex: 1.3, padding: '14px', backgroundColor: 'var(--color-accent)', color: '#000', fontSize: 14 }}
-                  >
-                    <Check size={18} />
-                    <span>Testi Bitir & Hesapla</span>
-                  </button>
-                </>
-              )}
-
-              {totalSeconds > 0 && (
-                <button className="btn-secondary" onClick={handleReset} style={{ padding: '12px 14px' }} title="Sıfırla">
-                  <RotateCcw size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-        ) : (
-          /* Finished Test Speed Calculation & Evaluation */
-          <div style={{ textAlign: 'center', padding: '10px 0' }}>
-            <div style={{ fontSize: 36, marginBottom: 6 }}>⏱️</div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>Soru Çözüm Hızı Karnesi</div>
-            <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
-              {selectedSubject} • {validQuestions} Soru
-            </div>
-
-            {/* Giant Metric: Seconds Per Question */}
-            <div
-              style={{
-                background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.1) 0%, rgba(24, 25, 30, 1) 100%)',
-                border: '1.5px solid var(--color-accent)',
-                borderRadius: 18,
-                padding: '18px 14px',
-                margin: '16px 0',
-                textAlign: 'center'
-              }}
-            >
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 700 }}>
-                ORTALAMA SORU BAŞINA SÜRE
-              </div>
-              <div
-                style={{
-                  fontSize: 44,
-                  fontWeight: 900,
-                  color: isFast ? 'var(--color-accent)' : '#FFB800',
-                  margin: '6px 0',
-                  fontFamily: 'var(--font-mono)'
-                }}
-              >
-                {avgMins > 0 ? `${avgMins} dk ${avgSecsRemainder} sn` : `${averageSecondsPerQuestion} Saniye`}
-              </div>
-              <div style={{ fontSize: 12, color: '#FFFFFF', fontWeight: 600 }}>
-                {isFast ? (
-                  <span style={{ color: 'var(--color-accent)' }}>
-                    ⚡ Harika! Hedefinden soru başına {Math.abs(speedDiff)} saniye daha hızlısın.
-                  </span>
-                ) : (
-                  <span style={{ color: '#FFB800' }}>
-                    ⏳ Hedefinden soru başına {Math.abs(speedDiff)} saniye daha yavaşsın.
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Test Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-              <div style={{ background: '#1F2027', padding: 12, borderRadius: 14, textAlign: 'left' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Toplam Harcanan Süre</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#38BDF8', marginTop: 4 }}>
-                  {totalMinutesDisplay}d {totalSecondsRemainder}s
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--color-text-dim)', marginTop: 2 }}>
-                  Net kronometre süresi
-                </div>
-              </div>
-
-              <div style={{ background: '#1F2027', padding: 12, borderRadius: 14, textAlign: 'left' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Çözülen Soru</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                  <input
-                    type="number"
-                    min="1"
-                    max="200"
-                    value={solvedQuestions}
-                    onChange={(e) => setSolvedQuestions(Number(e.target.value))}
-                    style={{
-                      width: 65,
-                      padding: '4px 6px',
-                      borderRadius: 6,
-                      background: '#121316',
-                      border: '1px solid var(--color-border)',
-                      color: '#fff',
-                      fontSize: 16,
-                      fontWeight: 800
-                    }}
-                  />
-                  <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>Soru</span>
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--color-text-dim)', marginTop: 2 }}>
-                  Gerekirse sayıyı düzelt
-                </div>
-              </div>
-            </div>
-
-            {/* Projection Note */}
-            <div style={{ background: '#18191E', padding: 12, borderRadius: 12, fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 16, textAlign: 'left' }}>
-              💡 <strong style={{ color: '#fff' }}>Sınav Projeksiyonu: </strong>
-              Bu tempoyu korursan, 40 soruluk bir {selectedSubject} bölümünü yaklaşık{' '}
-              <strong style={{ color: 'var(--color-accent)' }}>
-                {Math.round((averageSecondsPerQuestion * 40) / 60)} dakikada
-              </strong>{' '}
-              tamamlayacaksın!
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {onSaveLog && (
-                <button
-                  className="btn-primary"
-                  onClick={handleSaveToDailyLog}
-                  disabled={isSaved}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: isSaved ? '#16A34A' : '#00F0FF',
-                    color: '#000',
-                    fontSize: 13
-                  }}
-                >
-                  <Check size={16} />
-                  <span>{isSaved ? 'Günlüğe Kaydedildi ✓' : 'Bu Testi Günlük Soru Sayacıma Ekle'}</span>
-                </button>
-              )}
-
-              <button className="btn-secondary" onClick={handleReset} style={{ width: '100%', padding: '12px' }}>
-                <RotateCcw size={15} />
-                <span>Yeni Bir Hız Testi Başlat</span>
-              </button>
             </div>
           </div>
         )}
@@ -9723,857 +8476,6 @@ function BookTrackerModal({
   );
 }
 
-// ----------------------------------------------------------------------------
-// Feature 21: Rank Simulator Modal (YKS Sıralama Simülatörü)
-// ----------------------------------------------------------------------------
-function RankSimulatorModal({
-  profile,
-  latestExam,
-  onClose
-}: {
-  profile: StudentProfile;
-  latestExam?: Exam;
-  onClose: () => void;
-}) {
-  const [track, setTrack] = useState<'sayisal' | 'esit_agirlik' | 'sozel' | 'dil'>(profile.fieldTrack);
-  const [tytNet, setTytNet] = useState(latestExam ? latestExam.totalNet : 91.5);
-  const [aytNet, setAytNet] = useState(64.75);
-  const [obp, setObp] = useState(profile.obp);
-
-  // ÖSYM Standard formula simulation for Yerleştirme Puanı & Rank projection
-  const tytRaw = 100 + tytNet * 3.3;
-  const aytRaw = aytNet * 3.75;
-  const placementScore = tytRaw * 0.4 + aytRaw * 0.6 + obp * 0.6;
-
-  // 2024 & 2025 statistical curve interpolation
-  let estimatedRank2024 = 15000;
-  let range2025Min = 13500;
-  let range2025Max = 17000;
-
-  if (placementScore >= 520) {
-    estimatedRank2024 = Math.round(50 + (550 - placementScore) * 15);
-    range2025Min = Math.round(estimatedRank2024 * 0.85);
-    range2025Max = Math.round(estimatedRank2024 * 1.15);
-  } else if (placementScore >= 480) {
-    estimatedRank2024 = Math.round(1500 + (520 - placementScore) * 120);
-    range2025Min = Math.round(estimatedRank2024 * 0.9);
-    range2025Max = Math.round(estimatedRank2024 * 1.15);
-  } else if (placementScore >= 440) {
-    estimatedRank2024 = Math.round(7000 + (480 - placementScore) * 280);
-    range2025Min = Math.round(estimatedRank2024 * 0.92);
-    range2025Max = Math.round(estimatedRank2024 * 1.12);
-  } else if (placementScore >= 380) {
-    estimatedRank2024 = Math.round(22000 + (440 - placementScore) * 650);
-    range2025Min = Math.round(estimatedRank2024 * 0.9);
-    range2025Max = Math.round(estimatedRank2024 * 1.1);
-  } else {
-    estimatedRank2024 = Math.round(75000 + (380 - placementScore) * 1400);
-    range2025Min = Math.round(estimatedRank2024 * 0.88);
-    range2025Max = Math.round(estimatedRank2024 * 1.12);
-  }
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="bottom-sheet" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '88vh' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--color-text)' }}>
-              🎯 YKS Sıralama Simülatörü
-            </h3>
-            <p style={{ margin: '4px 0 0 0', fontSize: 12, color: 'var(--color-text-muted)' }}>
-              2024 ve 2025 ÖSYM yığılma katsayıları ile gerçekçi sıralama hesabı
-            </p>
-          </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-            <X size={22} />
-          </button>
-        </div>
-
-        {/* Alan Seçici */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 14 }}>
-          {[
-            { id: 'sayisal', label: 'Sayısal' },
-            { id: 'esit_agirlik', label: 'Eşit Ağ.' },
-            { id: 'sozel', label: 'Sözel' },
-            { id: 'dil', label: 'YDT Dil' }
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTrack(t.id as any)}
-              className={`pill-toggle-btn ${track === t.id ? 'active' : ''}`}
-              style={{ padding: '8px 4px', fontSize: 11 }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Result Highlight Card */}
-        <div
-          style={{
-            background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.1) 0%, rgba(24, 25, 30, 1) 100%)',
-            border: '1.5px solid var(--color-accent)',
-            borderRadius: 16,
-            padding: 16,
-            textAlign: 'center',
-            marginBottom: 16
-          }}
-        >
-          <div style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-            {track.toUpperCase()} TAHMİNİ YKS SIRALAMAN
-          </div>
-          <div style={{ fontSize: 34, fontWeight: 900, color: 'var(--color-accent)', margin: '6px 0', fontFamily: 'var(--font-mono)' }}>
-            ~{estimatedRank2024.toLocaleString('tr-TR')}.
-          </div>
-          <div style={{ fontSize: 12, color: '#FFFFFF', fontWeight: 700 }}>
-            2025 Yığılma Projeksiyon Aralığı: <span style={{ color: '#00F0FF' }}>{range2025Min.toLocaleString('tr-TR')} - {range2025Max.toLocaleString('tr-TR')}</span>
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginTop: 4 }}>
-            Yerleştirme Puanı (Y-{track.slice(0, 3).toUpperCase()}): {placementScore.toFixed(2)}
-          </div>
-        </div>
-
-        {/* Inputs & Sliders */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-              <span>TYT Toplam Neti:</span>
-              <strong style={{ color: 'var(--color-accent)' }}>{tytNet.toFixed(1)} Net</strong>
-            </div>
-            <ModernSlider
-              min={20}
-              max={120}
-              step={0.5}
-              value={tytNet}
-              accentColor="var(--color-accent)"
-              onChange={(e) => setTytNet(Number(e.target.value))}
-            />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-              <span>AYT Toplam Neti:</span>
-              <strong style={{ color: '#38BDF8' }}>{aytNet.toFixed(1)} Net</strong>
-            </div>
-            <ModernSlider
-              min={10}
-              max={80}
-              step={0.5}
-              value={aytNet}
-              accentColor="#38BDF8"
-              onChange={(e) => setAytNet(Number(e.target.value))}
-            />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-              <span>Diploma Notu (OBP):</span>
-              <strong style={{ color: '#FFB800' }}>{obp.toFixed(1)}</strong>
-            </div>
-            <ModernSlider
-              min={50}
-              max={100}
-              step={0.5}
-              value={obp}
-              accentColor="#FFB800"
-              onChange={(e) => setObp(Number(e.target.value))}
-            />
-          </div>
-        </div>
-
-        {/* Quick Insight Bar */}
-        <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: '#1F2027', fontSize: 12, color: 'var(--color-text-muted)' }}>
-          💡 <strong style={{ color: '#fff' }}>Hızlı Analiz: </strong>
-          AYT'de yapacağın fazladan <strong style={{ color: 'var(--color-accent)' }}>+3 net</strong>, bu bantta sıralamanı yaklaşık{' '}
-          <strong style={{ color: 'var(--color-accent)' }}>{Math.round(estimatedRank2024 * 0.18).toLocaleString('tr-TR')} kişi</strong> öne taşıyacaktır!
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ----------------------------------------------------------------------------
-// Feature 22: Benchmark Comparator (YÖK Atlas Hedef Kıyaslama)
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// Feature 22: Benchmark Comparator (YÖK Atlas Hedef Seçici & Net Açığı Analizi)
-// ----------------------------------------------------------------------------
-function BenchmarkModal({
-  exams,
-  profile,
-  onUpdateTarget,
-  onClose
-}: {
-  exams: Exam[];
-  profile: StudentProfile;
-  onUpdateTarget: (bm: DepartmentBenchmark) => void;
-  onClose: () => void;
-}) {
-  // Combine custom benchmarks and 2025 dataset
-  const allDepartments = useMemo(() => {
-    const combined: DepartmentBenchmark[] = [...YOK_ATLAS_BENCHMARKS];
-    const seen = new Set(combined.map((b) => `${b.university.toLowerCase()}-${b.department.toLowerCase()}`));
-    for (const d of YOK_ATLAS_DATASET_2025) {
-      const key = `${d.university.toLowerCase()}-${d.department.toLowerCase()}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        combined.push(d);
-      }
-    }
-    return combined;
-  }, []);
-
-  // Find initial department based on profile target, or first item
-  const initialDept = useMemo(() => {
-    const targetUni = (profile.targetUniversity || '').toLowerCase().trim();
-    const targetDept = (profile.targetDepartment || '').toLowerCase().trim();
-    const found = allDepartments.find(
-      (b) =>
-        (targetUni && b.university.toLowerCase().includes(targetUni)) ||
-        (targetDept && b.department.toLowerCase().includes(targetDept))
-    );
-    return found || allDepartments[0];
-  }, [allDepartments, profile]);
-
-  const [selectedDept, setSelectedDept] = useState<DepartmentBenchmark>(initialDept);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [trackFilter, setTrackFilter] = useState<'all' | 'sayisal' | 'esit_agirlik' | 'sozel' | 'dil'>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'Devlet' | 'Vakıf'>('all');
-  const [justUpdated, setJustUpdated] = useState(false);
-
-  // Filtered department list
-  const filteredDepartments = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
-    return allDepartments.filter((b) => {
-      if (trackFilter !== 'all' && b.track !== trackFilter) return false;
-      if (typeFilter !== 'all' && b.type !== typeFilter) return false;
-      if (!q) return true;
-      return (
-        b.university.toLowerCase().includes(q) ||
-        b.department.toLowerCase().includes(q) ||
-        b.city.toLowerCase().includes(q) ||
-        b.type.toLowerCase().includes(q)
-      );
-    });
-  }, [allDepartments, searchTerm, trackFilter, typeFilter]);
-
-  // Compute User's Current Performance from Real Exams
-  const latestTyt = exams.find((e) => e.type === 'TYT') || exams[0];
-  const userTytTurkce = latestTyt?.subjectResults?.find((s) => s.subjectCode.includes('turkce'))?.net ?? 34.0;
-  const userTytSosyal = latestTyt?.subjectResults?.find((s) => s.subjectCode.includes('sosyal'))?.net ?? 15.25;
-  const userTytMat = latestTyt?.subjectResults?.find((s) => s.subjectCode.includes('mat'))?.net ?? 27.5;
-  const userTytFen = latestTyt?.subjectResults?.filter((s) => ['tyt_fizik', 'tyt_kimya', 'tyt_biyo'].includes(s.subjectCode)).reduce((a, b) => a + b.net, 0) ?? 14.75;
-  const userTytTotal = Math.round((userTytTurkce + userTytSosyal + userTytMat + userTytFen) * 100) / 100;
-
-  // AYT Results according to track
-  const latestAyt = exams.find((e) => e.type === 'AYT');
-  const userAytMat = latestAyt?.subjectResults?.find((s) => s.subjectCode.includes('mat'))?.net ?? 31.25;
-  const userAytFizik = latestAyt?.subjectResults?.find((s) => s.subjectCode.includes('fizik'))?.net ?? 10.5;
-  const userAytKimya = latestAyt?.subjectResults?.find((s) => s.subjectCode.includes('kimya'))?.net ?? 10.75;
-  const userAytBiyo = latestAyt?.subjectResults?.find((s) => s.subjectCode.includes('biyo'))?.net ?? 12.25;
-  const userAytEdebiyat = 20.0;
-  const userAytTarih = 7.0;
-  const userAytCografya = 4.5;
-  const userAytDil = 72.0;
-
-  let userAytTotal = 0;
-  if (selectedDept.track === 'sayisal') {
-    userAytTotal = Math.round((userAytMat + userAytFizik + userAytKimya + userAytBiyo) * 100) / 100;
-  } else if (selectedDept.track === 'esit_agirlik') {
-    userAytTotal = Math.round((userAytMat + userAytEdebiyat + userAytTarih + userAytCografya) * 100) / 100;
-  } else if (selectedDept.track === 'sozel') {
-    userAytTotal = Math.round((userAytEdebiyat + userAytTarih + userAytCografya + 24.5) * 100) / 100;
-  } else {
-    userAytTotal = userAytDil;
-  }
-
-  const userTotal = Math.round((userTytTotal + userAytTotal) * 100) / 100;
-  const targetTotal = Math.round((selectedDept.tytTotal + selectedDept.aytTotal) * 100) / 100;
-
-  // Deficit Calculations (Net Açığı)
-  const totalDeficit = Math.round((userTotal - targetTotal) * 100) / 100;
-  const tytDeficit = Math.round((userTytTotal - selectedDept.tytTotal) * 100) / 100;
-  const aytDeficit = Math.round((userAytTotal - selectedDept.aytTotal) * 100) / 100;
-  const matchPct = Math.min(100, Math.round((userTotal / targetTotal) * 100));
-
-  // Build subject breakdown based on department track
-  const subjectBreakdown = useMemo(() => {
-    const list: { name: string; user: number; target: number; category: 'TYT' | 'AYT' }[] = [
-      { name: 'TYT Türkçe', user: userTytTurkce, target: selectedDept.tytTurkce, category: 'TYT' },
-      { name: 'TYT Sosyal Bilimler', user: userTytSosyal, target: selectedDept.tytSosyal, category: 'TYT' },
-      { name: 'TYT Temel Matematik', user: userTytMat, target: selectedDept.tytMat, category: 'TYT' },
-      { name: 'TYT Fen Bilimleri', user: userTytFen, target: selectedDept.tytFen, category: 'TYT' }
-    ];
-
-    if (selectedDept.track === 'sayisal') {
-      list.push(
-        { name: 'AYT Matematik', user: userAytMat, target: selectedDept.aytMat, category: 'AYT' },
-        { name: 'AYT Fizik', user: userAytFizik, target: selectedDept.aytFizik, category: 'AYT' },
-        { name: 'AYT Kimya', user: userAytKimya, target: selectedDept.aytKimya, category: 'AYT' },
-        { name: 'AYT Biyoloji', user: userAytBiyo, target: selectedDept.aytBiyo, category: 'AYT' }
-      );
-    } else if (selectedDept.track === 'esit_agirlik') {
-      list.push(
-        { name: 'AYT Matematik', user: userAytMat, target: selectedDept.aytMat, category: 'AYT' },
-        { name: 'AYT Türk Dili ve Edebiyatı', user: userAytEdebiyat, target: selectedDept.aytEdebiyat || 20.0, category: 'AYT' },
-        { name: 'AYT Tarih-1', user: userAytTarih, target: selectedDept.aytTarih || 7.0, category: 'AYT' },
-        { name: 'AYT Coğrafya-1', user: userAytCografya, target: selectedDept.aytCografya || 4.5, category: 'AYT' }
-      );
-    } else if (selectedDept.track === 'sozel') {
-      list.push(
-        { name: 'AYT Türk Dili ve Edebiyatı', user: userAytEdebiyat, target: selectedDept.aytEdebiyat || 21.0, category: 'AYT' },
-        { name: 'AYT Tarih-1', user: userAytTarih, target: selectedDept.aytTarih || 8.0, category: 'AYT' },
-        { name: 'AYT Coğrafya-1', user: userAytCografya, target: selectedDept.aytCografya || 5.0, category: 'AYT' }
-      );
-    } else {
-      list.push(
-        { name: 'YDT Yabancı Dil Testi', user: userAytDil, target: selectedDept.aytDil || 75.0, category: 'AYT' }
-      );
-    }
-
-    return list;
-  }, [selectedDept, userTytTurkce, userTytSosyal, userTytMat, userTytFen, userAytMat, userAytFizik, userAytKimya, userAytBiyo, userAytEdebiyat, userAytTarih, userAytCografya, userAytDil]);
-
-  // Identify top bottleneck subjects with largest net deficit
-  const topBottlenecks = useMemo(() => {
-    return [...subjectBreakdown]
-      .map((s) => ({ ...s, gap: Math.round((s.user - s.target) * 100) / 100 }))
-      .filter((s) => s.gap < 0)
-      .sort((a, b) => a.gap - b.gap)
-      .slice(0, 2);
-  }, [subjectBreakdown]);
-
-  const handleSelectAsTarget = () => {
-    onUpdateTarget(selectedDept);
-    setJustUpdated(true);
-    setTimeout(() => setJustUpdated(false), 2500);
-  };
-
-  const formatRank = (rank: number) => {
-    if (!rank || rank <= 0) return '-';
-    if (rank < 1000) return `${rank}.`;
-    return `${(rank / 1000).toFixed(1)}k`;
-  };
-
-  const getTrackBadge = (track: string) => {
-    switch (track) {
-      case 'sayisal': return { label: 'SAY', color: '#0A84FF', bg: 'rgba(10, 132, 255, 0.15)' };
-      case 'esit_agirlik': return { label: 'EA', color: '#FF9F0A', bg: 'rgba(255, 159, 10, 0.15)' };
-      case 'sozel': return { label: 'SÖZ', color: '#FF453A', bg: 'rgba(255, 69, 58, 0.15)' };
-      case 'dil': return { label: 'DİL', color: '#BF5AF2', bg: 'rgba(191, 90, 242, 0.15)' };
-      default: return { label: 'YKS', color: '#E5E5EA', bg: 'rgba(255, 255, 255, 0.1)' };
-    }
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div
-        className="bottom-sheet"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          maxHeight: '92vh',
-          maxWidth: 820,
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 0,
-          background: 'var(--color-bg)',
-          borderRadius: 22,
-          overflow: 'hidden'
-        }}
-      >
-        {/* Sticky Header */}
-        <div
-          style={{
-            padding: '18px 22px',
-            borderBottom: '1px solid var(--color-border)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'var(--color-surface)',
-            flexShrink: 0
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(10, 132, 255, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Target size={16} color="#0A84FF" />
-              </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#FFFFFF' }}>
-                YÖK Atlas Hedef Bölüm Seçici & Net Açığı
-              </h3>
-            </div>
-            <p style={{ margin: '4px 0 0 0', fontSize: 12, color: 'var(--color-text-muted)' }}>
-              yokatlas.yok.gov.tr resmi verileri • Taban puan, başarı sırası (k) ve son giren net analizi
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: 'none',
-              color: 'var(--color-text-muted)',
-              cursor: 'pointer',
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Modal Scrollable Body */}
-        <div style={{ padding: '20px 22px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          
-          {/* SEARCH & FILTERS BAR */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ position: 'relative' }}>
-              <Search size={16} color="var(--color-text-muted)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Üniversite, bölüm veya şehir ara... (Örn: Boğaziçi, Tıp, Bilgisayar, Hukuk, İzmir)"
-                style={{
-                  width: '100%',
-                  padding: '11px 38px 11px 40px',
-                  borderRadius: 12,
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
-                  color: '#FFFFFF',
-                  fontSize: 13,
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--color-text-muted)',
-                    cursor: 'pointer',
-                    padding: 2
-                  }}
-                >
-                  <X size={15} />
-                </button>
-              )}
-            </div>
-
-            {/* Track Filter Pills */}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: 'var(--color-text-dim)', marginRight: 2 }}>Puan Türü:</span>
-              {[
-                { id: 'all', label: 'Tümü' },
-                { id: 'sayisal', label: 'Sayısal (SAY)' },
-                { id: 'esit_agirlik', label: 'Eşit Ağırlık (EA)' },
-                { id: 'sozel', label: 'Sözel (SÖZ)' },
-                { id: 'dil', label: 'Dil (DİL)' }
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setTrackFilter(t.id as any)}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: 99,
-                    fontSize: 11.5,
-                    fontWeight: 600,
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: trackFilter === t.id ? 'var(--color-accent)' : 'rgba(255, 255, 255, 0.06)',
-                    color: trackFilter === t.id ? '#FFFFFF' : 'var(--color-text-muted)'
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-
-              <div style={{ width: 1, height: 16, background: 'var(--color-border)', margin: '0 4px' }} />
-
-              <span style={{ fontSize: 11, color: 'var(--color-text-dim)', marginRight: 2 }}>Tür:</span>
-              {[
-                { id: 'all', label: 'Tümü' },
-                { id: 'Devlet', label: 'Devlet' },
-                { id: 'Vakıf', label: 'Vakıf' }
-              ].map((ty) => (
-                <button
-                  key={ty.id}
-                  onClick={() => setTypeFilter(ty.id as any)}
-                  style={{
-                    padding: '4px 9px',
-                    borderRadius: 99,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: typeFilter === ty.id ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                    color: typeFilter === ty.id ? '#FFFFFF' : 'var(--color-text-muted)'
-                  }}
-                >
-                  {ty.label}
-                </button>
-              ))}
-
-              <span style={{ fontSize: 11, color: 'var(--color-text-dim)', marginLeft: 'auto' }}>
-                {filteredDepartments.length} Program
-              </span>
-            </div>
-          </div>
-
-          {/* ACTIVE TARGET INSPECTOR & NET DEFICIT CARD */}
-          <div
-            style={{
-              background: 'var(--color-surface)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: 18,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 16
-            }}
-          >
-            {/* Target Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  {(() => {
-                    const badge = getTrackBadge(selectedDept.track);
-                    return (
-                      <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: badge.bg, color: badge.color }}>
-                        {badge.label}
-                      </span>
-                    );
-                  })()}
-                  <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, background: 'rgba(255, 255, 255, 0.07)', color: 'var(--color-text-muted)' }}>
-                    {selectedDept.city} • {selectedDept.type}
-                  </span>
-                </div>
-                <h2 style={{ fontSize: 20, fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
-                  {selectedDept.department}
-                </h2>
-                <div style={{ fontSize: 13, color: 'var(--color-accent)', fontWeight: 600, marginTop: 2 }}>
-                  🏛️ {selectedDept.university}
-                </div>
-              </div>
-
-              {/* Action Button: Set as Profile Target */}
-              <div>
-                <button
-                  onClick={handleSelectAsTarget}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: 12,
-                    background: justUpdated ? '#30D158' : 'var(--color-accent)',
-                    border: 'none',
-                    color: '#FFFFFF',
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 4px 14px rgba(10, 132, 255, 0.3)'
-                  }}
-                >
-                  <Check size={15} />
-                  <span>{justUpdated ? 'Hedefin Olarak Kaydedildi!' : 'Bu Bölümü Hedefim Yap ✓'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Official YÖK Atlas Metrics Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
-              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginBottom: 2 }}>Taban Puan (2024)</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#FFFFFF' }}>{selectedDept.baseScore.toFixed(2)}</div>
-              </div>
-              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginBottom: 2 }}>Başarı Sırası (k)</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#FF9F0A' }}>{formatRank(selectedDept.lastRank)}</div>
-              </div>
-              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginBottom: 2 }}>Kontenjan</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#FFFFFF' }}>{selectedDept.quota} Kişi</div>
-              </div>
-              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                <div style={{ fontSize: 11, color: 'var(--color-text-dim)', marginBottom: 2 }}>Son Giren Neti</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#30D158' }}>{targetTotal.toFixed(2)} <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>Net</span></div>
-              </div>
-            </div>
-
-            {/* NET DEFICIT (NET AÇIĞI) SUMMARY CARD */}
-            <div
-              style={{
-                borderRadius: 16,
-                padding: '16px 18px',
-                background: totalDeficit >= 0
-                  ? 'linear-gradient(135deg, rgba(48, 209, 88, 0.12) 0%, rgba(28, 28, 30, 0.6) 100%)'
-                  : 'linear-gradient(135deg, rgba(255, 69, 58, 0.12) 0%, rgba(28, 28, 30, 0.6) 100%)',
-                border: totalDeficit >= 0
-                  ? '1px solid rgba(48, 209, 88, 0.3)'
-                  : '1px solid rgba(255, 69, 58, 0.3)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)' }}>
-                    Bölümü Kazanmak İçin Kalan Net Durumu
-                  </div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: totalDeficit >= 0 ? '#30D158' : '#FF453A', marginTop: 2 }}>
-                    {totalDeficit >= 0
-                      ? `+${totalDeficit.toFixed(2)} Net Hedefin Üzerindesin! ✨`
-                      : `${Math.abs(totalDeficit).toFixed(2)} Net Eksik ⚠️`}
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 12, color: 'var(--color-text-dim)' }}>Hedef Eşleşme Oranı</div>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: totalDeficit >= 0 ? '#30D158' : 'var(--color-accent)' }}>
-                    %{matchPct}
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div style={{ width: '100%', height: 9, background: 'rgba(0, 0, 0, 0.4)', borderRadius: 99, overflow: 'hidden', marginBottom: 10 }}>
-                <div
-                  style={{
-                    width: `${matchPct}%`,
-                    height: '100%',
-                    background: totalDeficit >= 0
-                      ? 'linear-gradient(90deg, #30D158, #63E6E2)'
-                      : 'linear-gradient(90deg, #0A84FF, #30D158)',
-                    borderRadius: 99,
-                    transition: 'width 0.4s ease'
-                  }}
-                />
-              </div>
-
-              {/* Detailed Sub Metrics */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, flexWrap: 'wrap', gap: 8 }}>
-                <div>
-                  <span style={{ color: 'var(--color-text-dim)' }}>Senin Toplamın: </span>
-                  <strong style={{ color: '#FFFFFF' }}>{userTotal.toFixed(2)} Net</strong>
-                  <span style={{ color: 'var(--color-text-dim)', fontSize: 11 }}> (TYT {userTytTotal.toFixed(2)} + AYT {userAytTotal.toFixed(2)})</span>
-                </div>
-                <div>
-                  <span style={{ color: 'var(--color-text-dim)' }}>Hedef Son Giren: </span>
-                  <strong style={{ color: '#FFFFFF' }}>{targetTotal.toFixed(2)} Net</strong>
-                  <span style={{ color: 'var(--color-text-dim)', fontSize: 11 }}> (TYT {selectedDept.tytTotal.toFixed(2)} + AYT {selectedDept.aytTotal.toFixed(2)})</span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 12, marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255, 255, 255, 0.08)', fontSize: 11.5 }}>
-                <div>
-                  TYT Açığı:{' '}
-                  <strong style={{ color: tytDeficit >= 0 ? '#30D158' : '#FF9F0A' }}>
-                    {tytDeficit >= 0 ? `+${tytDeficit.toFixed(2)} Hedefte ✓` : `${tytDeficit.toFixed(2)} Net Eksik`}
-                  </strong>
-                </div>
-                <div>
-                  AYT Açığı:{' '}
-                  <strong style={{ color: aytDeficit >= 0 ? '#30D158' : '#FF453A' }}>
-                    {aytDeficit >= 0 ? `+${aytDeficit.toFixed(2)} Hedefte ✓` : `${aytDeficit.toFixed(2)} Net Eksik`}
-                  </strong>
-                </div>
-              </div>
-            </div>
-
-            {/* AI COACH TACTICAL STRATEGY BOX */}
-            {topBottlenecks.length > 0 && (
-              <div
-                style={{
-                  background: 'rgba(10, 132, 255, 0.08)',
-                  border: '1px solid rgba(10, 132, 255, 0.2)',
-                  borderRadius: 14,
-                  padding: '12px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10
-                }}
-              >
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(10, 132, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Sparkles size={15} color="#0A84FF" />
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.45 }}>
-                  💡 <strong style={{ color: '#FFFFFF' }}>Koç Tavsiyesi: </strong>
-                  Bu bölümü kazanmak için en yüksek net artırma fırsatın{' '}
-                  <strong style={{ color: 'var(--color-accent)' }}>{topBottlenecks.map((b) => `${b.name} (${b.gap} net)`).join(' ve ')}</strong>{' '}
-                  alanlarında. Haftada ortalama <strong style={{ color: '#30D158' }}>+1.5 net</strong> artış sağlayarak hedefine ulaşabilirsin!
-                </div>
-              </div>
-            )}
-
-            {/* SUBJECT-BY-SUBJECT BREAKDOWN TABLE */}
-            <div>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: '#FFFFFF', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>Ders Bazında Net Açığı & Kıyaslama Tablosu</span>
-                <span style={{ fontSize: 11, color: 'var(--color-text-dim)', fontWeight: 400 }}>Mevcut Denemelerine Göre</span>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {subjectBreakdown.map((item) => {
-                  const diff = Math.round((item.user - item.target) * 100) / 100;
-                  const isAhead = diff >= 0;
-                  const subPct = Math.min(100, Math.round((item.user / (item.target || 1)) * 100));
-
-                  return (
-                    <div
-                      key={item.name}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '9px 12px',
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        border: '1px solid rgba(255, 255, 255, 0.05)',
-                        borderRadius: 10,
-                        gap: 10
-                      }}
-                    >
-                      <div style={{ minWidth: 150 }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 600, color: '#FFFFFF' }}>{item.name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>
-                          Sen: <strong style={{ color: '#FFFFFF' }}>{item.user.toFixed(2)}</strong> • Hedef: <strong style={{ color: 'var(--color-text-muted)' }}>{item.target.toFixed(2)}</strong>
-                        </div>
-                      </div>
-
-                      {/* Mini bar */}
-                      <div style={{ flex: 1, height: 5, background: 'rgba(255, 255, 255, 0.06)', borderRadius: 99, overflow: 'hidden' }}>
-                        <div
-                          style={{
-                            width: `${subPct}%`,
-                            height: '100%',
-                            background: isAhead ? '#30D158' : 'var(--color-accent)',
-                            borderRadius: 99
-                          }}
-                        />
-                      </div>
-
-                      <span
-                        style={{
-                          fontSize: 11.5,
-                          fontWeight: 700,
-                          padding: '3px 8px',
-                          borderRadius: 6,
-                          background: isAhead ? 'rgba(48, 209, 88, 0.14)' : 'rgba(255, 69, 58, 0.14)',
-                          color: isAhead ? '#30D158' : '#FF453A',
-                          minWidth: 80,
-                          textAlign: 'center'
-                        }}
-                      >
-                        {isAhead ? `+${diff.toFixed(2)} Net ✓` : `${diff.toFixed(2)} Eksik`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* ALL SEARCHABLE DEPARTMENTS CATALOG (MorphaxTheDeveloper/yokatlas-dataset-2025) */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF' }}>
-                YÖK Atlas 2025 Bölüm Kataloğu ({filteredDepartments.length})
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>
-                İncelemek istediğin bölüme tıkla
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: 10,
-                maxHeight: '38vh',
-                overflowY: 'auto',
-                paddingRight: 4
-              }}
-            >
-              {filteredDepartments.map((dept) => {
-                const isSelected = dept.id === selectedDept.id;
-                const badge = getTrackBadge(dept.track);
-                const deptTotal = Math.round((dept.tytTotal + dept.aytTotal) * 100) / 100;
-
-                return (
-                  <div
-                    key={dept.id}
-                    onClick={() => {
-                      setSelectedDept(dept);
-                      sounds.playClick();
-                    }}
-                    style={{
-                      padding: '12px 14px',
-                      borderRadius: 14,
-                      background: isSelected ? 'rgba(10, 132, 255, 0.1)' : 'var(--color-surface)',
-                      border: isSelected ? '1.5px solid var(--color-accent)' : '1px solid rgba(255, 255, 255, 0.06)',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 6
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
-                          <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: badge.bg, color: badge.color }}>
-                            {badge.label}
-                          </span>
-                          <span style={{ fontSize: 10, color: 'var(--color-text-dim)' }}>
-                            {dept.city} • {dept.type}
-                          </span>
-                        </div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
-                          {dept.department}
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
-                          {dept.university}
-                        </div>
-                      </div>
-
-                      {isSelected && (
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 99, background: 'rgba(48, 209, 88, 0.15)', color: '#30D158' }}>
-                          ✓ Seçili
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 6, borderTop: '1px solid rgba(255, 255, 255, 0.05)', fontSize: 11 }}>
-                      <span style={{ color: 'var(--color-text-dim)' }}>
-                        Taban: <strong style={{ color: '#FFFFFF' }}>{dept.baseScore.toFixed(2)}</strong>
-                      </span>
-                      <span style={{ color: '#FF9F0A', fontWeight: 600 }}>
-                        {formatRank(dept.lastRank)}
-                      </span>
-                      <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>
-                        {deptTotal.toFixed(2)} Net
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ----------------------------------------------------------------------------
 // Feature 26: Printable PDF Report Modal (Karne Raporu Çıktısı)
@@ -10951,256 +8853,6 @@ function WidgetSimulatorModal({
 }
 
 // ----------------------------------------------------------------------------
-// Feature 9: Flashcards & Formula Cards Modal (Hap Bilgi & Formül Kartları)
-// ----------------------------------------------------------------------------
-function FlashcardsModal({
-  flashcards,
-  onToggleMastered,
-  onClose
-}: {
-  flashcards: FlashcardItem[];
-  onToggleMastered: (id: string) => void;
-  onClose: () => void;
-}) {
-  const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-
-  const filteredCards = flashcards.filter((card) => {
-    if (selectedSubject !== 'all' && card.subjectCode !== selectedSubject) return false;
-    return true;
-  });
-
-  const currentCard = filteredCards[currentIndex] || filteredCards[0];
-  const totalMastered = flashcards.filter((c) => c.isMastered).length;
-  const progressPct = Math.round((totalMastered / (flashcards.length || 1)) * 100);
-
-  const handleNext = () => {
-    sounds.playClick();
-    setIsFlipped(false);
-    setCurrentIndex((prev) => (prev + 1) % filteredCards.length);
-  };
-
-  const handlePrev = () => {
-    sounds.playClick();
-    setIsFlipped(false);
-    setCurrentIndex((prev) => (prev - 1 + filteredCards.length) % filteredCards.length);
-  };
-
-  const handleCardClick = () => {
-    sounds.playClick();
-    setIsFlipped((prev) => !prev);
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="bottom-sheet" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '88vh' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div>
-            <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Brain size={20} color="var(--color-accent)" />
-              <span>Hap Bilgi & Formül Kartları</span>
-            </h3>
-            <p style={{ margin: '4px 0 0 0', fontSize: 12, color: 'var(--color-text-muted)' }}>
-              Karta dokunarak formülü aç, ezberlediğin kartları hafızaya ekle
-            </p>
-          </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-            <X size={22} />
-          </button>
-        </div>
-
-        {/* Progress Bar Strip */}
-        <div style={{ background: '#1D1F25', padding: '10px 14px', borderRadius: 12, marginBottom: 14 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>
-            <span style={{ color: 'var(--color-text-muted)' }}>Ezberlenen Formüller:</span>
-            <span style={{ color: 'var(--color-accent)' }}>{totalMastered} / {flashcards.length} (%{progressPct})</span>
-          </div>
-          <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-            <div
-              style={{
-                height: '100%',
-                width: `${progressPct}%`,
-                background: 'var(--color-accent)',
-                borderRadius: 3,
-                transition: 'width 0.4s ease'
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Subject Filter Pills */}
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 6, marginBottom: 14 }}>
-          <button
-            className={`pill-toggle-btn ${selectedSubject === 'all' ? 'active' : ''}`}
-            onClick={() => {
-              setSelectedSubject('all');
-              setCurrentIndex(0);
-              setIsFlipped(false);
-            }}
-          >
-            Tümü ({flashcards.length})
-          </button>
-          {[
-            { code: 'ayt_mat', name: 'AYT Mat' },
-            { code: 'tyt_mat', name: 'TYT Mat' },
-            { code: 'ayt_fizik', name: 'AYT Fizik' },
-            { code: 'tyt_fizik', name: 'TYT Fizik' },
-            { code: 'ayt_kimya', name: 'AYT Kimya' },
-            { code: 'ayt_biyo', name: 'AYT Biyoloji' }
-          ].map((sub) => {
-            const count = flashcards.filter((f) => f.subjectCode === sub.code).length;
-            if (count === 0) return null;
-            return (
-              <button
-                key={sub.code}
-                className={`pill-toggle-btn ${selectedSubject === sub.code ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedSubject(sub.code);
-                  setCurrentIndex(0);
-                  setIsFlipped(false);
-                }}
-              >
-                {sub.name} ({count})
-              </button>
-            );
-          })}
-        </div>
-
-        {/* 3D Flip Card */}
-        {currentCard ? (
-          <div style={{ marginBottom: 16 }}>
-            <div className="flashcard-perspective" onClick={handleCardClick} style={{ minHeight: 250 }}>
-              <div className={`flashcard-inner ${isFlipped ? 'flipped' : ''}`}>
-                {/* Front Side */}
-                <div className="flashcard-face flashcard-front">
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6, background: 'rgba(212, 255, 0, 0.15)', color: 'var(--color-accent)' }}>
-                        {currentCard.subjectName} • {currentCard.category}
-                      </span>
-                      {currentCard.isMastered && (
-                        <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 99, background: 'rgba(0, 229, 153, 0.2)', color: '#00E599' }}>
-                          ✓ Ezberlendi
-                        </span>
-                      )}
-                    </div>
-                    <h4 style={{ fontSize: 17, fontWeight: 800, marginTop: 14, color: '#fff' }}>
-                      {currentCard.title}
-                    </h4>
-                    <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.5, marginTop: 10 }}>
-                      {currentCard.front}
-                    </p>
-                  </div>
-
-                  <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--color-accent)', fontWeight: 700 }}>
-                    💡 Formülü ve çözümü görmek için dokun ↺
-                  </div>
-                </div>
-
-                {/* Back Side */}
-                <div className="flashcard-face flashcard-back">
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6, background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
-                        {currentCard.subjectName}
-                      </span>
-                      <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>
-                        Formül & Püf Nokta
-                      </span>
-                    </div>
-
-                    <div style={{
-                      marginTop: 14,
-                      padding: '12px 14px',
-                      background: 'rgba(0,0,0,0.4)',
-                      borderRadius: 12,
-                      border: '1px solid rgba(0, 240, 255, 0.25)',
-                      fontFamily: 'monospace',
-                      fontSize: 14,
-                      color: '#00F0FF',
-                      lineHeight: 1.6,
-                      whiteSpace: 'pre-wrap',
-                      textAlign: 'left'
-                    }}>
-                      {currentCard.back}
-                    </div>
-
-                    {currentCard.formulaNote && (
-                      <div style={{ marginTop: 10, padding: '8px 12px', background: 'rgba(255, 184, 0, 0.1)', borderRadius: 8, borderLeft: '3px solid #FFB800', textAlign: 'left', fontSize: 11, color: '#FFE082' }}>
-                        <strong>Önemli: </strong>{currentCard.formulaNote}
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--color-text-dim)' }}>
-                    Ön yüze dönmek için dokun ↺
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation and Action Bar */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, gap: 10 }}>
-              <button
-                onClick={handlePrev}
-                className="btn-secondary"
-                style={{ padding: '8px 12px', fontSize: 12 }}
-                disabled={filteredCards.length <= 1}
-              >
-                <ArrowLeft size={16} />
-                <span>Önceki</span>
-              </button>
-
-              <button
-                onClick={() => onToggleMastered(currentCard.id)}
-                style={{
-                  flex: 1,
-                  padding: '9px 12px',
-                  borderRadius: 10,
-                  background: currentCard.isMastered ? 'rgba(0, 229, 153, 0.15)' : 'rgba(212, 255, 0, 0.15)',
-                  border: currentCard.isMastered ? '1px solid #00E599' : '1px solid var(--color-accent)',
-                  color: currentCard.isMastered ? '#00E599' : 'var(--color-accent)',
-                  fontSize: 12,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6
-                }}
-              >
-                <Check size={16} />
-                <span>{currentCard.isMastered ? 'Ezberlendi ✓' : 'Ezberledim / Hakimim'}</span>
-              </button>
-
-              <button
-                onClick={handleNext}
-                className="btn-secondary"
-                style={{ padding: '8px 12px', fontSize: 12 }}
-                disabled={filteredCards.length <= 1}
-              >
-                <span>Sonraki</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-
-            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--color-text-dim)', marginTop: 8 }}>
-              Kart {currentIndex + 1} / {filteredCards.length}
-            </div>
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--color-text-muted)' }}>
-            Bu derste henüz formül kartı bulunamadı.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
 // Forms for Quick Action Modal
 // ============================================================================
 function QuickQuestionForm({
