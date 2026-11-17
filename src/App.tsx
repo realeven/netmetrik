@@ -54,6 +54,7 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { WeeklyQuestionSchedule } from './components/WeeklyQuestionSchedule';
 import { ModernSlider } from './components/ModernSlider';
 import { YksCountdownCard } from './components/YksCountdownCard';
+import { FormulaGameView } from './components/FormulaGameView';
 import { YksRankCalculatorModal } from './components/YksRankCalculatorModal';
 import { OSYM_QUESTION_DISTRIBUTION } from './data/osymDistributionData';
 import { sounds } from './lib/sound';
@@ -98,11 +99,11 @@ type FeatureModalType = 'vault' | 'rank' | 'books' | 'report' | 'widget' | null;
 // Main Application Component
 // ============================================================================
 export default function App() {
-  // Navigation Tabs: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym'
-  const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym'>(() => {
+  // Navigation Tabs: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym' | 'formula'
+  const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym' | 'formula'>(() => {
     try {
       const saved = localStorage.getItem('netmetrik_active_tab');
-      if (saved && ['home', 'calendar', 'analytics', 'profile', 'exams', 'curriculum', 'pomodoro', 'osym'].includes(saved)) {
+      if (saved && ['home', 'calendar', 'analytics', 'profile', 'exams', 'curriculum', 'pomodoro', 'osym', 'formula'].includes(saved)) {
         return saved as any;
       }
     } catch {}
@@ -118,7 +119,7 @@ export default function App() {
     }
   };
 
-  const handleNavigateTab = (tab: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym') => {
+  const handleNavigateTab = (tab: 'home' | 'calendar' | 'analytics' | 'profile' | 'exams' | 'curriculum' | 'pomodoro' | 'osym' | 'formula') => {
     if (tab !== activeTab) {
       sounds.playTabSwitch();
       setActiveTab(tab);
@@ -979,6 +980,10 @@ export default function App() {
         />
       )}
 
+      {activeTab === 'formula' && (
+        <FormulaGameView isDesktop={isDesktop} />
+      )}
+
       {activeTab === 'profile' && (
         <ProfileScreenView
           profile={profile}
@@ -1124,6 +1129,14 @@ export default function App() {
                   >
                     2018–2026
                   </span>
+                </button>
+
+                <button
+                  className={`desktop-nav-btn ${activeTab === 'formula' ? 'active' : ''}`}
+                  onClick={() => handleNavigateTab('formula')}
+                >
+                  <Sparkles size={19} color={activeTab === 'formula' ? 'var(--color-accent)' : undefined} />
+                  <span>Formül Düellosu</span>
                 </button>
 
                 <button
@@ -1300,6 +1313,7 @@ export default function App() {
                   {activeTab === 'exams' && 'Denemeler & Karne'}
                   {activeTab === 'curriculum' && 'Konu Takip'}
                   {activeTab === 'osym' && 'ÖSYM Soru Dağılımı'}
+                  {activeTab === 'formula' && 'Formül Düellosu'}
                   {activeTab === 'profile' && 'Profilim'}
                 </div>
               </div>
