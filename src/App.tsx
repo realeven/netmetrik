@@ -2387,10 +2387,10 @@ function AnalyticsScreenView({
         const maxNet = Math.ceil(maxVal + (maxVal - minVal < 4 ? 2 : 1.5));
         const netRange = Math.max(4, maxNet - minNet);
 
-        // Apple proportions: 760x170 wide aspect ratio
-        const svgW = 760;
-        const svgH = 170;
-        const padL = 42;
+        // Apple proportions: 1000x160 ultra wide aspect ratio
+        const svgW = 1000;
+        const svgH = 160;
+        const padL = 44;
         const padR = 24;
         const padT = 18;
         const padB = 30;
@@ -2443,8 +2443,7 @@ function AnalyticsScreenView({
             className="app-card"
             style={{
               padding: '22px 24px',
-              maxWidth: 960,
-              margin: '0 auto'
+              width: '100%'
             }}
           >
             {/* Top Bar: Title + Metric Switcher */}
@@ -2556,7 +2555,7 @@ function AnalyticsScreenView({
                   style={{
                     width: '100%',
                     height: 'auto',
-                    maxHeight: 200,
+                    maxHeight: 180,
                     overflow: 'visible',
                     display: 'block'
                   }}
