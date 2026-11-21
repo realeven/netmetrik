@@ -4601,7 +4601,8 @@ function ExamsScreenView({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 16
+            padding: '64px 16px 40px',
+            overflowY: 'auto'
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -4614,12 +4615,13 @@ function ExamsScreenView({
             style={{
               maxWidth: 560,
               width: '100%',
-              maxHeight: '90vh',
+              maxHeight: 'min(82vh, 700px)',
+              margin: 'auto',
               overflowY: 'auto',
               background: '#141519',
               border: '1px solid var(--color-border)',
               borderRadius: 20,
-              padding: 20,
+              padding: 22,
               display: 'flex',
               flexDirection: 'column',
               gap: 16,
