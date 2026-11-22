@@ -228,46 +228,71 @@ button, .clickable-card, .btn-primary, .btn-secondary, .nav-item-icon-btn, .cent
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Device Shell Wrapper */
+/* Device Shell Wrapper (Native Mobile First - Edge-to-Edge) */
 .mobile-viewport-shell {
   width: 100%;
-  max-width: 440px;
+  max-width: 100%;
   min-height: 100vh;
   background-color: var(--color-bg);
   position: relative;
   display: flex;
   flex-direction: column;
   box-shadow: none;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
+  box-sizing: border-box;
   transition: background-color 0.35s ease, border-color 0.35s ease;
 }
 
-@media (max-width: 540px) {
-  body {
+/* Simulated Phone Frame ONLY on real Desktop screens (width > 768px) when not in wide PC dashboard mode */
+@media (min-width: 769px) {
+  body.mobile-preview-mode {
+    padding: 20px 0;
+    background: radial-gradient(circle at 50% 20%, #15171C 0%, #050607 80%);
+  }
+
+  body.mobile-preview-mode .mobile-viewport-shell {
+    max-width: 440px;
+    min-height: 890px;
+    height: 94vh;
+    border-radius: 46px;
+    overflow: hidden;
+    border: 10px solid #1A1C22;
+    margin: 0 auto;
+    box-shadow: 0 0 70px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+}
+
+@media (max-width: 768px) {
+  html, body {
     padding: 0 !important;
     margin: 0 !important;
-  }
-  .mobile-viewport-shell {
-    max-width: 100% !important;
     width: 100% !important;
-    box-shadow: none !important;
-    border: none !important;
-    border-radius: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    background: var(--color-bg) !important;
   }
-}
 
-body.mobile-preview-mode {
-  padding: 20px 0;
-  background: radial-gradient(circle at 50% 20%, #15171C 0%, #050607 80%);
-}
+  body.mobile-preview-mode {
+    padding: 0 !important;
+    background: var(--color-bg) !important;
+  }
 
-body.mobile-preview-mode .mobile-viewport-shell {
-  min-height: 890px;
-  height: 94vh;
-  border-radius: 46px;
-  overflow: hidden;
-  border: 10px solid #1A1C22;
-  margin: 0 auto;
+  body.mobile-preview-mode .mobile-viewport-shell,
+  .mobile-viewport-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100vh !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    overflow-x: hidden !important;
+  }
 }
 
 body.desktop-view-active {
@@ -1108,11 +1133,23 @@ button:focus-visible {
   background: rgba(0, 0, 0, 0.86);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  z-index: 100;
+  z-index: 2500 !important;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   animation: fadeIn 180ms var(--ease-out);
+}
+
+/* Modal, Bottom Sheet veya Detay Açıldığında Alt Gezinme Barını Tamamen Gizle */
+body:has(.modal-overlay) .floating-bottom-nav,
+body:has(.bottom-sheet) .floating-bottom-nav,
+.mobile-viewport-shell:has(.modal-overlay) .floating-bottom-nav,
+.mobile-viewport-shell:has(.bottom-sheet) .floating-bottom-nav {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(150%) !important;
 }
 
 .bottom-sheet {

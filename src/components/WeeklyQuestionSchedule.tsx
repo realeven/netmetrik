@@ -328,7 +328,7 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box', overflowX: 'hidden' }}>
       {/* HEADER CARD: TITLE & WEEK NAVIGATION */}
       <div
         className="app-card"
@@ -643,15 +643,19 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
             border: '1px solid rgba(255, 255, 255, 0.12)',
             borderRadius: 20,
             padding: 0,
-            overflow: 'hidden'
+            overflow: 'hidden',
+            width: '100%',
+            maxWidth: '100%',
+            minWidth: 0,
+            boxSizing: 'border-box'
           }}
         >
-          <div style={{ overflowX: 'auto', width: '100%' }}>
+          <div style={{ overflowX: 'auto', width: '100%', maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
             <table
               style={{
                 width: '100%',
                 borderCollapse: 'collapse',
-                minWidth: 720,
+                minWidth: 580,
                 textAlign: 'left'
               }}
             >

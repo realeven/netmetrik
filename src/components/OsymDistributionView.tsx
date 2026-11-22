@@ -102,7 +102,12 @@ export function OsymDistributionView({
         padding: isDesktop ? '0 0 40px 0' : '0 16px 40px 16px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 16
+        gap: 16,
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
+        overflowX: 'hidden'
       }}
     >
       <style>{`

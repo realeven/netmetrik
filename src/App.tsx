@@ -134,6 +134,13 @@ export default function App() {
       try {
         localStorage.setItem('netmetrik_active_tab', tab);
       } catch {}
+      // Reset scroll position so every screen starts perfectly aligned at top-left
+      window.scrollTo(0, 0);
+      const container = document.querySelector('.screen-scroll-container');
+      if (container) {
+        container.scrollTop = 0;
+        container.scrollLeft = 0;
+      }
     }
   };
 
@@ -278,6 +285,15 @@ export default function App() {
     const search = window.location.search || '';
     return hash.includes('type=recovery') || search.includes('type=recovery');
   });
+
+  // Check if any modal or bottom-sheet is active (hides floating bottom nav)
+  const isAnyModalOpen = Boolean(
+    showQuickModal ||
+    activeAnalizModal ||
+    activeFeatureModal ||
+    showOnboardingModal ||
+    showPasswordResetModal
+  );
 
   // Listen for Supabase password recovery events
   useEffect(() => {
@@ -1489,8 +1505,8 @@ export default function App() {
             {renderScreenContent(false)}
           </main>
 
-          {/* Floating Pill Bottom Navigation with Protruding Center (+) FAB (hidden in NetFocus) */}
-          {activeTab !== 'pomodoro' && (
+          {/* Floating Pill Bottom Navigation with Protruding Center (+) FAB (hidden in NetFocus or when any modal/sheet is open) */}
+          {activeTab !== 'pomodoro' && !isAnyModalOpen && (
             <nav className="floating-bottom-nav">
               {/* Tab 1: Home */}
               <button
@@ -3442,19 +3458,21 @@ function CalendarTasksView({
   const breakPresets = [5, 10, 15, 20];
 
   return (
-    <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 20 : 16 }}>
+    <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 20 : 16, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* Calendar Sub-Tabs: Haftalık Soru Çizelgesi (DEFAULT) | Odak & Sayaç | Görevler */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr 1fr',
+          gridTemplateColumns: isDesktop ? '1.2fr 1fr 1fr' : 'repeat(3, 1fr)',
           gap: 6,
           background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
           padding: 5,
           borderRadius: 16,
           border: '1.5px solid rgba(255, 255, 255, 0.16)',
           borderTop: '1.8px solid rgba(255, 255, 255, 0.38)',
-          boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.5)'
+          boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.5)',
+          width: '100%',
+          boxSizing: 'border-box'
         }}
       >
         <button
@@ -3464,9 +3482,9 @@ function CalendarTasksView({
             setCalendarSubTab('schedule');
           }}
           style={{
-            padding: '10px 8px',
+            padding: isDesktop ? '10px 8px' : '9px 4px',
             borderRadius: 12,
-            fontSize: 12.5,
+            fontSize: isDesktop ? 12.5 : 11,
             fontWeight: 800,
             cursor: 'pointer',
             border: calendarSubTab === 'schedule' ? '1px solid #FFFFFF' : '1px solid transparent',
@@ -3475,13 +3493,16 @@ function CalendarTasksView({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 6,
+            gap: 4,
             boxShadow: calendarSubTab === 'schedule' ? '0 4px 14px rgba(255, 255, 255, 0.25), inset 0 1px 0 #FFFFFF' : 'none',
-            transition: 'all 0.15s ease'
+            transition: 'all 0.15s ease',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}
         >
-          <BarChart3 size={16} />
-          <span>Haftalık Soru Çizelgesi</span>
+          <BarChart3 size={15} />
+          <span>{isDesktop ? 'Haftalık Soru Çizelgesi' : 'Çizelge'}</span>
         </button>
 
         <button
@@ -3491,9 +3512,9 @@ function CalendarTasksView({
             setCalendarSubTab('timer');
           }}
           style={{
-            padding: '10px 8px',
+            padding: isDesktop ? '10px 8px' : '9px 4px',
             borderRadius: 12,
-            fontSize: 12.5,
+            fontSize: isDesktop ? 12.5 : 11,
             fontWeight: 800,
             cursor: 'pointer',
             border: calendarSubTab === 'timer' ? '1px solid #FFFFFF' : '1px solid transparent',
@@ -3502,13 +3523,16 @@ function CalendarTasksView({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 6,
+            gap: 4,
             boxShadow: calendarSubTab === 'timer' ? '0 4px 14px rgba(255, 255, 255, 0.25), inset 0 1px 0 #FFFFFF' : 'none',
-            transition: 'all 0.15s ease'
+            transition: 'all 0.15s ease',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}
         >
-          <Timer size={16} />
-          <span>Odak & Sayaç</span>
+          <Timer size={15} />
+          <span>{isDesktop ? 'Odak & Sayaç' : 'Odak'}</span>
         </button>
 
         <button
@@ -3518,9 +3542,9 @@ function CalendarTasksView({
             setCalendarSubTab('tasks');
           }}
           style={{
-            padding: '10px 8px',
+            padding: isDesktop ? '10px 8px' : '9px 4px',
             borderRadius: 12,
-            fontSize: 12.5,
+            fontSize: isDesktop ? 12.5 : 11,
             fontWeight: 800,
             cursor: 'pointer',
             border: calendarSubTab === 'tasks' ? '1px solid #FFFFFF' : '1px solid transparent',
@@ -3529,13 +3553,16 @@ function CalendarTasksView({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 6,
+            gap: 4,
             boxShadow: calendarSubTab === 'tasks' ? '0 4px 14px rgba(255, 255, 255, 0.25), inset 0 1px 0 #FFFFFF' : 'none',
-            transition: 'all 0.15s ease'
+            transition: 'all 0.15s ease',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}
         >
-          <CheckCircle2 size={16} />
-          <span>Görevler ({tasks.length})</span>
+          <CheckCircle2 size={15} />
+          <span>Görevler</span>
         </button>
       </div>
 
@@ -4608,6 +4635,7 @@ function ExamsScreenView({
       {/* EXAM DETAIL & EDIT MODAL */}
       {selectedExam && (
         <div
+          className="modal-overlay"
           style={{
             position: 'fixed',
             inset: 0,
