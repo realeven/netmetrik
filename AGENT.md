@@ -9,7 +9,7 @@ Kullanıcıya **asla ekstra soru sormadan** doğrudan şu adımları sırasıyla
    - Capacitor ile Android klasörüne kopyalar (`npx cap sync android`),
    - Gradle ile debug APK'sını derler (`gradlew.bat assembleDebug`).
 2. Derleme tamamlandığında oluşan güncel APK'nın tam dosya yolunu kullanıcıya net olarak ver:
-   `c:\Users\burak\.gemini\antigravity-ide\scratch\ekoc-clone\app\android\app\build\outputs\apk\debug\netmetrikv1.apk` (veya `c:\Users\burak\.gemini\antigravity-ide\scratch\ekoc-clone\app\netmetrikv1.apk`)
+   `c:\Users\burak\.gemini\antigravity-ide\scratch\ekoc-clone\app\android\app\build\outputs\apk\debug\app-debug.apk`
 
 ---
 

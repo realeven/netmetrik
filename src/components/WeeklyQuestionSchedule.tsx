@@ -400,7 +400,7 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
                   border: 'none',
                   cursor: 'pointer',
                   background: viewMode === 'matrix' ? 'var(--color-accent)' : 'transparent',
-                  color: viewMode === 'matrix' ? '#FFFFFF' : 'var(--color-text-dim)',
+                  color: viewMode === 'matrix' ? '#060709' : 'var(--color-text-dim)',
                   transition: 'all 0.15s ease'
                 }}
               >
@@ -420,7 +420,7 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
                   border: 'none',
                   cursor: 'pointer',
                   background: viewMode === 'cards' ? 'var(--color-accent)' : 'transparent',
-                  color: viewMode === 'cards' ? '#FFFFFF' : 'var(--color-text-dim)',
+                  color: viewMode === 'cards' ? '#060709' : 'var(--color-text-dim)',
                   transition: 'all 0.15s ease'
                 }}
               >
@@ -635,1268 +635,1268 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
       </div>
 
       {/* VIEW 1: MATRIX TABLE (DESK / COACHING SHEET) */}
-      {viewMode === 'matrix' && (
-        <div
-          className="app-card"
-          style={{
-            background: 'linear-gradient(180deg, rgba(20, 24, 34, 0.95) 0%, rgba(13, 16, 24, 0.98) 100%)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 20,
-            padding: 0,
-            overflow: 'hidden',
-            width: '100%',
-            maxWidth: '100%',
-            minWidth: 0,
-            boxSizing: 'border-box'
-          }}
-        >
-          <div style={{ overflowX: 'auto', width: '100%', maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                minWidth: 580,
-                textAlign: 'left'
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                >
-                  <th
-                    style={{
-                      padding: '12px 16px',
-                      fontSize: 12,
-                      fontWeight: 800,
-                      color: 'var(--color-text-muted)',
-                      width: '30%'
-                    }}
-                  >
-                    Ders & Konu
-                  </th>
-                  {weekDays.map((day) => (
-                    <th
-                      key={day.dateKey}
+                  {viewMode === 'matrix' && (
+                    <div
+                      className="app-card"
                       style={{
-                        padding: '10px 8px',
-                        textAlign: 'center',
-                        fontSize: 11.5,
-                        fontWeight: 800,
-                        color: day.isToday ? 'var(--color-accent)' : 'var(--color-text-dim)',
-                        background: day.isToday ? 'rgba(10, 132, 255, 0.08)' : 'transparent',
-                        borderLeft: '1px solid rgba(255, 255, 255, 0.06)'
+                        background: 'linear-gradient(180deg, rgba(20, 24, 34, 0.95) 0%, rgba(13, 16, 24, 0.98) 100%)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        borderRadius: 20,
+                        padding: 0,
+                        overflow: 'hidden',
+                        width: '100%',
+                        maxWidth: '100%',
+                        minWidth: 0,
+                        boxSizing: 'border-box'
                       }}
                     >
-                      <div style={{ fontWeight: 900 }}>{day.dayNameShort}</div>
-                      <div style={{ fontSize: 10, opacity: 0.8, marginTop: 1 }}>{day.dayNumber} {day.monthName}</div>
-                    </th>
-                  ))}
-                  <th
-                    style={{
-                      padding: '12px 14px',
-                      textAlign: 'center',
-                      fontSize: 12,
-                      fontWeight: 900,
-                      color: 'var(--color-accent)',
-                      background: 'rgba(10, 132, 255, 0.06)',
-                      borderLeft: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}
-                  >
-                    Toplam
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {Object.keys(matrixData).length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      style={{
-                        textAlign: 'center',
-                        padding: '40px 16px',
-                        color: 'var(--color-text-muted)'
-                      }}
-                    >
-                      <BookOpen size={36} color="var(--color-text-dim)" style={{ margin: '0 auto 10px auto' }} />
-                      <div style={{ fontSize: 14, fontWeight: 800, color: '#FFFFFF', marginBottom: 4 }}>
-                        Bu haftaya ait soru kaydı henüz yok.
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 14 }}>
-                        Çözdüğün soruları ders ve konu seçerek ekle, haftalık çizelgen otomatik dolsun.
-                      </div>
-                      <button
-                        onClick={() => handleOpenAdd(todayKey)}
-                        style={{
-                          padding: '8px 16px',
-                          borderRadius: 99,
-                          background: 'var(--color-accent)',
-                          color: '#FFFFFF',
-                          border: 'none',
-                          fontSize: 12,
-                          fontWeight: 800,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        + İlk Soru Kaydını Ekle
-                      </button>
-                    </td>
-                  </tr>
-                ) : (
-                  Object.entries(matrixData).map(([subjectName, subjData]) => (
-                    <React.Fragment key={subjectName}>
-                      {/* Subject Header Row */}
-                      <tr
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.025)',
-                          borderTop: '1px solid rgba(255, 255, 255, 0.08)'
-                        }}
-                      >
-                        <td
-                          colSpan={9}
+                      <div style={{ overflowX: 'auto', width: '100%', maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
+                        <table
                           style={{
-                            padding: '9px 16px',
-                            fontSize: 12.5,
-                            fontWeight: 900,
-                            color: subjData.color || '#FFF'
+                            width: '100%',
+                            borderCollapse: 'collapse',
+                            minWidth: 580,
+                            textAlign: 'left'
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <span
+                          <thead>
+                            <tr
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.04)',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                              }}
+                            >
+                              <th
                                 style={{
-                                  width: 8,
-                                  height: 8,
-                                  borderRadius: '50%',
-                                  background: subjData.color || 'var(--color-accent)'
+                                  padding: '12px 16px',
+                                  fontSize: 12,
+                                  fontWeight: 800,
+                                  color: 'var(--color-text-muted)',
+                                  width: '30%'
                                 }}
-                              />
-                              <span>{subjectName}</span>
-                            </div>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-dim)' }}>
-                              Haftalık: <strong style={{ color: '#FFF' }}>{subjData.total}</strong> soru
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-
-                      {/* Topic Rows */}
-                      {Object.entries(subjData.topics).map(([topicName, topicData]) => (
-                        <tr
-                          key={`${subjectName}-${topicName}`}
-                          style={{
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                            transition: 'background 0.15s ease'
-                          }}
-                        >
-                          {/* Topic Name */}
-                          <td
-                            style={{
-                              padding: '10px 16px 10px 28px',
-                              fontSize: 12,
-                              color: '#E0E6F0',
-                              fontWeight: 600
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <span style={{ color: 'var(--color-text-dim)' }}>↳</span>
-                              <span>{topicName}</span>
-                            </div>
-                          </td>
-
-                          {/* Day Columns */}
-                          {weekDays.map((day) => {
-                            const count = topicData.days[day.dateKey] || 0;
-                            return (
-                              <td
-                                key={day.dateKey}
-                                onClick={() => handleOpenAdd(day.dateKey, subjectName)}
-                                title={`${day.dayNameFull}: ${count > 0 ? `${count} Soru` : 'Tıkla ve Soru Ekle'}`}
+                              >
+                                Ders & Konu
+                              </th>
+                              {weekDays.map((day) => (
+                                <th
+                                  key={day.dateKey}
+                                  style={{
+                                    padding: '10px 8px',
+                                    textAlign: 'center',
+                                    fontSize: 11.5,
+                                    fontWeight: 800,
+                                    color: day.isToday ? 'var(--color-accent)' : 'var(--color-text-dim)',
+                                    background: day.isToday ? 'rgba(10, 132, 255, 0.08)' : 'transparent',
+                                    borderLeft: '1px solid rgba(255, 255, 255, 0.06)'
+                                  }}
+                                >
+                                  <div style={{ fontWeight: 900 }}>{day.dayNameShort}</div>
+                                  <div style={{ fontSize: 10, opacity: 0.8, marginTop: 1 }}>{day.dayNumber} {day.monthName}</div>
+                                </th>
+                              ))}
+                              <th
                                 style={{
-                                  padding: '10px 6px',
+                                  padding: '12px 14px',
                                   textAlign: 'center',
                                   fontSize: 12,
-                                  fontWeight: count > 0 ? 800 : 500,
-                                  color: count > 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.18)',
-                                  background:
-                                    count > 0
-                                      ? 'rgba(10, 132, 255, 0.1)'
-                                      : day.isToday
-                                      ? 'rgba(10, 132, 255, 0.03)'
-                                      : 'transparent',
-                                  borderLeft: '1px solid rgba(255, 255, 255, 0.05)',
-                                  cursor: 'pointer'
+                                  fontWeight: 900,
+                                  color: 'var(--color-accent)',
+                                  background: 'rgba(10, 132, 255, 0.06)',
+                                  borderLeft: '1px solid rgba(255, 255, 255, 0.1)'
                                 }}
                               >
-                                {count > 0 ? count : '-'}
-                              </td>
-                            );
-                          })}
+                                Toplam
+                              </th>
+                            </tr>
+                          </thead>
 
-                          {/* Topic Total */}
-                          <td
-                            style={{
-                              padding: '10px 12px',
-                              textAlign: 'center',
-                              fontSize: 12.5,
-                              fontWeight: 900,
-                              color: 'var(--color-accent)',
-                              background: 'rgba(10, 132, 255, 0.04)',
-                              borderLeft: '1px solid rgba(255, 255, 255, 0.08)'
-                            }}
-                          >
-                            {topicData.total}
-                          </td>
-                        </tr>
-                      ))}
-                    </React.Fragment>
-                  ))
-                )}
-              </tbody>
+                          <tbody>
+                            {Object.keys(matrixData).length === 0 ? (
+                              <tr>
+                                <td
+                                  colSpan={9}
+                                  style={{
+                                    textAlign: 'center',
+                                    padding: '40px 16px',
+                                    color: 'var(--color-text-muted)'
+                                  }}
+                                >
+                                  <BookOpen size={36} color="var(--color-text-dim)" style={{ margin: '0 auto 10px auto' }} />
+                                  <div style={{ fontSize: 14, fontWeight: 800, color: '#FFFFFF', marginBottom: 4 }}>
+                                    Bu haftaya ait soru kaydı henüz yok.
+                                  </div>
+                                  <div style={{ fontSize: 12, color: 'var(--color-text-dim)', marginBottom: 14 }}>
+                                    Çözdüğün soruları ders ve konu seçerek ekle, haftalık çizelgen otomatik dolsun.
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={() => handleOpenAdd(todayKey)}
+                                    style={{
+                                      padding: '10px 20px',
+                                      borderRadius: 99,
+                                      fontSize: 12.5,
+                                      fontWeight: 900,
+                                      cursor: 'pointer',
+                                      color: '#060709 !important'
+                                    }}
+                                  >
+                                    + İlk Soru Kaydını Ekle
+                                  </button>
+                                </td>
+                              </tr>
+                            ) : (
+                              Object.entries(matrixData).map(([subjectName, subjData]) => (
+                                <React.Fragment key={subjectName}>
+                                  {/* Subject Header Row */}
+                                  <tr
+                                    style={{
+                                      background: 'rgba(255, 255, 255, 0.025)',
+                                      borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                                    }}
+                                  >
+                                    <td
+                                      colSpan={9}
+                                      style={{
+                                        padding: '9px 16px',
+                                        fontSize: 12.5,
+                                        fontWeight: 900,
+                                        color: subjData.color || '#FFF'
+                                      }}
+                                    >
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                          <span
+                                            style={{
+                                              width: 8,
+                                              height: 8,
+                                              borderRadius: '50%',
+                                              background: subjData.color || 'var(--color-accent)'
+                                            }}
+                                          />
+                                          <span>{subjectName}</span>
+                                        </div>
+                                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-dim)' }}>
+                                          Haftalık: <strong style={{ color: '#FFF' }}>{subjData.total}</strong> soru
+                                        </span>
+                                      </div>
+                                    </td>
+                                  </tr>
 
-              {/* FOOTER ROWS: 1) DAILY TOTAL QUESTIONS, 2) DAILY TOTAL STUDY MINUTES */}
-              {Object.keys(matrixData).length > 0 && (
-                <tfoot>
-                  {/* Row 1: Soru Toplamı */}
-                  <tr
-                    style={{
-                      background: 'rgba(10, 132, 255, 0.08)',
-                      borderTop: '2px solid rgba(10, 132, 255, 0.3)'
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: '11px 16px',
-                        fontSize: 12,
-                        fontWeight: 900,
-                        color: '#FFFFFF'
-                      }}
-                    >
-                      📊 GÜNLÜK TOPLAM SORU
-                    </td>
-                    {weekDays.map((day) => {
-                      const daySum = dailyTotals[day.dateKey] || 0;
-                      return (
-                        <td
-                          key={day.dateKey}
-                          style={{
-                            padding: '11px 6px',
-                            textAlign: 'center',
-                            fontSize: 12.5,
-                            fontWeight: 900,
-                            color: daySum > 0 ? '#FFFFFF' : 'var(--color-text-dim)',
-                            borderLeft: '1px solid rgba(255, 255, 255, 0.06)'
-                          }}
-                        >
-                          {daySum > 0 ? daySum : 0}
-                        </td>
-                      );
-                    })}
-                    <td
-                      style={{
-                        padding: '11px 12px',
-                        textAlign: 'center',
-                        fontSize: 13.5,
-                        fontWeight: 900,
-                        color: 'var(--color-accent)',
-                        borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(10, 132, 255, 0.15)'
-                      }}
-                    >
-                      {weeklyTotalQuestions}
-                    </td>
-                  </tr>
+                                  {/* Topic Rows */}
+                                  {Object.entries(subjData.topics).map(([topicName, topicData]) => (
+                                    <tr
+                                      key={`${subjectName}-${topicName}`}
+                                      style={{
+                                        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                                        transition: 'background 0.15s ease'
+                                      }}
+                                    >
+                                      {/* Topic Name */}
+                                      <td
+                                        style={{
+                                          padding: '10px 16px 10px 28px',
+                                          fontSize: 12,
+                                          color: '#E0E6F0',
+                                          fontWeight: 600
+                                        }}
+                                      >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                          <span style={{ color: 'var(--color-text-dim)' }}>↳</span>
+                                          <span>{topicName}</span>
+                                        </div>
+                                      </td>
 
-                  {/* Row 2: Çalışma Süresi Toplamı (NetFocus + Genel Etüt) */}
-                  <tr
-                    style={{
-                      background: 'rgba(48, 209, 88, 0.06)',
-                      borderTop: '1px solid rgba(48, 209, 88, 0.2)'
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: '10px 16px',
-                        fontSize: 11.5,
-                        fontWeight: 900,
-                        color: '#30D158'
-                      }}
-                    >
-                      ⏱️ ÇALIŞMA SÜRESİ (NetFocus + Etüt)
-                    </td>
-                    {weekDays.map((day) => {
-                      const dayMins = dailyMinutes[day.dateKey] || 0;
-                      return (
-                        <td
-                          key={day.dateKey}
-                          onClick={() => handleOpenStudyTime(day.dateKey)}
-                          title={`${day.dayNameFull}: ${dayMins > 0 ? `${dayMins} dakika çalışma` : 'Süre eklemek için tıkla'}`}
-                          style={{
-                            padding: '10px 6px',
-                            textAlign: 'center',
-                            fontSize: 11,
-                            fontWeight: 800,
-                            color: dayMins > 0 ? '#30D158' : 'var(--color-text-dim)',
-                            borderLeft: '1px solid rgba(255, 255, 255, 0.06)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {dayMins > 0
-                            ? dayMins >= 60
-                              ? `${Math.floor(dayMins / 60)}s ${dayMins % 60}d`
-                              : `${dayMins} dk`
-                            : '-'}
-                        </td>
-                      );
-                    })}
-                    <td
-                      style={{
-                        padding: '10px 12px',
-                        textAlign: 'center',
-                        fontSize: 12.5,
-                        fontWeight: 900,
-                        color: '#30D158',
-                        borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(48, 209, 88, 0.12)'
-                      }}
-                    >
-                      {weeklyTotalMinutes >= 60
-                        ? `${Math.floor(weeklyTotalMinutes / 60)}s ${weeklyTotalMinutes % 60}d`
-                        : `${weeklyTotalMinutes} dk`}
-                    </td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
-          </div>
-        </div>
-      )}
+                                      {/* Day Columns */}
+                                      {weekDays.map((day) => {
+                                        const count = topicData.days[day.dateKey] || 0;
+                                        return (
+                                          <td
+                                            key={day.dateKey}
+                                            onClick={() => handleOpenAdd(day.dateKey, subjectName)}
+                                            title={`${day.dayNameFull}: ${count > 0 ? `${count} Soru` : 'Tıkla ve Soru Ekle'}`}
+                                            style={{
+                                              padding: '10px 6px',
+                                              textAlign: 'center',
+                                              fontSize: 12,
+                                              fontWeight: count > 0 ? 800 : 500,
+                                              color: count > 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.18)',
+                                              background:
+                                                count > 0
+                                                  ? 'rgba(10, 132, 255, 0.1)'
+                                                  : day.isToday
+                                                    ? 'rgba(10, 132, 255, 0.03)'
+                                                    : 'transparent',
+                                              borderLeft: '1px solid rgba(255, 255, 255, 0.05)',
+                                              cursor: 'pointer'
+                                            }}
+                                          >
+                                            {count > 0 ? count : '-'}
+                                          </td>
+                                        );
+                                      })}
 
-      {/* VIEW 2: DAILY CARDS BREAKDOWN */}
-      {viewMode === 'cards' && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: isDesktop ? 'repeat(auto-fit, minmax(320px, 1fr))' : '1fr',
-            gap: 12
-          }}
-        >
-          {weekDays.map((day) => {
-            const dayLogs = weeklyLogs.filter((l) => l.date === day.dateKey);
-            const dayTotal = dayLogs.reduce((s, l) => s + (l.count || 0), 0);
-            const dayTotalMinutes = dayLogs.reduce((s, l) => s + (l.durationMinutes || 0), 0);
+                                      {/* Topic Total */}
+                                      <td
+                                        style={{
+                                          padding: '10px 12px',
+                                          textAlign: 'center',
+                                          fontSize: 12.5,
+                                          fontWeight: 900,
+                                          color: 'var(--color-accent)',
+                                          background: 'rgba(10, 132, 255, 0.04)',
+                                          borderLeft: '1px solid rgba(255, 255, 255, 0.08)'
+                                        }}
+                                      >
+                                        {topicData.total}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </React.Fragment>
+                              ))
+                            )}
+                          </tbody>
 
-            return (
-              <div
-                key={day.dateKey}
-                className="app-card"
-                style={{
-                  background: day.isToday
-                    ? 'linear-gradient(180deg, rgba(20, 28, 44, 0.95) 0%, rgba(13, 18, 30, 0.98) 100%)'
-                    : 'linear-gradient(180deg, rgba(20, 24, 34, 0.9) 0%, rgba(13, 16, 24, 0.95) 100%)',
-                  border: day.isToday
-                    ? '1.5px solid var(--color-accent)'
-                    : '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: 18,
-                  padding: '14px 16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10
-                }}
-              >
-                {/* Day Card Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {/* FOOTER ROWS: 1) DAILY TOTAL QUESTIONS, 2) DAILY TOTAL STUDY MINUTES */}
+                          {Object.keys(matrixData).length > 0 && (
+                            <tfoot>
+                              {/* Row 1: Soru Toplamı */}
+                              <tr
+                                style={{
+                                  background: 'rgba(10, 132, 255, 0.08)',
+                                  borderTop: '2px solid rgba(10, 132, 255, 0.3)'
+                                }}
+                              >
+                                <td
+                                  style={{
+                                    padding: '11px 16px',
+                                    fontSize: 12,
+                                    fontWeight: 900,
+                                    color: '#FFFFFF'
+                                  }}
+                                >
+                                  📊 GÜNLÜK TOPLAM SORU
+                                </td>
+                                {weekDays.map((day) => {
+                                  const daySum = dailyTotals[day.dateKey] || 0;
+                                  return (
+                                    <td
+                                      key={day.dateKey}
+                                      style={{
+                                        padding: '11px 6px',
+                                        textAlign: 'center',
+                                        fontSize: 12.5,
+                                        fontWeight: 900,
+                                        color: daySum > 0 ? '#FFFFFF' : 'var(--color-text-dim)',
+                                        borderLeft: '1px solid rgba(255, 255, 255, 0.06)'
+                                      }}
+                                    >
+                                      {daySum > 0 ? daySum : 0}
+                                    </td>
+                                  );
+                                })}
+                                <td
+                                  style={{
+                                    padding: '11px 12px',
+                                    textAlign: 'center',
+                                    fontSize: 13.5,
+                                    fontWeight: 900,
+                                    color: 'var(--color-accent)',
+                                    borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
+                                    background: 'rgba(10, 132, 255, 0.15)'
+                                  }}
+                                >
+                                  {weeklyTotalQuestions}
+                                </td>
+                              </tr>
+
+                              {/* Row 2: Çalışma Süresi Toplamı (NetFocus + Genel Etüt) */}
+                              <tr
+                                style={{
+                                  background: 'rgba(48, 209, 88, 0.06)',
+                                  borderTop: '1px solid rgba(48, 209, 88, 0.2)'
+                                }}
+                              >
+                                <td
+                                  style={{
+                                    padding: '10px 16px',
+                                    fontSize: 11.5,
+                                    fontWeight: 900,
+                                    color: '#30D158'
+                                  }}
+                                >
+                                  ⏱️ ÇALIŞMA SÜRESİ (NetFocus + Etüt)
+                                </td>
+                                {weekDays.map((day) => {
+                                  const dayMins = dailyMinutes[day.dateKey] || 0;
+                                  return (
+                                    <td
+                                      key={day.dateKey}
+                                      onClick={() => handleOpenStudyTime(day.dateKey)}
+                                      title={`${day.dayNameFull}: ${dayMins > 0 ? `${dayMins} dakika çalışma` : 'Süre eklemek için tıkla'}`}
+                                      style={{
+                                        padding: '10px 6px',
+                                        textAlign: 'center',
+                                        fontSize: 11,
+                                        fontWeight: 800,
+                                        color: dayMins > 0 ? '#30D158' : 'var(--color-text-dim)',
+                                        borderLeft: '1px solid rgba(255, 255, 255, 0.06)',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      {dayMins > 0
+                                        ? dayMins >= 60
+                                          ? `${Math.floor(dayMins / 60)}s ${dayMins % 60}d`
+                                          : `${dayMins} dk`
+                                        : '-'}
+                                    </td>
+                                  );
+                                })}
+                                <td
+                                  style={{
+                                    padding: '10px 12px',
+                                    textAlign: 'center',
+                                    fontSize: 12.5,
+                                    fontWeight: 900,
+                                    color: '#30D158',
+                                    borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
+                                    background: 'rgba(48, 209, 88, 0.12)'
+                                  }}
+                                >
+                                  {weeklyTotalMinutes >= 60
+                                    ? `${Math.floor(weeklyTotalMinutes / 60)}s ${weeklyTotalMinutes % 60}d`
+                                    : `${weeklyTotalMinutes} dk`}
+                                </td>
+                              </tr>
+                            </tfoot>
+                          )}
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VIEW 2: DAILY CARDS BREAKDOWN */}
+                  {viewMode === 'cards' && (
                     <div
                       style={{
-                        fontSize: 14,
-                        fontWeight: 900,
-                        color: day.isToday ? 'var(--color-accent)' : '#FFFFFF'
+                        display: 'grid',
+                        gridTemplateColumns: isDesktop ? 'repeat(auto-fit, minmax(320px, 1fr))' : '1fr',
+                        gap: 12
                       }}
                     >
-                      {day.dayNameFull}
-                    </div>
-                    <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>
-                      {day.dayNumber} {day.monthName}
-                    </span>
-                    {day.isToday && (
-                      <span
-                        style={{
-                          fontSize: 9.5,
-                          fontWeight: 800,
-                          padding: '2px 6px',
-                          borderRadius: 99,
-                          background: 'rgba(10, 132, 255, 0.2)',
-                          color: 'var(--color-accent)',
-                          border: '1px solid rgba(10, 132, 255, 0.35)'
-                        }}
-                      >
-                        BUGÜN
-                      </span>
-                    )}
-                  </div>
+                      {weekDays.map((day) => {
+                        const dayLogs = weeklyLogs.filter((l) => l.date === day.dateKey);
+                        const dayTotal = dayLogs.reduce((s, l) => s + (l.count || 0), 0);
+                        const dayTotalMinutes = dayLogs.reduce((s, l) => s + (l.durationMinutes || 0), 0);
 
-                  {/* Header Action Buttons: Add Time + Add Question */}
-                  <div style={{ display: 'flex', gap: 5 }}>
-                    <button
-                      onClick={() => handleOpenStudyTime(day.dateKey)}
-                      title="Bu güne çalışma süresi ekle"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 3,
-                        padding: '4px 7px',
-                        borderRadius: 7,
-                        background: 'rgba(48, 209, 88, 0.12)',
-                        border: '1px solid rgba(48, 209, 88, 0.25)',
-                        color: '#30D158',
-                        fontSize: 10.5,
-                        fontWeight: 800,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Clock size={11} />
-                      <span>Süre</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleOpenAdd(day.dateKey)}
-                      title="Bu güne soru çözümü ekle"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 3,
-                        padding: '4px 8px',
-                        borderRadius: 7,
-                        background: 'rgba(10, 132, 255, 0.12)',
-                        border: '1px solid rgba(10, 132, 255, 0.25)',
-                        color: 'var(--color-accent)',
-                        fontSize: 10.5,
-                        fontWeight: 800,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Plus size={12} />
-                      <span>Soru</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Day Total Bar (Questions + Total Study Duration) */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px 10px',
-                    borderRadius: 10,
-                    background: 'rgba(0, 0, 0, 0.25)',
-                    fontSize: 11.5
-                  }}
-                >
-                  <span style={{ color: 'var(--color-text-muted)' }}>Günlük Toplam:</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <strong style={{ color: 'var(--color-accent)' }}>{dayTotal} Soru</strong>
-                    <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>•</span>
-                    <strong style={{ color: '#30D158' }}>
-                      {dayTotalMinutes >= 60
-                        ? `${Math.floor(dayTotalMinutes / 60)}s ${dayTotalMinutes % 60}d`
-                        : `${dayTotalMinutes} dk`}{' '}
-                      Çalışma
-                    </strong>
-                  </div>
-                </div>
-
-                {/* Logged Items List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {dayLogs.length === 0 ? (
-                    <div
-                      style={{
-                        padding: '12px 0',
-                        textAlign: 'center',
-                        fontSize: 11.5,
-                        color: 'var(--color-text-dim)'
-                      }}
-                    >
-                      Henüz kayıt girilmedi.
-                    </div>
-                  ) : (
-                    dayLogs.map((log) => {
-                      const isStudySession = (log.count || 0) === 0 && (log.durationMinutes || 0) > 0;
-                      const sub = YKS_SUBJECTS.find((s) => s.name === log.subjectName);
-
-                      // 1. General Study Time or NetFocus Session
-                      if (isStudySession) {
                         return (
                           <div
-                            key={log.id}
+                            key={day.dateKey}
+                            className="app-card"
                             style={{
+                              background: day.isToday
+                                ? 'linear-gradient(180deg, rgba(20, 28, 44, 0.95) 0%, rgba(13, 18, 30, 0.98) 100%)'
+                                : 'linear-gradient(180deg, rgba(20, 24, 34, 0.9) 0%, rgba(13, 16, 24, 0.95) 100%)',
+                              border: day.isToday
+                                ? '1.5px solid var(--color-accent)'
+                                : '1px solid rgba(255, 255, 255, 0.1)',
+                              borderRadius: 18,
+                              padding: '14px 16px',
                               display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '8px 10px',
-                              borderRadius: 10,
-                              background: 'rgba(48, 209, 88, 0.08)',
-                              border: '1px solid rgba(48, 209, 88, 0.2)'
+                              flexDirection: 'column',
+                              gap: 10
                             }}
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                              <div
-                                style={{
-                                  width: 26,
-                                  height: 26,
-                                  borderRadius: 8,
-                                  background: 'rgba(48, 209, 88, 0.18)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  color: '#30D158',
-                                  flexShrink: 0
-                                }}
-                              >
-                                <Clock size={14} />
+                            {/* Day Card Header */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div
+                                  style={{
+                                    fontSize: 14,
+                                    fontWeight: 900,
+                                    color: day.isToday ? 'var(--color-accent)' : '#FFFFFF'
+                                  }}
+                                >
+                                  {day.dayNameFull}
+                                </div>
+                                <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>
+                                  {day.dayNumber} {day.monthName}
+                                </span>
+                                {day.isToday && (
+                                  <span
+                                    style={{
+                                      fontSize: 9.5,
+                                      fontWeight: 800,
+                                      padding: '2px 6px',
+                                      borderRadius: 99,
+                                      background: 'rgba(10, 132, 255, 0.2)',
+                                      color: 'var(--color-accent)',
+                                      border: '1px solid rgba(10, 132, 255, 0.35)'
+                                    }}
+                                  >
+                                    BUGÜN
+                                  </span>
+                                )}
                               </div>
-                              <div style={{ minWidth: 0 }}>
-                                <div style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {log.subjectName}
-                                </div>
-                                <div style={{ fontSize: 10.5, color: 'var(--color-text-muted)' }}>
-                                  {log.sourceBook || 'Odak & Çalışma Seansı'}
-                                </div>
+
+                              {/* Header Action Buttons: Add Time + Add Question */}
+                              <div style={{ display: 'flex', gap: 5 }}>
+                                <button
+                                  onClick={() => handleOpenStudyTime(day.dateKey)}
+                                  title="Bu güne çalışma süresi ekle"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 3,
+                                    padding: '4px 7px',
+                                    borderRadius: 7,
+                                    background: 'rgba(48, 209, 88, 0.12)',
+                                    border: '1px solid rgba(48, 209, 88, 0.25)',
+                                    color: '#30D158',
+                                    fontSize: 10.5,
+                                    fontWeight: 800,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  <Clock size={11} />
+                                  <span>Süre</span>
+                                </button>
+
+                                <button
+                                  onClick={() => handleOpenAdd(day.dateKey)}
+                                  title="Bu güne soru çözümü ekle"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 3,
+                                    padding: '4px 8px',
+                                    borderRadius: 7,
+                                    background: 'rgba(10, 132, 255, 0.12)',
+                                    border: '1px solid rgba(10, 132, 255, 0.25)',
+                                    color: 'var(--color-accent)',
+                                    fontSize: 10.5,
+                                    fontWeight: 800,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  <Plus size={12} />
+                                  <span>Soru</span>
+                                </button>
                               </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                              <span
-                                style={{
-                                  padding: '3px 8px',
-                                  borderRadius: 99,
-                                  background: 'rgba(48, 209, 88, 0.2)',
-                                  color: '#30D158',
-                                  fontSize: 11,
-                                  fontWeight: 800
-                                }}
-                              >
-                                {log.durationMinutes} dk
-                              </span>
+                            {/* Day Total Bar (Questions + Total Study Duration) */}
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '8px 10px',
+                                borderRadius: 10,
+                                background: 'rgba(0, 0, 0, 0.25)',
+                                fontSize: 11.5
+                              }}
+                            >
+                              <span style={{ color: 'var(--color-text-muted)' }}>Günlük Toplam:</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <strong style={{ color: 'var(--color-accent)' }}>{dayTotal} Soru</strong>
+                                <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>•</span>
+                                <strong style={{ color: '#30D158' }}>
+                                  {dayTotalMinutes >= 60
+                                    ? `${Math.floor(dayTotalMinutes / 60)}s ${dayTotalMinutes % 60}d`
+                                    : `${dayTotalMinutes} dk`}{' '}
+                                  Çalışma
+                                </strong>
+                              </div>
+                            </div>
 
-                              <button
-                                onClick={() => onDeleteQuestionLog(log.id)}
-                                title="Kaydı Sil"
-                                style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  color: 'var(--color-text-dim)',
-                                  cursor: 'pointer',
-                                  padding: 4
-                                }}
-                              >
-                                <Trash2 size={13} />
-                              </button>
+                            {/* Logged Items List */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              {dayLogs.length === 0 ? (
+                                <div
+                                  style={{
+                                    padding: '12px 0',
+                                    textAlign: 'center',
+                                    fontSize: 11.5,
+                                    color: 'var(--color-text-dim)'
+                                  }}
+                                >
+                                  Henüz kayıt girilmedi.
+                                </div>
+                              ) : (
+                                dayLogs.map((log) => {
+                                  const isStudySession = (log.count || 0) === 0 && (log.durationMinutes || 0) > 0;
+                                  const sub = YKS_SUBJECTS.find((s) => s.name === log.subjectName);
+
+                                  // 1. General Study Time or NetFocus Session
+                                  if (isStudySession) {
+                                    return (
+                                      <div
+                                        key={log.id}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'space-between',
+                                          padding: '8px 10px',
+                                          borderRadius: 10,
+                                          background: 'rgba(48, 209, 88, 0.08)',
+                                          border: '1px solid rgba(48, 209, 88, 0.2)'
+                                        }}
+                                      >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                          <div
+                                            style={{
+                                              width: 26,
+                                              height: 26,
+                                              borderRadius: 8,
+                                              background: 'rgba(48, 209, 88, 0.18)',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              color: '#30D158',
+                                              flexShrink: 0
+                                            }}
+                                          >
+                                            <Clock size={14} />
+                                          </div>
+                                          <div style={{ minWidth: 0 }}>
+                                            <div style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                              {log.subjectName}
+                                            </div>
+                                            <div style={{ fontSize: 10.5, color: 'var(--color-text-muted)' }}>
+                                              {log.sourceBook || 'Odak & Çalışma Seansı'}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                                          <span
+                                            style={{
+                                              padding: '3px 8px',
+                                              borderRadius: 99,
+                                              background: 'rgba(48, 209, 88, 0.2)',
+                                              color: '#30D158',
+                                              fontSize: 11,
+                                              fontWeight: 800
+                                            }}
+                                          >
+                                            {log.durationMinutes} dk
+                                          </span>
+
+                                          <button
+                                            onClick={() => onDeleteQuestionLog(log.id)}
+                                            title="Kaydı Sil"
+                                            style={{
+                                              background: 'transparent',
+                                              border: 'none',
+                                              color: 'var(--color-text-dim)',
+                                              cursor: 'pointer',
+                                              padding: 4
+                                            }}
+                                          >
+                                            <Trash2 size={13} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+
+                                  // 2. Question Log Entry (No minutes required!)
+                                  return (
+                                    <div
+                                      key={log.id}
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        padding: '8px 10px',
+                                        borderRadius: 10,
+                                        background: 'rgba(255, 255, 255, 0.03)',
+                                        border: '1px solid rgba(255, 255, 255, 0.06)'
+                                      }}
+                                    >
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                          <span
+                                            style={{
+                                              width: 6,
+                                              height: 6,
+                                              borderRadius: '50%',
+                                              background: sub?.color || 'var(--color-accent)',
+                                              flexShrink: 0
+                                            }}
+                                          />
+                                          <span style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF' }}>
+                                            {log.subjectName}
+                                          </span>
+                                        </div>
+                                        <div
+                                          style={{
+                                            fontSize: 11,
+                                            color: 'var(--color-text-muted)',
+                                            marginTop: 2,
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis'
+                                          }}
+                                        >
+                                          {log.topicName || 'Genel Soru'} • {log.sourceBook || 'Soru Bankası'}
+                                        </div>
+                                      </div>
+
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                                        <div style={{ textAlign: 'right' }}>
+                                          <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-accent)' }}>
+                                            {log.count} Soru
+                                          </div>
+                                          {(log.correctCount !== undefined || log.wrongCount !== undefined) && (
+                                            <div style={{ fontSize: 10, color: 'var(--color-text-dim)', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                                              {log.correctCount !== undefined && (
+                                                <span style={{ color: '#30D158' }}>✓{log.correctCount}</span>
+                                              )}
+                                              {log.wrongCount !== undefined && (
+                                                <span style={{ color: '#FF453A' }}>✗{log.wrongCount}</span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <button
+                                          onClick={() => onDeleteQuestionLog(log.id)}
+                                          title="Kaydı Sil"
+                                          style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: 'var(--color-text-dim)',
+                                            cursor: 'pointer',
+                                            padding: 4
+                                          }}
+                                        >
+                                          <Trash2 size={13} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
                             </div>
                           </div>
                         );
-                      }
+                      })}
+                    </div>
+                  )}
 
-                      // 2. Question Log Entry (No minutes required!)
-                      return (
+                  {/* QUICK ADD MODAL WITH DERS & KONU SEÇİMİ */}
+                  {showAddModal && (
+                    <div
+                      style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 99999,
+                        background: 'rgba(5, 7, 12, 0.82)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 16
+                      }}
+                      onClick={() => setShowAddModal(false)}
+                    >
+                      <div
+                        style={{
+                          width: '100%',
+                          maxWidth: 440,
+                          background: 'linear-gradient(180deg, #1A1D26 0%, #12141C 100%)',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          borderRadius: 22,
+                          padding: '22px 20px',
+                          color: '#FFFFFF',
+                          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* Modal Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                          <div>
+                            <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0, letterSpacing: -0.3 }}>
+                              Soru Çözümü Ekle
+                            </h3>
+                            <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                              Ders, konu ve soru adedini belirleyip çizelgene kaydet
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setShowAddModal(false)}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.06)',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: 30,
+                              height: 30,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'var(--color-text-muted)',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <X size={15} />
+                          </button>
+                        </div>
+
+                        <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          {/* Tarih Seçimi */}
+                          <div>
+                            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
+                              📅 Çözüldüğü Gün
+                            </label>
+                            <select
+                              value={selectedDate}
+                              onChange={(e) => setSelectedDate(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: 10,
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                color: '#FFFFFF',
+                                fontSize: 12.5,
+                                outline: 'none'
+                              }}
+                            >
+                              {weekDays.map((d) => (
+                                <option key={d.dateKey} value={d.dateKey} style={{ background: '#1A1D26' }}>
+                                  {d.dayNameFull} ({d.dayNumber} {d.monthName}) {d.isToday ? '• Bugün' : ''}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Ders Seçimi */}
+                          <div>
+                            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
+                              📚 Ders Seçin *
+                            </label>
+                            <select
+                              value={modalSubject}
+                              onChange={(e) => handleSubjectChange(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: 10,
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                color: '#FFFFFF',
+                                fontSize: 12.5,
+                                outline: 'none'
+                              }}
+                            >
+                              <optgroup label="TYT Dersleri" style={{ background: '#1A1D26', fontWeight: 800 }}>
+                                {YKS_SUBJECTS.filter((s) => s.category === 'TYT').map((s) => (
+                                  <option key={s.code} value={s.name}>
+                                    {s.name}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="AYT Dersleri" style={{ background: '#1A1D26', fontWeight: 800 }}>
+                                {YKS_SUBJECTS.filter((s) => s.category === 'AYT').map((s) => (
+                                  <option key={s.code} value={s.name}>
+                                    {s.name}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            </select>
+                          </div>
+
+                          {/* Konu Seçimi */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                              <label style={{ fontSize: 11.5, fontWeight: 800, color: '#C8CFDC' }}>
+                                🎯 Konu Seçin *
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setIsCustomTopic(!isCustomTopic)}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  color: 'var(--color-accent)',
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  padding: 0
+                                }}
+                              >
+                                {isCustomTopic ? 'Listeden Seç' : '+ Farklı Konu Yaz'}
+                              </button>
+                            </div>
+
+                            {isCustomTopic ? (
+                              <input
+                                type="text"
+                                placeholder="Konu adı yazın (ör: Karma Deneme, İleri Düzey Problemler...)"
+                                value={customTopicText}
+                                onChange={(e) => setCustomTopicText(e.target.value)}
+                                required
+                                style={{
+                                  width: '100%',
+                                  padding: '9px 12px',
+                                  borderRadius: 10,
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                                  color: '#FFFFFF',
+                                  fontSize: 12.5,
+                                  outline: 'none'
+                                }}
+                              />
+                            ) : (
+                              <select
+                                value={modalTopic}
+                                onChange={(e) => setModalTopic(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '9px 12px',
+                                  borderRadius: 10,
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                                  color: '#FFFFFF',
+                                  fontSize: 12.5,
+                                  outline: 'none'
+                                }}
+                              >
+                                {currentSubjectTopics.map((top) => (
+                                  <option key={top} value={top} style={{ background: '#1A1D26' }}>
+                                    {top}
+                                  </option>
+                                ))}
+                                <option value="Genel Soru Çözümü" style={{ background: '#1A1D26' }}>
+                                  Genel / Karma Soru Çözümü
+                                </option>
+                              </select>
+                            )}
+                          </div>
+
+                          {/* Soru Sayısı (Dakika kaldırıldı, genel çalışma süresine ayrıldı) */}
+                          <div>
+                            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
+                              Çözülen Soru Sayısı *
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="2000"
+                              value={modalCount}
+                              onChange={(e) => setModalCount(Number(e.target.value))}
+                              required
+                              style={{
+                                width: '100%',
+                                padding: '10px 14px',
+                                borderRadius: 10,
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                color: '#FFFFFF',
+                                fontSize: 15,
+                                fontWeight: 900,
+                                outline: 'none'
+                              }}
+                            />
+                            {/* Quick Add Buttons */}
+                            <div style={{ display: 'flex', gap: 5, marginTop: 6 }}>
+                              {[10, 20, 30, 50, 100].map((amt) => (
+                                <button
+                                  key={amt}
+                                  type="button"
+                                  onClick={() => setModalCount((prev) => prev + amt)}
+                                  style={{
+                                    flex: 1,
+                                    padding: '5px 0',
+                                    borderRadius: 6,
+                                    background: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                    color: 'var(--color-text-dim)',
+                                    fontSize: 11,
+                                    fontWeight: 800,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  +{amt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Kaynak Kitap / Yayın */}
+                          <div>
+                            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
+                              📖 Kaynak / Yayın (İsteğe Bağlı)
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Ör: 3D Soru Bankası Test 4, Bilgi Sarmal..."
+                              value={modalSource}
+                              onChange={(e) => setModalSource(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: 10,
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                color: '#FFFFFF',
+                                fontSize: 12,
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+
+                          {/* Doğru & Yanlış (Opsiyonel) */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                            <div>
+                              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#30D158', marginBottom: 5 }}>
+                                ✓ Doğru Sayısı (İsteğe Bağlı)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="Ör: 26"
+                                value={modalCorrect}
+                                onChange={(e) => setModalCorrect(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '9px 12px',
+                                  borderRadius: 10,
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                                  color: '#FFFFFF',
+                                  fontSize: 12.5,
+                                  outline: 'none'
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#FF453A', marginBottom: 5 }}>
+                                ✗ Yanlış Sayısı (İsteğe Bağlı)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="Ör: 4"
+                                value={modalWrong}
+                                onChange={(e) => setModalWrong(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '9px 12px',
+                                  borderRadius: 10,
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                                  color: '#FFFFFF',
+                                  fontSize: 12.5,
+                                  outline: 'none'
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Submit Button */}
+                          <button
+                            type="submit"
+                            style={{
+                              marginTop: 6,
+                              padding: '12px 0',
+                              borderRadius: 12,
+                              background: 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              fontSize: 13,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              boxShadow: '0 4px 16px rgba(10, 132, 255, 0.35)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6
+                            }}
+                          >
+                            <CheckCircle2 size={16} />
+                            <span>Çizelgeye Kaydet</span>
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* MODAL 2: GENERAL STUDY TIME MODAL (GENEL ÇALIŞMA SÜRESİ EKLE) */}
+                  {showStudyTimeModal && (
+                    <div
+                      style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 99999,
+                        background: 'rgba(5, 7, 12, 0.82)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 16
+                      }}
+                      onClick={() => setShowStudyTimeModal(false)}
+                    >
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          width: '100%',
+                          maxWidth: 480,
+                          background: '#141824',
+                          border: '1px solid rgba(48, 209, 88, 0.25)',
+                          borderRadius: 20,
+                          padding: 22,
+                          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 16
+                        }}
+                      >
+                        {/* Modal Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div
+                              style={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: 10,
+                                background: 'linear-gradient(135deg, #30D158 0%, #248A3D 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#FFF'
+                              }}
+                            >
+                              <Clock size={19} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 900, color: '#FFFFFF' }}>
+                                Çalışma Süresi Ekle
+                              </div>
+                              <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
+                                Masa başı etüt ve konu çalışma sürenizi gün bazında kaydedin
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowStudyTimeModal(false)}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              borderRadius: 8,
+                              color: 'var(--color-text-dim)',
+                              cursor: 'pointer',
+                              padding: 6
+                            }}
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+
+                        {/* Info Hint about NetFocus */}
                         <div
-                          key={log.id}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '8px 10px',
+                            gap: 8,
+                            padding: '9px 12px',
                             borderRadius: 10,
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.06)'
+                            background: 'rgba(10, 132, 255, 0.1)',
+                            border: '1px solid rgba(10, 132, 255, 0.25)',
+                            fontSize: 11.5,
+                            color: '#80BFFF'
                           }}
                         >
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <span
+                          <Sparkles size={14} style={{ flexShrink: 0 }} />
+                          <span>NetFocus Pomodoro seanslarınız otomatik olarak buraya eklenir.</span>
+                        </div>
+
+                        <form onSubmit={handleStudyTimeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                          {/* Tarih Seçimi */}
+                          <div>
+                            <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
+                              📅 Tarih *
+                            </label>
+                            <input
+                              type="date"
+                              value={studyTimeDate}
+                              onChange={(e) => setStudyTimeDate(e.target.value)}
+                              required
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: 10,
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                color: '#FFFFFF',
+                                fontSize: 13,
+                                fontWeight: 700,
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+
+                          {/* Aktivite / Çalışma Türü */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                              <label style={{ fontSize: 11.5, fontWeight: 800, color: '#C8CFDC' }}>
+                                📖 Çalışma Alanı / Aktivite *
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setIsCustomActivity(!isCustomActivity)}
                                 style={{
-                                  width: 6,
-                                  height: 6,
-                                  borderRadius: '50%',
-                                  background: sub?.color || 'var(--color-accent)',
-                                  flexShrink: 0
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#30D158',
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  padding: 0
+                                }}
+                              >
+                                {isCustomActivity ? '← Önerilenlerden Seç' : '+ Farklı Başlık Yaz'}
+                              </button>
+                            </div>
+
+                            {isCustomActivity ? (
+                              <input
+                                type="text"
+                                placeholder="Ör: Geometri üçgenler video izleme..."
+                                value={customActivity}
+                                onChange={(e) => setCustomActivity(e.target.value)}
+                                required
+                                style={{
+                                  width: '100%',
+                                  padding: '9px 12px',
+                                  borderRadius: 10,
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                                  color: '#FFFFFF',
+                                  fontSize: 13,
+                                  outline: 'none'
                                 }}
                               />
-                              <span style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF' }}>
-                                {log.subjectName}
+                            ) : (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                {PRESET_ACTIVITIES.map((act) => {
+                                  const isSel = studyActivity === act;
+                                  return (
+                                    <button
+                                      key={act}
+                                      type="button"
+                                      onClick={() => setStudyActivity(act)}
+                                      style={{
+                                        padding: '6px 10px',
+                                        borderRadius: 8,
+                                        fontSize: 11.5,
+                                        fontWeight: isSel ? 800 : 600,
+                                        background: isSel ? 'rgba(48, 209, 88, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                                        border: isSel ? '1px solid #30D158' : '1px solid rgba(255, 255, 255, 0.08)',
+                                        color: isSel ? '#30D158' : 'var(--color-text-dim)',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      {act}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Süre (Dakika) ve Hızlı Ön Ayarlar */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                              <label style={{ fontSize: 11.5, fontWeight: 800, color: '#C8CFDC' }}>
+                                ⏱️ Çalışma Süresi (Dakika) *
+                              </label>
+                              <span style={{ fontSize: 11.5, fontWeight: 900, color: '#30D158' }}>
+                                {studyMinutes >= 60
+                                  ? `${Math.floor(studyMinutes / 60)} Saat ${studyMinutes % 60 > 0 ? `${studyMinutes % 60} Dk` : ''}`
+                                  : `${studyMinutes} Dakika`}
                               </span>
                             </div>
-                            <div
+                            <input
+                              type="number"
+                              min="5"
+                              max="1440"
+                              step="5"
+                              value={studyMinutes}
+                              onChange={(e) => setStudyMinutes(Number(e.target.value))}
+                              required
                               style={{
-                                fontSize: 11,
-                                color: 'var(--color-text-muted)',
-                                marginTop: 2,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
+                                width: '100%',
+                                padding: '10px 14px',
+                                borderRadius: 10,
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                color: '#FFFFFF',
+                                fontSize: 15,
+                                fontWeight: 900,
+                                outline: 'none'
                               }}
-                            >
-                              {log.topicName || 'Genel Soru'} • {log.sourceBook || 'Soru Bankası'}
+                            />
+
+                            {/* Quick Minute Preset Buttons */}
+                            <div style={{ display: 'flex', gap: 5, marginTop: 6 }}>
+                              {[30, 45, 60, 90, 120, 180].map((mins) => (
+                                <button
+                                  key={mins}
+                                  type="button"
+                                  onClick={() => setStudyMinutes(mins)}
+                                  style={{
+                                    flex: 1,
+                                    padding: '5px 0',
+                                    borderRadius: 6,
+                                    background: studyMinutes === mins ? 'rgba(48, 209, 88, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                                    border: studyMinutes === mins ? '1px solid #30D158' : '1px solid rgba(255, 255, 255, 0.08)',
+                                    color: studyMinutes === mins ? '#30D158' : 'var(--color-text-dim)',
+                                    fontSize: 11,
+                                    fontWeight: 800,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {mins >= 60 ? `${mins / 60}s` : `${mins}d`}
+                                </button>
+                              ))}
                             </div>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--color-accent)' }}>
-                                {log.count} Soru
-                              </div>
-                              {(log.correctCount !== undefined || log.wrongCount !== undefined) && (
-                                <div style={{ fontSize: 10, color: 'var(--color-text-dim)', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                                  {log.correctCount !== undefined && (
-                                    <span style={{ color: '#30D158' }}>✓{log.correctCount}</span>
-                                  )}
-                                  {log.wrongCount !== undefined && (
-                                    <span style={{ color: '#FF453A' }}>✗{log.wrongCount}</span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-
-                            <button
-                              onClick={() => onDeleteQuestionLog(log.id)}
-                              title="Kaydı Sil"
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--color-text-dim)',
-                                cursor: 'pointer',
-                                padding: 4
-                              }}
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
+                          {/* Submit Button */}
+                          <button
+                            type="submit"
+                            style={{
+                              marginTop: 6,
+                              padding: '12px 0',
+                              borderRadius: 12,
+                              background: 'linear-gradient(135deg, #30D158 0%, #248A3D 100%)',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              fontSize: 13,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              boxShadow: '0 4px 16px rgba(48, 209, 88, 0.35)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 6
+                            }}
+                          >
+                            <CheckCircle2 size={16} />
+                            <span>Çalışma Süresini Kaydet</span>
+                          </button>
+                        </form>
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* QUICK ADD MODAL WITH DERS & KONU SEÇİMİ */}
-      {showAddModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99999,
-            background: 'rgba(5, 7, 12, 0.82)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
-          onClick={() => setShowAddModal(false)}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 440,
-              background: 'linear-gradient(180deg, #1A1D26 0%, #12141C 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: 22,
-              padding: '22px 20px',
-              color: '#FFFFFF',
-              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div>
-                <h3 style={{ fontSize: 17, fontWeight: 900, margin: 0, letterSpacing: -0.3 }}>
-                  Soru Çözümü Ekle
-                </h3>
-                <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                  Ders, konu ve soru adedini belirleyip çizelgene kaydet
-                </div>
-              </div>
-              <button
-                onClick={() => setShowAddModal(false)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: 30,
-                  height: 30,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--color-text-muted)',
-                  cursor: 'pointer'
-                }}
-              >
-                <X size={15} />
-              </button>
-            </div>
-
-            <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* Tarih Seçimi */}
-              <div>
-                <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
-                  📅 Çözüldüğü Gün
-                </label>
-                <select
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    fontSize: 12.5,
-                    outline: 'none'
-                  }}
-                >
-                  {weekDays.map((d) => (
-                    <option key={d.dateKey} value={d.dateKey} style={{ background: '#1A1D26' }}>
-                      {d.dayNameFull} ({d.dayNumber} {d.monthName}) {d.isToday ? '• Bugün' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Ders Seçimi */}
-              <div>
-                <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
-                  📚 Ders Seçin *
-                </label>
-                <select
-                  value={modalSubject}
-                  onChange={(e) => handleSubjectChange(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    fontSize: 12.5,
-                    outline: 'none'
-                  }}
-                >
-                  <optgroup label="TYT Dersleri" style={{ background: '#1A1D26', fontWeight: 800 }}>
-                    {YKS_SUBJECTS.filter((s) => s.category === 'TYT').map((s) => (
-                      <option key={s.code} value={s.name}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="AYT Dersleri" style={{ background: '#1A1D26', fontWeight: 800 }}>
-                    {YKS_SUBJECTS.filter((s) => s.category === 'AYT').map((s) => (
-                      <option key={s.code} value={s.name}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-              </div>
-
-              {/* Konu Seçimi */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                  <label style={{ fontSize: 11.5, fontWeight: 800, color: '#C8CFDC' }}>
-                    🎯 Konu Seçin *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsCustomTopic(!isCustomTopic)}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--color-accent)',
-                      fontSize: 11,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      padding: 0
-                    }}
-                  >
-                    {isCustomTopic ? 'Listeden Seç' : '+ Farklı Konu Yaz'}
-                  </button>
-                </div>
-
-                {isCustomTopic ? (
-                  <input
-                    type="text"
-                    placeholder="Konu adı yazın (ör: Karma Deneme, İleri Düzey Problemler...)"
-                    value={customTopicText}
-                    onChange={(e) => setCustomTopicText(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: 10,
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#FFFFFF',
-                      fontSize: 12.5,
-                      outline: 'none'
-                    }}
-                  />
-                ) : (
-                  <select
-                    value={modalTopic}
-                    onChange={(e) => setModalTopic(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: 10,
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#FFFFFF',
-                      fontSize: 12.5,
-                      outline: 'none'
-                    }}
-                  >
-                    {currentSubjectTopics.map((top) => (
-                      <option key={top} value={top} style={{ background: '#1A1D26' }}>
-                        {top}
-                      </option>
-                    ))}
-                    <option value="Genel Soru Çözümü" style={{ background: '#1A1D26' }}>
-                      Genel / Karma Soru Çözümü
-                    </option>
-                  </select>
-                )}
-              </div>
-
-              {/* Soru Sayısı (Dakika kaldırıldı, genel çalışma süresine ayrıldı) */}
-              <div>
-                <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
-                  Çözülen Soru Sayısı *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="2000"
-                  value={modalCount}
-                  onChange={(e) => setModalCount(Number(e.target.value))}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    outline: 'none'
-                  }}
-                />
-                {/* Quick Add Buttons */}
-                <div style={{ display: 'flex', gap: 5, marginTop: 6 }}>
-                  {[10, 20, 30, 50, 100].map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setModalCount((prev) => prev + amt)}
-                      style={{
-                        flex: 1,
-                        padding: '5px 0',
-                        borderRadius: 6,
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                        color: 'var(--color-text-dim)',
-                        fontSize: 11,
-                        fontWeight: 800,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      +{amt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Kaynak Kitap / Yayın */}
-              <div>
-                <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
-                  📖 Kaynak / Yayın (İsteğe Bağlı)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ör: 3D Soru Bankası Test 4, Bilgi Sarmal..."
-                  value={modalSource}
-                  onChange={(e) => setModalSource(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    fontSize: 12,
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              {/* Doğru & Yanlış (Opsiyonel) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#30D158', marginBottom: 5 }}>
-                    ✓ Doğru Sayısı (İsteğe Bağlı)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="Ör: 26"
-                    value={modalCorrect}
-                    onChange={(e) => setModalCorrect(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: 10,
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#FFFFFF',
-                      fontSize: 12.5,
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#FF453A', marginBottom: 5 }}>
-                    ✗ Yanlış Sayısı (İsteğe Bağlı)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="Ör: 4"
-                    value={modalWrong}
-                    onChange={(e) => setModalWrong(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: 10,
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#FFFFFF',
-                      fontSize: 12.5,
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                style={{
-                  marginTop: 6,
-                  padding: '12px 0',
-                  borderRadius: 12,
-                  background: 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  fontSize: 13,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(10, 132, 255, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6
-                }}
-              >
-                <CheckCircle2 size={16} />
-                <span>Çizelgeye Kaydet</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: GENERAL STUDY TIME MODAL (GENEL ÇALIŞMA SÜRESİ EKLE) */}
-      {showStudyTimeModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 99999,
-            background: 'rgba(5, 7, 12, 0.82)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 16
-          }}
-          onClick={() => setShowStudyTimeModal(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 480,
-              background: '#141824',
-              border: '1px solid rgba(48, 209, 88, 0.25)',
-              borderRadius: 20,
-              padding: 22,
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 16
-            }}
-          >
-            {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 10,
-                    background: 'linear-gradient(135deg, #30D158 0%, #248A3D 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFF'
-                  }}
-                >
-                  <Clock size={19} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: '#FFFFFF' }}>
-                    Çalışma Süresi Ekle
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
-                    Masa başı etüt ve konu çalışma sürenizi gün bazında kaydedin
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowStudyTimeModal(false)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: 8,
-                  color: 'var(--color-text-dim)',
-                  cursor: 'pointer',
-                  padding: 6
-                }}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Info Hint about NetFocus */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '9px 12px',
-                borderRadius: 10,
-                background: 'rgba(10, 132, 255, 0.1)',
-                border: '1px solid rgba(10, 132, 255, 0.25)',
-                fontSize: 11.5,
-                color: '#80BFFF'
-              }}
-            >
-              <Sparkles size={14} style={{ flexShrink: 0 }} />
-              <span>NetFocus Pomodoro seanslarınız otomatik olarak buraya eklenir.</span>
-            </div>
-
-            <form onSubmit={handleStudyTimeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {/* Tarih Seçimi */}
-              <div>
-                <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 5 }}>
-                  📅 Tarih *
-                </label>
-                <input
-                  type="date"
-                  value={studyTimeDate}
-                  onChange={(e) => setStudyTimeDate(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              {/* Aktivite / Çalışma Türü */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <label style={{ fontSize: 11.5, fontWeight: 800, color: '#C8CFDC' }}>
-                    📖 Çalışma Alanı / Aktivite *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsCustomActivity(!isCustomActivity)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#30D158',
-                      fontSize: 11,
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      padding: 0
-                    }}
-                  >
-                    {isCustomActivity ? '← Önerilenlerden Seç' : '+ Farklı Başlık Yaz'}
-                  </button>
-                </div>
-
-                {isCustomActivity ? (
-                  <input
-                    type="text"
-                    placeholder="Ör: Geometri üçgenler video izleme..."
-                    value={customActivity}
-                    onChange={(e) => setCustomActivity(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: 10,
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      color: '#FFFFFF',
-                      fontSize: 13,
-                      outline: 'none'
-                    }}
-                  />
-                ) : (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {PRESET_ACTIVITIES.map((act) => {
-                      const isSel = studyActivity === act;
-                      return (
-                        <button
-                          key={act}
-                          type="button"
-                          onClick={() => setStudyActivity(act)}
-                          style={{
-                            padding: '6px 10px',
-                            borderRadius: 8,
-                            fontSize: 11.5,
-                            fontWeight: isSel ? 800 : 600,
-                            background: isSel ? 'rgba(48, 209, 88, 0.2)' : 'rgba(255, 255, 255, 0.04)',
-                            border: isSel ? '1px solid #30D158' : '1px solid rgba(255, 255, 255, 0.08)',
-                            color: isSel ? '#30D158' : 'var(--color-text-dim)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {act}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Süre (Dakika) ve Hızlı Ön Ayarlar */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                  <label style={{ fontSize: 11.5, fontWeight: 800, color: '#C8CFDC' }}>
-                    ⏱️ Çalışma Süresi (Dakika) *
-                  </label>
-                  <span style={{ fontSize: 11.5, fontWeight: 900, color: '#30D158' }}>
-                    {studyMinutes >= 60
-                      ? `${Math.floor(studyMinutes / 60)} Saat ${studyMinutes % 60 > 0 ? `${studyMinutes % 60} Dk` : ''}`
-                      : `${studyMinutes} Dakika`}
-                  </span>
-                </div>
-                <input
-                  type="number"
-                  min="5"
-                  max="1440"
-                  step="5"
-                  value={studyMinutes}
-                  onChange={(e) => setStudyMinutes(Number(e.target.value))}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#FFFFFF',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    outline: 'none'
-                  }}
-                />
-
-                {/* Quick Minute Preset Buttons */}
-                <div style={{ display: 'flex', gap: 5, marginTop: 6 }}>
-                  {[30, 45, 60, 90, 120, 180].map((mins) => (
-                    <button
-                      key={mins}
-                      type="button"
-                      onClick={() => setStudyMinutes(mins)}
-                      style={{
-                        flex: 1,
-                        padding: '5px 0',
-                        borderRadius: 6,
-                        background: studyMinutes === mins ? 'rgba(48, 209, 88, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                        border: studyMinutes === mins ? '1px solid #30D158' : '1px solid rgba(255, 255, 255, 0.08)',
-                        color: studyMinutes === mins ? '#30D158' : 'var(--color-text-dim)',
-                        fontSize: 11,
-                        fontWeight: 800,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {mins >= 60 ? `${mins / 60}s` : `${mins}d`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                style={{
-                  marginTop: 6,
-                  padding: '12px 0',
-                  borderRadius: 12,
-                  background: 'linear-gradient(135deg, #30D158 0%, #248A3D 100%)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  fontSize: 13,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(48, 209, 88, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6
-                }}
-              >
-                <CheckCircle2 size={16} />
-                <span>Çalışma Süresini Kaydet</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+                );
 };

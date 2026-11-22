@@ -2198,20 +2198,31 @@ function AnalyticsScreenView({
   const aytPct = Math.round((completedAytTopics / (totalAytTopics || 1)) * 100);
 
   return (
-    <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 22 : 16 }}>
+    <div
+      style={{
+        padding: isDesktop ? 0 : '0 12px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: isDesktop ? 22 : 12,
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box'
+      }}
+    >
       {/* --------------------------------------------------------------------
           Card 1: Top Hero Wave Card (TYT Genel Net)
       -------------------------------------------------------------------- */}
       <div>
         <div className="wave-hero-card">
-          <div style={{ textAlign: 'center', paddingTop: 8 }}>
-            <div style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 600 }}>
+          <div style={{ textAlign: 'center', paddingTop: isDesktop ? 8 : 4 }}>
+            <div style={{ fontSize: isDesktop ? 13 : 11.5, color: 'var(--color-text-muted)', fontWeight: 600 }}>
               {heroCardIndex === 0 && 'TYT Genel Net'}
               {heroCardIndex === 1 && 'AYT Genel Net'}
               {heroCardIndex === 2 && 'Haftalık Soru Çözümü'}
               {heroCardIndex === 3 && 'Ortalama Süre'}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 700, marginTop: 10, color: '#FFFFFF' }}>
+            <div style={{ fontSize: isDesktop ? 20 : 16, fontWeight: 800, marginTop: 4, color: '#FFFFFF', letterSpacing: -0.3 }}>
               {heroCardIndex === 0 && (latestTyt ? `${latestTyt.totalNet.toFixed(2)} Net (TYT)` : 'Henüz TYT sınavı yok')}
               {heroCardIndex === 1 && (latestAyt ? `${latestAyt.totalNet.toFixed(2)} Net (AYT)` : 'Henüz AYT sınavı yok')}
               {heroCardIndex === 2 && `${last7DaysQuestions} Soru / Son 7 Gün`}
@@ -2225,7 +2236,7 @@ function AnalyticsScreenView({
             viewBox="0 0 400 120"
             fill="none"
             preserveAspectRatio="none"
-            style={{ height: 110 }}
+            style={{ height: isDesktop ? 100 : 48 }}
           >
             <path
               d="M0,60 C80,20 160,90 240,40 C320,0 360,70 400,50 L400,120 L0,120 Z"
@@ -2245,7 +2256,7 @@ function AnalyticsScreenView({
         </div>
 
         {/* Carousel indicator dots */}
-        <div className="wave-hero-dots">
+        <div className="wave-hero-dots" style={{ marginTop: isDesktop ? 8 : 4 }}>
           {[0, 1, 2, 3].map((idx) => (
             <div
               key={idx}
@@ -2259,94 +2270,101 @@ function AnalyticsScreenView({
       {/* --------------------------------------------------------------------
           Card 2: Soru Çözüm Geçmişi (Heatmap Matrix)
       -------------------------------------------------------------------- */}
-      <div className="app-card">
+      <div className="app-card" style={{ minWidth: 0, overflow: 'hidden' }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isDesktop ? 12 : 8 }}>
+          <span style={{ fontSize: isDesktop ? 15 : 13.5, fontWeight: 700, color: 'var(--color-text)' }}>
             Soru çözüm geçmişi
           </span>
           <div style={{ display: 'flex', gap: 6 }}>
             <button
               onClick={() => setHeatmapRange('4_ay')}
               className={`pill-toggle-btn ${heatmapRange === '4_ay' ? 'active' : ''}`}
+              style={{ padding: isDesktop ? '6px 14px' : '4px 10px', fontSize: isDesktop ? 12 : 11 }}
             >
               4 ay
             </button>
             <button
               onClick={() => setHeatmapRange('1_yil')}
               className={`pill-toggle-btn ${heatmapRange === '1_yil' ? 'active' : ''}`}
+              style={{ padding: isDesktop ? '6px 14px' : '4px 10px', fontSize: isDesktop ? 12 : 11 }}
             >
               1 yıl
             </button>
           </div>
         </div>
 
-        {/* Month Labels Bar */}
-        <div
-          style={{
-            display: 'flex',
-            position: 'relative',
-            height: 16,
-            marginBottom: 8,
-            paddingLeft: 30,
-            fontSize: 11,
-            color: 'var(--color-text-dim)',
-            fontWeight: 600,
-            overflowX: 'hidden'
-          }}
-        >
-          {monthHeaders.map((hdr, i) => (
-            <span
-              key={i}
+        {/* Heatmap Responsive Scrollable Area */}
+        <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', minWidth: 0, paddingBottom: 2 }}>
+          <div style={{ minWidth: isDesktop ? '100%' : (heatmapRange === '1_yil' ? 520 : 270) }}>
+            {/* Month Labels Bar */}
+            <div
               style={{
-                position: 'absolute',
-                left: `calc(30px + ${(hdr.colIndex / columnsCount) * 100}%)`,
-                whiteSpace: 'nowrap'
+                display: 'flex',
+                position: 'relative',
+                height: isDesktop ? 16 : 14,
+                marginBottom: isDesktop ? 8 : 4,
+                paddingLeft: isDesktop ? 30 : 22,
+                fontSize: isDesktop ? 11 : 9.5,
+                color: 'var(--color-text-dim)',
+                fontWeight: 600,
+                overflowX: 'hidden'
               }}
             >
-              {hdr.month}
-            </span>
-          ))}
-        </div>
+              {monthHeaders.map((hdr, i) => (
+                <span
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: `calc(${isDesktop ? 30 : 22}px + ${(hdr.colIndex / columnsCount) * 100}%)`,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {hdr.month}
+                </span>
+              ))}
+            </div>
 
-        {/* Heatmap Grid with Days on Left */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, fontSize: 10, color: 'var(--color-text-dim)', fontWeight: 600 }}>
-            {daysOfWeek.map((d) => (
-              <span key={d} style={{ height: 14, lineHeight: '14px' }}>
-                {d}
-              </span>
-            ))}
-          </div>
-
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, overflowX: heatmapRange === '1_yil' ? 'auto' : 'hidden' }}>
-            {heatmapGrid.map((row, rIdx) => (
-              <div key={rIdx} style={{ display: 'flex', gap: 5, justifyContent: 'space-between' }}>
-                {row.map((cell, cIdx) => (
-                  <div
-                    key={cIdx}
-                    onClick={() => {
-                      if (cell.isFuture) return;
-                      setSelectedCellDetail({
-                        dateStr: cell.dateStr,
-                        formattedDate: cell.formattedDate,
-                        questions: cell.questions,
-                        minutes: cell.minutes,
-                        isToday: cell.isToday
-                      });
-                      sounds.playClick();
-                    }}
-                    className={`heatmap-cell ${cell.isToday ? 'today-selected' : cell.level > 0 ? `level-${cell.level}` : ''}`}
-                    title={`${cell.formattedDate}: ${cell.questions} Soru (${cell.minutes} dk)`}
-                    style={{
-                      cursor: cell.isFuture ? 'default' : 'pointer',
-                      opacity: cell.isFuture ? 0.25 : 1,
-                      boxShadow: cell.isToday ? '0 0 0 1.5px var(--color-accent)' : undefined
-                    }}
-                  />
+            {/* Heatmap Grid with Days on Left */}
+            <div style={{ display: 'flex', gap: isDesktop ? 8 : 5 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: isDesktop ? 5 : 3.5, fontSize: isDesktop ? 10 : 8.5, color: 'var(--color-text-dim)', fontWeight: 600, width: isDesktop ? 22 : 18 }}>
+                {daysOfWeek.map((d) => (
+                  <span key={d} style={{ height: isDesktop ? 14 : 11, lineHeight: isDesktop ? '14px' : '11px' }}>
+                    {d}
+                  </span>
                 ))}
               </div>
-            ))}
+
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: isDesktop ? 5 : 3.5 }}>
+                {heatmapGrid.map((row, rIdx) => (
+                  <div key={rIdx} style={{ display: 'flex', gap: isDesktop ? 5 : 3.5, justifyContent: 'space-between' }}>
+                    {row.map((cell, cIdx) => (
+                      <div
+                        key={cIdx}
+                        onClick={() => {
+                          if (cell.isFuture) return;
+                          setSelectedCellDetail({
+                            dateStr: cell.dateStr,
+                            formattedDate: cell.formattedDate,
+                            questions: cell.questions,
+                            minutes: cell.minutes,
+                            isToday: cell.isToday
+                          });
+                          sounds.playClick();
+                        }}
+                        className={`heatmap-cell ${cell.isToday ? 'today-selected' : cell.level > 0 ? `level-${cell.level}` : ''}`}
+                        title={`${cell.formattedDate}: ${cell.questions} Soru (${cell.minutes} dk)`}
+                        style={{
+                          cursor: cell.isFuture ? 'default' : 'pointer',
+                          opacity: cell.isFuture ? 0.25 : 1,
+                          boxShadow: cell.isToday ? '0 0 0 1.5px var(--color-accent)' : undefined
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2354,15 +2372,15 @@ function AnalyticsScreenView({
         {selectedCellDetail && (
           <div
             style={{
-              marginTop: 12,
-              padding: '8px 12px',
+              marginTop: isDesktop ? 12 : 8,
+              padding: isDesktop ? '8px 12px' : '6px 9px',
               borderRadius: 10,
               background: '#1F2026',
               border: '1px solid var(--color-border)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              fontSize: 11.5
+              fontSize: isDesktop ? 11.5 : 10.5
             }}
           >
             <span style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>
@@ -2377,15 +2395,15 @@ function AnalyticsScreenView({
         )}
 
         {/* Heatmap Legend */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, fontSize: 11, color: 'var(--color-text-dim)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: isDesktop ? 12 : 8, fontSize: isDesktop ? 11 : 10, color: 'var(--color-text-dim)' }}>
           <span>Dokun • basılı tut</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span>Az</span>
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#21232A' }} />
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#1A3B22' }} />
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#235D33' }} />
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: '#2E8046' }} />
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--color-accent)' }} />
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: '#21232A' }} />
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: '#1A3B22' }} />
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: '#235D33' }} />
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: '#2E8046' }} />
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--color-accent)' }} />
             <span>Çok</span>
           </div>
         </div>
@@ -2476,8 +2494,9 @@ function AnalyticsScreenView({
           <div
             className="app-card"
             style={{
-              padding: '22px 24px',
-              width: '100%'
+              padding: isDesktop ? '22px 24px' : '14px 14px',
+              width: '100%',
+              boxSizing: 'border-box'
             }}
           >
             {/* Top Bar: Title + Metric Switcher */}
@@ -2487,24 +2506,24 @@ function AnalyticsScreenView({
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-                gap: 12,
-                marginBottom: 14
+                gap: isDesktop ? 12 : 8,
+                marginBottom: isDesktop ? 14 : 10
               }}
             >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <BarChart3 size={17} color="var(--color-accent)" />
-                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)' }}>
+                  <BarChart3 size={isDesktop ? 17 : 15} color="var(--color-accent)" />
+                  <span style={{ fontSize: isDesktop ? 16 : 14, fontWeight: 700, color: 'var(--color-text)' }}>
                     Net Gelişim İvmesi & Trend Eğrisi
                   </span>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                <div style={{ fontSize: isDesktop ? 12 : 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
                   Tarihsel deneme netleri ve sınav başı gelişim eğrisi
                 </div>
               </div>
 
               {/* Metric Selector Tabs */}
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {[
                   { id: 'tyt_total', label: 'TYT Toplam' },
                   { id: 'ayt_total', label: 'AYT Toplam' },
@@ -2518,7 +2537,7 @@ function AnalyticsScreenView({
                       setSelectedTrendPoint(null);
                     }}
                     className={`pill-toggle-btn ${trendMetric === tab.id ? 'active' : ''}`}
-                    style={{ fontSize: 12, padding: '5px 12px' }}
+                    style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '5px 12px' : '4px 8px' }}
                   >
                     {tab.label}
                   </button>
@@ -2534,28 +2553,28 @@ function AnalyticsScreenView({
                   alignItems: 'baseline',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
-                  gap: 12,
-                  padding: '12px 14px',
+                  gap: isDesktop ? 12 : 6,
+                  padding: isDesktop ? '12px 14px' : '8px 10px',
                   borderRadius: 14,
                   background: 'linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%)',
                   border: '1.5px solid rgba(255, 255, 255, 0.16)',
                   borderTop: '1.8px solid rgba(255, 255, 255, 0.38)',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.18)',
-                  marginBottom: 14
+                  marginBottom: isDesktop ? 14 : 10
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-text)', letterSpacing: -0.5 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <span style={{ fontSize: isDesktop ? 24 : 18, fontWeight: 800, color: 'var(--color-text)', letterSpacing: -0.5 }}>
                     {latestNet.toFixed(2)}
                   </span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)' }}>
+                  <span style={{ fontSize: isDesktop ? 11 : 9.5, fontWeight: 700, color: 'var(--color-text-muted)' }}>
                     SON NET
                   </span>
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: isDesktop ? 11 : 9.5,
                       fontWeight: 700,
-                      padding: '2px 8px',
+                      padding: '2px 6px',
                       borderRadius: 9999,
                       background: diffNet >= 0 ? 'rgba(48, 209, 88, 0.14)' : 'rgba(255, 69, 58, 0.14)',
                       color: diffNet >= 0 ? '#30D158' : '#FF453A'
@@ -2565,17 +2584,17 @@ function AnalyticsScreenView({
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', gap: 14, fontSize: 12, color: 'var(--color-text-muted)' }}>
+                <div style={{ display: 'flex', gap: isDesktop ? 14 : 8, fontSize: isDesktop ? 12 : 10.5, color: 'var(--color-text-muted)' }}>
                   <span>
                     En Yüksek: <strong style={{ color: '#FFFFFF' }}>{maxVal.toFixed(2)}</strong>
                   </span>
                   <span>•</span>
                   <span>
-                    Ortalama: <strong style={{ color: '#FFFFFF' }}>{avgNet.toFixed(2)}</strong>
+                    Ort: <strong style={{ color: '#FFFFFF' }}>{avgNet.toFixed(2)}</strong>
                   </span>
                   <span>•</span>
                   <span>
-                    Kayıtlı Deneme: <strong style={{ color: '#FFFFFF' }}>{trendPoints.length}</strong>
+                    Kayıt: <strong style={{ color: '#FFFFFF' }}>{trendPoints.length}</strong>
                   </span>
                 </div>
               </div>
@@ -2589,7 +2608,7 @@ function AnalyticsScreenView({
                   style={{
                     width: '100%',
                     height: 'auto',
-                    maxHeight: 180,
+                    maxHeight: isDesktop ? 180 : 120,
                     overflow: 'visible',
                     display: 'block'
                   }}
@@ -3459,7 +3478,7 @@ function CalendarTasksView({
   const breakPresets = [5, 10, 15, 20];
 
   return (
-    <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 20 : 16, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div style={{ padding: isDesktop ? 0 : '0 12px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 20 : 16, width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* Calendar Sub-Tabs: Haftalık Soru Çizelgesi (DEFAULT) | Odak & Sayaç | Görevler */}
       <div
         style={{
@@ -4272,31 +4291,31 @@ function ExamsScreenView({
   };
 
   return (
-    <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ padding: isDesktop ? 0 : '0 12px', display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Top Banner & Print Trigger (Feature 26) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Denemeler & Karne</h2>
-          <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>Toplam {exams.length} Deneme Sınavı Kayıtlı</div>
+          <h2 style={{ fontSize: isDesktop ? 18 : 16, fontWeight: 800, margin: 0 }}>Denemeler & Karne</h2>
+          <div style={{ fontSize: isDesktop ? 12 : 10.5, color: 'var(--color-text-muted)' }}>Toplam {exams.length} Deneme Sınavı Kayıtlı</div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
           {onOpenPrintReport && (
             <button
               className="btn-secondary"
               onClick={onOpenPrintReport}
-              style={{ padding: '8px 12px', fontSize: 12 }}
+              style={{ padding: isDesktop ? '8px 12px' : '6px 10px', fontSize: isDesktop ? 12 : 11 }}
               title="Karne çıktısı al"
             >
-              <Printer size={15} />
+              <Printer size={14} />
               <span>Yazdır</span>
             </button>
           )}
           <button
             className="btn-primary"
             onClick={() => setShowAddForm(!showAddForm)}
-            style={{ padding: '8px 14px', fontSize: 12 }}
+            style={{ padding: isDesktop ? '8px 14px' : '6px 12px', fontSize: isDesktop ? 12 : 11 }}
           >
-            <Plus size={16} />
+            <Plus size={15} />
             <span>{showAddForm ? 'İptal' : 'Deneme Ekle'}</span>
           </button>
         </div>
@@ -4361,10 +4380,10 @@ function ExamsScreenView({
 
           {/* Feature 6: Zorluk Seviyesi Seçimi */}
           <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 5 }}>
               Zorluk Seviyesi
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
               {[
                 { id: 'kolay', label: '🟢 Kolay', color: '#00E599' },
                 { id: 'orta', label: '🟡 Orta', color: '#FFB800' },
@@ -4376,9 +4395,9 @@ function ExamsScreenView({
                   type="button"
                   onClick={() => setFormDifficulty(lvl.id as any)}
                   style={{
-                    padding: '8px 4px',
+                    padding: isDesktop ? '8px 4px' : '6px 2px',
                     borderRadius: 8,
-                    fontSize: 11,
+                    fontSize: isDesktop ? 11 : 10,
                     fontWeight: 800,
                     cursor: 'pointer',
                     background: formDifficulty === lvl.id ? `${lvl.color}25` : '#1D1F25',
@@ -4393,8 +4412,8 @@ function ExamsScreenView({
           </div>
 
           {/* Subject Net Matrix Inputs */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 700 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', fontSize: 10.5, color: 'var(--color-text-muted)', fontWeight: 700 }}>
               <span>Ders</span>
               <span style={{ textAlign: 'center' }}>Doğru</span>
               <span style={{ textAlign: 'center' }}>Yanlış</span>
@@ -4405,15 +4424,15 @@ function ExamsScreenView({
               const currentScore = scores[sub.code] || { correct: 0, wrong: 0, blank: 0 };
               const currentNet = Math.round((currentScore.correct - currentScore.wrong * 0.25) * 100) / 100;
               return (
-                <div key={sub.code} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 6, alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700 }}>{sub.name}</span>
+                <div key={sub.code} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 4, alignItems: 'center' }}>
+                  <span style={{ fontSize: isDesktop ? 12 : 11, fontWeight: 700 }}>{sub.name}</span>
                   <input
                     type="number"
                     min="0"
                     max={sub.q}
                     value={currentScore.correct || ''}
                     onChange={(e) => handleScoreChange(sub.code, 'correct', Number(e.target.value))}
-                    style={{ padding: 6, borderRadius: 8, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', textAlign: 'center' }}
+                    style={{ padding: isDesktop ? 6 : '5px 2px', borderRadius: 8, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', textAlign: 'center', fontSize: isDesktop ? 12 : 11 }}
                   />
                   <input
                     type="number"
@@ -4421,9 +4440,9 @@ function ExamsScreenView({
                     max={sub.q}
                     value={currentScore.wrong || ''}
                     onChange={(e) => handleScoreChange(sub.code, 'wrong', Number(e.target.value))}
-                    style={{ padding: 6, borderRadius: 8, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', textAlign: 'center' }}
+                    style={{ padding: isDesktop ? 6 : '5px 2px', borderRadius: 8, background: '#1D1F25', border: '1px solid var(--color-border)', color: '#fff', textAlign: 'center', fontSize: isDesktop ? 12 : 11 }}
                   />
-                  <div style={{ textAlign: 'center', fontSize: 13, fontWeight: 800, color: currentNet < 0 ? '#FF453A' : 'var(--color-accent)' }}>
+                  <div style={{ textAlign: 'center', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800, color: currentNet < 0 ? '#FF453A' : 'var(--color-accent)' }}>
                     {currentNet > 0 ? `+${currentNet.toFixed(2)}` : currentNet.toFixed(2)}
                   </div>
                 </div>
@@ -4438,12 +4457,13 @@ function ExamsScreenView({
       ) : (
         <>
           {/* Feature 6: Filter Tabs & Publisher Selector */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 5 }}>
                 <button
                   className={`pill-toggle-btn ${filterType === 'all' ? 'active' : ''}`}
                   onClick={() => setFilterType('all')}
+                  style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
                 >
                   Tümü ({exams.length})
                 </button>
@@ -4454,6 +4474,7 @@ function ExamsScreenView({
                     setFilterType(filterType === 'TYT' ? 'all' : 'TYT');
                   }}
                   title={filterType === 'TYT' ? 'Filtreyi kaldır (Tüm sınavlar)' : 'Sadece TYT'}
+                  style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
                 >
                   TYT {filterType === 'TYT' ? '✕' : ''}
                 </button>
@@ -4464,6 +4485,7 @@ function ExamsScreenView({
                     setFilterType(filterType === 'AYT' ? 'all' : 'AYT');
                   }}
                   title={filterType === 'AYT' ? 'Filtreyi kaldır (Tüm sınavlar)' : 'Sadece AYT'}
+                  style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
                 >
                   AYT {filterType === 'AYT' ? '✕' : ''}
                 </button>
@@ -4474,13 +4496,13 @@ function ExamsScreenView({
                 value={filterPublisher}
                 onChange={(e) => setFilterPublisher(e.target.value)}
                 style={{
-                  padding: '5px 10px',
+                  padding: '4px 8px',
                   borderRadius: 99,
                   background: '#1D1F25',
                   border: '1px solid var(--color-border)',
                   color: '#fff',
-                  fontSize: 11,
-                  maxWidth: 140
+                  fontSize: isDesktop ? 11 : 10,
+                  maxWidth: isDesktop ? 140 : 105
                 }}
               >
                 <option value="all">Tüm Yayınlar</option>
@@ -4491,10 +4513,11 @@ function ExamsScreenView({
             </div>
 
             {/* Difficulty Filter Pills */}
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+            <div style={{ display: 'flex', gap: 5, overflowX: 'auto', paddingBottom: 2, WebkitOverflowScrolling: 'touch' }}>
               <button
                 className={`pill-toggle-btn ${filterDifficulty === 'all' ? 'active' : ''}`}
                 onClick={() => setFilterDifficulty('all')}
+                style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
               >
                 Tümü
               </button>
@@ -4505,6 +4528,7 @@ function ExamsScreenView({
                   setFilterDifficulty(filterDifficulty === 'kolay' ? 'all' : 'kolay');
                 }}
                 title={filterDifficulty === 'kolay' ? 'Filtreyi kaldır' : 'Kolay'}
+                style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
               >
                 🟢 Kolay {filterDifficulty === 'kolay' ? '✕' : ''}
               </button>
@@ -4515,6 +4539,7 @@ function ExamsScreenView({
                   setFilterDifficulty(filterDifficulty === 'orta' ? 'all' : 'orta');
                 }}
                 title={filterDifficulty === 'orta' ? 'Filtreyi kaldır' : 'Orta'}
+                style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
               >
                 🟡 Orta {filterDifficulty === 'orta' ? '✕' : ''}
               </button>
@@ -4525,8 +4550,9 @@ function ExamsScreenView({
                   setFilterDifficulty(filterDifficulty === 'osym' ? 'all' : 'osym');
                 }}
                 title={filterDifficulty === 'osym' ? 'Filtreyi kaldır' : 'ÖSYM Ayarı'}
+                style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
               >
-                🟣 ÖSYM Ayarı {filterDifficulty === 'osym' ? '✕' : ''}
+                🟣 ÖSYM {filterDifficulty === 'osym' ? '✕' : ''}
               </button>
               <button
                 className={`pill-toggle-btn ${filterDifficulty === 'zor' ? 'active' : ''}`}
@@ -4535,6 +4561,7 @@ function ExamsScreenView({
                   setFilterDifficulty(filterDifficulty === 'zor' ? 'all' : 'zor');
                 }}
                 title={filterDifficulty === 'zor' ? 'Filtreyi kaldır' : 'Zor'}
+                style={{ fontSize: isDesktop ? 12 : 10.5, padding: isDesktop ? '6px 14px' : '4px 8px' }}
               >
                 🔴 Zor {filterDifficulty === 'zor' ? '✕' : ''}
               </button>
@@ -4544,13 +4571,15 @@ function ExamsScreenView({
           {/* KPI Summary Strip */}
           <div
             style={{
-              padding: '8px 12px',
+              padding: isDesktop ? '8px 12px' : '7px 8px',
               borderRadius: 10,
               background: '#191A20',
               border: '1px solid var(--color-border)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontSize: 11
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              textAlign: 'center',
+              gap: 4,
+              fontSize: isDesktop ? 11 : 10
             }}
           >
             <span style={{ color: 'var(--color-text-muted)' }}>
@@ -4565,7 +4594,7 @@ function ExamsScreenView({
           </div>
 
           {/* Exams List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {filteredExams.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--color-text-muted)', fontSize: 13 }}>
                 Bu filtreye uygun deneme sınavı bulunamadı.
@@ -4581,7 +4610,8 @@ function ExamsScreenView({
                     style={{
                       cursor: 'pointer',
                       transition: 'transform 0.15s ease, border-color 0.15s ease',
-                      position: 'relative'
+                      position: 'relative',
+                      padding: isDesktop ? '16px 20px' : '11px 12px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderColor = 'rgba(212, 255, 0, 0.4)';
@@ -4593,36 +4623,36 @@ function ExamsScreenView({
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
+                      <div style={{ flex: 1, minWidth: 0, paddingRight: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: 'rgba(212, 255, 0, 0.15)', color: 'var(--color-accent)' }}>
+                          <span style={{ fontSize: isDesktop ? 11 : 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6, background: 'rgba(212, 255, 0, 0.15)', color: 'var(--color-accent)' }}>
                             {exam.type}
                           </span>
                           {diff && (
-                            <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: `${diff.color}20`, color: diff.color }}>
+                            <span style={{ fontSize: isDesktop ? 10 : 9, fontWeight: 800, padding: '2px 6px', borderRadius: 6, background: `${diff.color}20`, color: diff.color }}>
                               {diff.label}
                             </span>
                           )}
-                          <span style={{ fontSize: 10, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                          <span style={{ fontSize: isDesktop ? 10 : 9.5, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 2 }}>
                             Detay & Düzenle ↗
                           </span>
                         </div>
-                        <div style={{ fontSize: 15, fontWeight: 800, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: isDesktop ? 15 : 13.5, fontWeight: 800, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {exam.title}
                         </div>
-                        <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                        <div style={{ fontSize: isDesktop ? 12 : 10.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
                           {exam.publisher} • {exam.date}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         <div style={{
-                          fontSize: 22,
+                          fontSize: isDesktop ? 22 : 18,
                           fontWeight: 800,
                           color: exam.totalNet < 0 ? '#FF453A' : 'var(--color-accent)'
                         }}>
                           {exam.totalNet > 0 ? `+${exam.totalNet.toFixed(2)}` : exam.totalNet.toFixed(2)}
                         </div>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--color-text-muted)' }}>NET</div>
+                        <div style={{ fontSize: isDesktop ? 9 : 8.5, fontWeight: 700, color: 'var(--color-text-muted)' }}>NET</div>
                       </div>
                     </div>
                   </div>
@@ -4660,16 +4690,16 @@ function ExamsScreenView({
             style={{
               maxWidth: 560,
               width: '100%',
-              maxHeight: 'min(82vh, 700px)',
+              maxHeight: 'min(85vh, 700px)',
               margin: 'auto',
               overflowY: 'auto',
               background: '#141519',
               border: '1px solid var(--color-border)',
-              borderRadius: 20,
-              padding: 22,
+              borderRadius: isDesktop ? 20 : 16,
+              padding: isDesktop ? 22 : 14,
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
+              gap: isDesktop ? 16 : 12,
               boxShadow: '0 24px 48px rgba(0, 0, 0, 0.6)'
             }}
           >
@@ -4848,7 +4878,7 @@ function ExamsScreenView({
               return (
                 <div
                   style={{
-                    padding: '14px 18px',
+                    padding: isDesktop ? '14px 18px' : '10px 12px',
                     borderRadius: 14,
                     background: displayNet < 0 ? 'rgba(255, 69, 58, 0.1)' : 'rgba(212, 255, 0, 0.08)',
                     border: displayNet < 0 ? '1px solid rgba(255, 69, 58, 0.3)' : '1px solid rgba(212, 255, 0, 0.25)',
@@ -4858,10 +4888,10 @@ function ExamsScreenView({
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)' }}>TOPLAM NET</div>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--color-text-muted)' }}>TOPLAM NET</div>
                     <div
                       style={{
-                        fontSize: 28,
+                        fontSize: isDesktop ? 28 : 22,
                         fontWeight: 900,
                         color: displayNet < 0 ? '#FF453A' : 'var(--color-accent)'
                       }}
@@ -4869,18 +4899,18 @@ function ExamsScreenView({
                       {displayNet > 0 ? `+${displayNet.toFixed(2)}` : displayNet.toFixed(2)}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 14, textAlign: 'center' }}>
+                  <div style={{ display: 'flex', gap: isDesktop ? 14 : 10, textAlign: 'center' }}>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Doğru</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: '#00E599' }}>{totalCorrect}</div>
+                      <div style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>Doğru</div>
+                      <div style={{ fontSize: isDesktop ? 16 : 14, fontWeight: 800, color: '#00E599' }}>{totalCorrect}</div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Yanlış</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: '#FF453A' }}>{totalWrong}</div>
+                      <div style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>Yanlış</div>
+                      <div style={{ fontSize: isDesktop ? 16 : 14, fontWeight: 800, color: '#FF453A' }}>{totalWrong}</div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Boş</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--color-text-muted)' }}>{totalBlank}</div>
+                      <div style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>Boş</div>
+                      <div style={{ fontSize: isDesktop ? 16 : 14, fontWeight: 800, color: 'var(--color-text-muted)' }}>{totalBlank}</div>
                     </div>
                   </div>
                 </div>
@@ -4889,139 +4919,143 @@ function ExamsScreenView({
 
             {/* Subject Results Table */}
             <div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 8 }}>
+              <div style={{ fontSize: isDesktop ? 12 : 11, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 6 }}>
                 Ders Bazlı Net Dağılımı {isEditingExam && '(Doğru / Yanlış Değerlerini Düzenleyin)'}
               </div>
 
               {!isEditingExam ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
-                      fontSize: 11,
-                      color: 'var(--color-text-muted)',
-                      fontWeight: 700,
-                      padding: '4px 8px'
-                    }}
-                  >
-                    <span>Ders</span>
-                    <span style={{ textAlign: 'center' }}>Doğru</span>
-                    <span style={{ textAlign: 'center' }}>Yanlış</span>
-                    <span style={{ textAlign: 'center' }}>Boş</span>
-                    <span style={{ textAlign: 'right' }}>Net</span>
-                  </div>
-                  {selectedExam.subjectResults?.map((sr) => (
+                <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: isDesktop ? '100%' : 320 }}>
                     <div
-                      key={sr.subjectCode}
                       style={{
                         display: 'grid',
                         gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
-                        padding: '8px 10px',
-                        borderRadius: 10,
-                        background: '#1D1F25',
-                        border: '1px solid var(--color-border)',
-                        alignItems: 'center',
-                        fontSize: 12
+                        fontSize: isDesktop ? 11 : 10,
+                        color: 'var(--color-text-muted)',
+                        fontWeight: 700,
+                        padding: '3px 6px'
                       }}
                     >
-                      <span style={{ fontWeight: 700 }}>{sr.subjectName}</span>
-                      <span style={{ textAlign: 'center', color: '#00E599', fontWeight: 700 }}>{sr.correct}</span>
-                      <span style={{ textAlign: 'center', color: '#FF453A', fontWeight: 700 }}>{sr.wrong}</span>
-                      <span style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>{sr.blank}</span>
-                      <span
+                      <span>Ders</span>
+                      <span style={{ textAlign: 'center' }}>Doğru</span>
+                      <span style={{ textAlign: 'center' }}>Yanlış</span>
+                      <span style={{ textAlign: 'center' }}>Boş</span>
+                      <span style={{ textAlign: 'right' }}>Net</span>
+                    </div>
+                    {selectedExam.subjectResults?.map((sr) => (
+                      <div
+                        key={sr.subjectCode}
                         style={{
-                          textAlign: 'right',
-                          fontWeight: 800,
-                          color: sr.net < 0 ? '#FF453A' : 'var(--color-accent)'
+                          display: 'grid',
+                          gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
+                          padding: isDesktop ? '8px 10px' : '6px 8px',
+                          borderRadius: 8,
+                          background: '#1D1F25',
+                          border: '1px solid var(--color-border)',
+                          alignItems: 'center',
+                          fontSize: isDesktop ? 12 : 11
                         }}
                       >
-                        {sr.net > 0 ? `+${sr.net.toFixed(2)}` : sr.net.toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+                        <span style={{ fontWeight: 700 }}>{sr.subjectName}</span>
+                        <span style={{ textAlign: 'center', color: '#00E599', fontWeight: 700 }}>{sr.correct}</span>
+                        <span style={{ textAlign: 'center', color: '#FF453A', fontWeight: 700 }}>{sr.wrong}</span>
+                        <span style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>{sr.blank}</span>
+                        <span
+                          style={{
+                            textAlign: 'right',
+                            fontWeight: 800,
+                            color: sr.net < 0 ? '#FF453A' : 'var(--color-accent)'
+                          }}
+                        >
+                          {sr.net > 0 ? `+${sr.net.toFixed(2)}` : sr.net.toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 /* Editable Table */
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1.4fr 1fr 1fr 1fr',
-                      fontSize: 11,
-                      color: 'var(--color-text-muted)',
-                      fontWeight: 700,
-                      padding: '4px 8px'
-                    }}
-                  >
-                    <span>Ders</span>
-                    <span style={{ textAlign: 'center' }}>Doğru</span>
-                    <span style={{ textAlign: 'center' }}>Yanlış</span>
-                    <span style={{ textAlign: 'right' }}>Net</span>
-                  </div>
-                  {(selectedExam.type === 'TYT' ? tytSubjects : aytSubjects).map((sub) => {
-                    const current = editScores[sub.code] || { correct: 0, wrong: 0, blank: 0 };
-                    const currentNet = Math.round((current.correct - current.wrong * 0.25) * 100) / 100;
-                    return (
-                      <div
-                        key={sub.code}
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '1.4fr 1fr 1fr 1fr',
-                          gap: 6,
-                          alignItems: 'center',
-                          padding: '6px 8px',
-                          borderRadius: 10,
-                          background: '#1D1F25',
-                          border: '1px solid var(--color-border)'
-                        }}
-                      >
-                        <span style={{ fontSize: 12, fontWeight: 700 }}>{sub.name}</span>
-                        <input
-                          type="number"
-                          min="0"
-                          max={sub.q}
-                          value={current.correct || ''}
-                          onChange={(e) => handleEditScoreChange(sub.code, 'correct', Number(e.target.value))}
-                          style={{
-                            padding: 6,
-                            borderRadius: 6,
-                            background: '#141519',
-                            border: '1px solid var(--color-border)',
-                            color: '#fff',
-                            textAlign: 'center',
-                            fontSize: 12
-                          }}
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max={sub.q}
-                          value={current.wrong || ''}
-                          onChange={(e) => handleEditScoreChange(sub.code, 'wrong', Number(e.target.value))}
-                          style={{
-                            padding: 6,
-                            borderRadius: 6,
-                            background: '#141519',
-                            border: '1px solid var(--color-border)',
-                            color: '#fff',
-                            textAlign: 'center',
-                            fontSize: 12
-                          }}
-                        />
+                <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: isDesktop ? '100%' : 300 }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1.4fr 1fr 1fr 1fr',
+                        fontSize: isDesktop ? 11 : 10,
+                        color: 'var(--color-text-muted)',
+                        fontWeight: 700,
+                        padding: '3px 6px'
+                      }}
+                    >
+                      <span>Ders</span>
+                      <span style={{ textAlign: 'center' }}>Doğru</span>
+                      <span style={{ textAlign: 'center' }}>Yanlış</span>
+                      <span style={{ textAlign: 'right' }}>Net</span>
+                    </div>
+                    {(selectedExam.type === 'TYT' ? tytSubjects : aytSubjects).map((sub) => {
+                      const current = editScores[sub.code] || { correct: 0, wrong: 0, blank: 0 };
+                      const currentNet = Math.round((current.correct - current.wrong * 0.25) * 100) / 100;
+                      return (
                         <div
+                          key={sub.code}
                           style={{
-                            textAlign: 'right',
-                            fontSize: 13,
-                            fontWeight: 800,
-                            color: currentNet < 0 ? '#FF453A' : 'var(--color-accent)'
+                            display: 'grid',
+                            gridTemplateColumns: '1.4fr 1fr 1fr 1fr',
+                            gap: 4,
+                            alignItems: 'center',
+                            padding: isDesktop ? '6px 8px' : '5px 6px',
+                            borderRadius: 8,
+                            background: '#1D1F25',
+                            border: '1px solid var(--color-border)'
                           }}
                         >
-                          {currentNet > 0 ? `+${currentNet.toFixed(2)}` : currentNet.toFixed(2)}
+                          <span style={{ fontSize: isDesktop ? 12 : 11, fontWeight: 700 }}>{sub.name}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max={sub.q}
+                            value={current.correct || ''}
+                            onChange={(e) => handleEditScoreChange(sub.code, 'correct', Number(e.target.value))}
+                            style={{
+                              padding: isDesktop ? 6 : '4px 2px',
+                              borderRadius: 6,
+                              background: '#141519',
+                              border: '1px solid var(--color-border)',
+                              color: '#fff',
+                              textAlign: 'center',
+                              fontSize: isDesktop ? 12 : 11
+                            }}
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            max={sub.q}
+                            value={current.wrong || ''}
+                            onChange={(e) => handleEditScoreChange(sub.code, 'wrong', Number(e.target.value))}
+                            style={{
+                              padding: isDesktop ? 6 : '4px 2px',
+                              borderRadius: 6,
+                              background: '#141519',
+                              border: '1px solid var(--color-border)',
+                              color: '#fff',
+                              textAlign: 'center',
+                              fontSize: isDesktop ? 12 : 11
+                            }}
+                          />
+                          <div
+                            style={{
+                              textAlign: 'right',
+                              fontSize: isDesktop ? 13 : 11.5,
+                              fontWeight: 800,
+                              color: currentNet < 0 ? '#FF453A' : 'var(--color-accent)'
+                            }}
+                          >
+                            {currentNet > 0 ? `+${currentNet.toFixed(2)}` : currentNet.toFixed(2)}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -5178,13 +5212,13 @@ function CurriculumScreenView({
   };
 
   return (
-    <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ padding: isDesktop ? 0 : '0 12px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 14 : 10 }}>
       {/* Top Main Section Switcher: Konu Takip Çizelgesi vs ÖSYM Soru Dağılımı */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <button
           type="button"
           className={`btn-secondary ${activeCurriculumTab === 'mufredat' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: '12px 14px', fontSize: 13, fontWeight: 800 }}
+          style={{ justifyContent: 'center', padding: isDesktop ? '12px 14px' : '9px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
           onClick={() => {
             sounds.playTabSwitch();
             setActiveCurriculumTab('mufredat');
@@ -5196,7 +5230,7 @@ function CurriculumScreenView({
         <button
           type="button"
           className={`btn-secondary ${activeCurriculumTab === 'osym' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: '12px 14px', fontSize: 13, fontWeight: 800 }}
+          style={{ justifyContent: 'center', padding: isDesktop ? '12px 14px' : '9px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
           onClick={() => {
             sounds.playTabSwitch();
             if (onOpenOsymDistribution) {
@@ -5224,7 +5258,7 @@ function CurriculumScreenView({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <button
               className={`btn-secondary ${examCategory === 'TYT' ? 'active' : ''}`}
-              style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+              style={{ justifyContent: 'center', padding: isDesktop ? '10px 14px' : '8px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
               onClick={() => {
                 sounds.playTabSwitch();
                 setExamCategory('TYT');
@@ -5234,7 +5268,7 @@ function CurriculumScreenView({
             </button>
             <button
               className={`btn-secondary ${examCategory === 'AYT' ? 'active' : ''}`}
-              style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+              style={{ justifyContent: 'center', padding: isDesktop ? '10px 14px' : '8px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
               onClick={() => {
                 sounds.playTabSwitch();
                 setExamCategory('AYT');
@@ -5250,15 +5284,16 @@ function CurriculumScreenView({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                padding: '8px 12px',
+                gap: 6,
+                padding: isDesktop ? '8px 12px' : '6px 8px',
                 background: 'rgba(212, 255, 0, 0.05)',
                 border: '1px solid rgba(212, 255, 0, 0.2)',
                 borderRadius: 12,
-                overflowX: 'auto'
+                overflowX: 'auto',
+                WebkitOverflowScrolling: 'touch'
               }}
             >
-              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--color-accent)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: isDesktop ? 11 : 10, fontWeight: 800, color: 'var(--color-accent)', whiteSpace: 'nowrap' }}>
                 🎯 Alan:
               </span>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
@@ -5274,7 +5309,7 @@ function CurriculumScreenView({
                       key={track.id}
                       type="button"
                       className={`alan-btn${isActive ? ' active' : ''}`}
-                      style={{ padding: '5px 10px', borderRadius: 8, fontSize: 11 }}
+                      style={{ padding: isDesktop ? '5px 10px' : '4px 8px', borderRadius: 8, fontSize: isDesktop ? 11 : 10 }}
                       onClick={() => {
                         sounds.playClick();
                         const nextTrack = selectedFieldTrack === track.id ? 'all' : (track.id as any);
@@ -5296,12 +5331,12 @@ function CurriculumScreenView({
             style={{
               background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.08) 0%, rgba(26, 28, 34, 1) 100%)',
               border: '1px solid var(--color-border)',
-              padding: 16
+              padding: isDesktop ? 16 : '12px 14px'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>
+                <div style={{ fontSize: isDesktop ? 16 : 13.5, fontWeight: 800 }}>
                   {examCategory === 'AYT' && selectedFieldTrack === 'sayisal'
                     ? 'AYT Sayısal (MF) Müfredat İlerlemesi'
                     : examCategory === 'AYT' && selectedFieldTrack === 'esit_agirlik'
@@ -5310,13 +5345,13 @@ function CurriculumScreenView({
                     ? 'AYT Sözel (TS) Müfredat İlerlemesi'
                     : `${examCategory} Müfredat İlerlemesi`}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                <div style={{ fontSize: isDesktop ? 12 : 10.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
                   Toplam {completedTopicsInCategory} / {totalTopicsInCategory} Konu Tamamlandı
                 </div>
               </div>
               <div
                 style={{
-                  fontSize: 24,
+                  fontSize: isDesktop ? 24 : 19,
                   fontWeight: 900,
                   color: 'var(--color-accent)',
                   fontFamily: 'var(--font-mono)'
@@ -5326,7 +5361,7 @@ function CurriculumScreenView({
               </div>
             </div>
 
-            <div style={{ width: '100%', height: 10, background: '#14161C', borderRadius: 99, overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: 8, background: '#14161C', borderRadius: 99, overflow: 'hidden' }}>
               <div
                 style={{
                   width: `${categoryPct}%`,
@@ -5435,7 +5470,7 @@ function CurriculumScreenView({
                   <div
                     onClick={() => toggleSubjectExpand(sub.code)}
                     style={{
-                      padding: '14px 16px',
+                      padding: isDesktop ? '14px 16px' : '10px 12px',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
@@ -5444,47 +5479,50 @@ function CurriculumScreenView({
                       background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? 10 : 8, minWidth: 0, flex: 1 }}>
                       <div
                         style={{
-                          width: 10,
-                          height: 10,
+                          width: 9,
+                          height: 9,
                           borderRadius: '50%',
                           background: sub.color,
-                          boxShadow: `0 0 8px ${sub.color}`
+                          boxShadow: `0 0 8px ${sub.color}`,
+                          flexShrink: 0
                         }}
                       />
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: '#FFFFFF' }}>{sub.name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                          {completedSub} / {totalSub} Konu Tamamlandı
+                      <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                        <div style={{ fontSize: isDesktop ? 14 : 13, fontWeight: 800, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.name}</div>
+                        <div style={{ fontSize: isDesktop ? 11 : 10, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                          {completedSub}/{totalSub} Konu
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? 12 : 8, flexShrink: 0 }}>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: sub.color }}>%{subPct}</div>
+                        <div style={{ fontSize: isDesktop ? 14 : 12.5, fontWeight: 800, color: sub.color }}>%{subPct}</div>
                       </div>
                       <ChevronDown
-                        size={18}
+                        size={isDesktop ? 18 : 16}
                         color="var(--color-text-muted)"
                         style={{
                           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                          transition: 'transform 0.2s ease'
+                          transition: 'transform 0.2s ease',
+                          flexShrink: 0
                         }}
                       />
                     </div>
                   </div>
 
                   {isExpanded && (
-                    <div style={{ width: '100%', overflowX: 'auto' }}>
+                    <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                       <table
                         style={{
                           width: '100%',
                           borderCollapse: 'collapse',
-                          fontSize: 12,
-                          textAlign: 'left'
+                          fontSize: isDesktop ? 12 : 11,
+                          textAlign: 'left',
+                          minWidth: isDesktop ? '100%' : 380
                         }}
                       >
                         <thead>
@@ -5494,13 +5532,13 @@ function CurriculumScreenView({
                               borderBottom: '1px solid var(--color-border)',
                               color: 'var(--color-text-muted)',
                               fontWeight: 800,
-                              fontSize: 11
+                              fontSize: isDesktop ? 11 : 10
                             }}
                           >
-                            <th style={{ padding: '10px 12px', width: 44, textAlign: 'center' }}>Tik</th>
-                            <th style={{ padding: '10px 14px' }}>Konu Adı</th>
-                            <th style={{ padding: '10px 12px', textAlign: 'center', width: 130 }}>ÖSYM Çıkmış</th>
-                            <th style={{ padding: '10px 14px', textAlign: 'right', width: 130 }}>Durum</th>
+                            <th style={{ padding: isDesktop ? '10px 12px' : '7px 8px', width: isDesktop ? 44 : 34, textAlign: 'center' }}>Tik</th>
+                            <th style={{ padding: isDesktop ? '10px 14px' : '7px 8px' }}>Konu Adı</th>
+                            <th style={{ padding: isDesktop ? '10px 12px' : '7px 6px', textAlign: 'center', width: isDesktop ? 130 : 70 }}>ÖSYM Çıkmış</th>
+                            <th style={{ padding: isDesktop ? '10px 14px' : '7px 8px', textAlign: 'right', width: isDesktop ? 130 : 80 }}>Durum</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -5539,21 +5577,21 @@ function CurriculumScreenView({
                                 }}
                                 className="table-row-hover"
                               >
-                                <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                <td style={{ padding: isDesktop ? '10px 12px' : '7px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                                   <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                                     {isCompleted ? (
-                                      <CheckCircle2 size={19} color="var(--color-accent)" />
+                                      <CheckCircle2 size={isDesktop ? 19 : 17} color="var(--color-accent)" />
                                     ) : currentStatus === 'in_progress' ? (
-                                      <Circle size={19} color="#00F0FF" />
+                                      <Circle size={isDesktop ? 19 : 17} color="#00F0FF" />
                                     ) : (
-                                      <Circle size={19} color="rgba(255, 255, 255, 0.25)" />
+                                      <Circle size={isDesktop ? 19 : 17} color="rgba(255, 255, 255, 0.25)" />
                                     )}
                                   </div>
                                 </td>
-                                <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
+                                <td style={{ padding: isDesktop ? '10px 14px' : '7px 8px', verticalAlign: 'middle' }}>
                                   <span
                                     style={{
-                                      fontSize: 13,
+                                      fontSize: isDesktop ? 13 : 11.5,
                                       fontWeight: isCompleted ? 700 : 600,
                                       color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
                                       textDecoration: isCompleted ? 'line-through' : 'none'
@@ -5562,14 +5600,14 @@ function CurriculumScreenView({
                                     {topic}
                                   </span>
                                 </td>
-                                <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                <td style={{ padding: isDesktop ? '10px 12px' : '7px 4px', textAlign: 'center', verticalAlign: 'middle' }}>
                                   {osymTopic ? (
                                     <span
                                       style={{
-                                        fontSize: 11,
+                                        fontSize: isDesktop ? 11 : 9.5,
                                         fontWeight: 800,
                                         fontFamily: 'var(--font-mono)',
-                                        padding: '2px 8px',
+                                        padding: '2px 6px',
                                         borderRadius: 6,
                                         background: osymTopic.total >= 10 ? 'rgba(212, 255, 0, 0.12)' : 'rgba(255, 255, 255, 0.05)',
                                         color: osymTopic.total >= 10 ? 'var(--color-accent)' : 'var(--color-text-dim)'
@@ -5578,15 +5616,15 @@ function CurriculumScreenView({
                                       {osymTopic.total} Soru
                                     </span>
                                   ) : (
-                                    <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>–</span>
+                                    <span style={{ fontSize: 10, color: 'var(--color-text-dim)' }}>–</span>
                                   )}
                                 </td>
-                                <td style={{ padding: '10px 14px', textAlign: 'right', verticalAlign: 'middle' }}>
+                                <td style={{ padding: isDesktop ? '10px 14px' : '7px 6px', textAlign: 'right', verticalAlign: 'middle' }}>
                                   <span
                                     style={{
-                                      fontSize: 10,
+                                      fontSize: isDesktop ? 10 : 9,
                                       fontWeight: 800,
-                                      padding: '3px 8px',
+                                      padding: isDesktop ? '3px 8px' : '2px 6px',
                                       borderRadius: 6,
                                       background:
                                         isCompleted
@@ -6050,7 +6088,7 @@ function ProfileScreenView({
                     height: 56,
                     borderRadius: 18,
                     background: 'linear-gradient(135deg, var(--color-accent) 0%, rgba(255,255,255,0.15) 100%)',
-                    color: '#FFFFFF',
+                    color: '#060709',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -6103,7 +6141,7 @@ function ProfileScreenView({
                     borderRadius: 99,
                     background: 'var(--color-accent)',
                     border: 'none',
-                    color: '#fff',
+                    color: '#060709',
                     fontSize: 11,
                     fontWeight: 700,
                     cursor: 'pointer'

@@ -85,7 +85,8 @@
 }
 
 /* 1. Cupertino Electric Blue */
-.theme-blue, .theme-cyan {
+.theme-blue,
+.theme-cyan {
   --color-bg: #07080B;
   --color-surface: #111218;
   --color-surface-elevated: #181A22;
@@ -113,7 +114,8 @@
 }
 
 /* 3. Deep Indigo Violet */
-.theme-indigo, .theme-purple {
+.theme-indigo,
+.theme-purple {
   --color-bg: #07080B;
   --color-surface: #111218;
   --color-surface-elevated: #181A22;
@@ -141,7 +143,9 @@
 }
 
 /* 5. Activity Mint Teal */
-.theme-mint, .theme-lime, .theme-emerald {
+.theme-mint,
+.theme-lime,
+.theme-emerald {
   --color-bg: #07080B;
   --color-surface: #111218;
   --color-surface-elevated: #181A22;
@@ -171,7 +175,9 @@ button {
   appearance: none;
 }
 
-select, input, textarea {
+select,
+input,
+textarea {
   font-family: inherit;
   color-scheme: dark;
 }
@@ -179,7 +185,7 @@ select, input, textarea {
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg, #07080B);
-  background-image: 
+  background-image:
     radial-gradient(ellipse 90% 50% at 50% -10%, rgba(135, 145, 180, 0.14), transparent 70%),
     radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.04), transparent 30%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cpath d='M40 50 L120 20 L200 60 L220 140 L160 210 L60 200 L20 130 Z' fill='none' stroke='rgba(255,255,255,0.035)' stroke-width='1'/%3E%3Cpath d='M120 20 L160 210 M40 50 L220 140 M200 60 L20 130 M120 20 L60 200' fill='none' stroke='rgba(255,255,255,0.02)' stroke-width='0.75'/%3E%3Ccircle cx='120' cy='20' r='1.8' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='200' cy='60' r='1.8' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='220' cy='140' r='1.8' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='160' cy='210' r='1.8' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='60' cy='200' r='1.8' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='20' cy='130' r='1.8' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='40' cy='50' r='1.8' fill='rgba(255,255,255,0.08)'/%3E%3C/svg%3E"),
@@ -209,6 +215,7 @@ body {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
+
 *::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
@@ -216,14 +223,20 @@ body {
   background: transparent !important;
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden !important;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
 
-button, .clickable-card, .btn-primary, .btn-secondary, .nav-item-icon-btn, .center-fab-protruding {
+button,
+.clickable-card,
+.btn-primary,
+.btn-secondary,
+.nav-item-icon-btn,
+.center-fab-protruding {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -267,7 +280,9 @@ button, .clickable-card, .btn-primary, .btn-secondary, .nav-item-icon-btn, .cent
 }
 
 @media (max-width: 768px) {
-  html, body {
+
+  html,
+  body {
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
@@ -321,6 +336,41 @@ button, .clickable-card, .btn-primary, .btn-secondary, .nav-item-icon-btn, .cent
     touch-action: pan-y !important;
     padding-bottom: calc(125px + env(safe-area-inset-bottom, 0px)) !important;
     box-sizing: border-box !important;
+  }
+
+  /* Mobile Fluid & Compact Cards for Analiz & Rapor */
+  .app-card {
+    padding: 14px 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .wave-hero-card {
+    min-height: 105px !important;
+    padding: 12px 14px 0 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .wave-hero-card .wave-graphic {
+    height: 48px !important;
+    max-height: 48px !important;
+    width: calc(100% + 28px) !important;
+    margin-left: -14px !important;
+  }
+
+  .grid-2x2 {
+    gap: 8px !important;
+  }
+
+  .analiz-card-item {
+    padding: 11px 12px !important;
+    border-radius: 14px !important;
+    gap: 8px !important;
+  }
+
+  .heatmap-cell {
+    width: 11px !important;
+    height: 11px !important;
+    border-radius: 3px !important;
   }
 }
 
@@ -482,7 +532,8 @@ body.desktop-view-active {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: calc(125px + env(safe-area-inset-bottom, 0px)); /* Space for fixed floating bottom nav */
+  padding-bottom: calc(125px + env(safe-area-inset-bottom, 0px));
+  /* Space for fixed floating bottom nav */
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
@@ -504,6 +555,7 @@ body.desktop-view-active {
     opacity: 0.2;
     transform: translateY(4px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -549,6 +601,7 @@ button:active:not(:disabled) {
 button:focus {
   outline: none;
 }
+
 button:focus-visible {
   outline: none;
   box-shadow: none;
@@ -571,6 +624,7 @@ button:focus-visible {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.20) !important;
   transition: all 0.14s ease;
 }
+
 .option-btn.selected {
   background: linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%) !important;
   border: 1px solid #FFFFFF !important;
@@ -578,6 +632,7 @@ button:focus-visible {
   font-weight: 800 !important;
   box-shadow: 0 4px 16px rgba(255, 255, 255, 0.35), inset 0 1px 0 #FFFFFF !important;
 }
+
 .option-btn:not(.selected) {
   background: linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%) !important;
   border-color: rgba(255, 255, 255, 0.16) !important;
@@ -604,6 +659,7 @@ button:focus-visible {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.20) !important;
   transition: all 0.14s ease;
 }
+
 .alan-btn.active {
   font-weight: 800;
   background: linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%) !important;
@@ -611,6 +667,7 @@ button:focus-visible {
   border-color: #FFFFFF !important;
   box-shadow: 0 4px 16px rgba(255, 255, 255, 0.35), inset 0 1px 0 #FFFFFF !important;
 }
+
 .alan-btn:not(.active) {
   background: linear-gradient(180deg, #1C1E26 0%, #111319 50%, #090A0D 100%) !important;
   color: #D1D5DB !important;
@@ -803,11 +860,30 @@ button:focus-visible {
   }
 }
 
-.heatmap-cell.level-1 { opacity: 0.40; background: var(--color-accent); }
-.heatmap-cell.level-2 { opacity: 0.60; background: var(--color-accent); }
-.heatmap-cell.level-3 { opacity: 0.80; background: var(--color-accent); }
-.heatmap-cell.level-4 { opacity: 0.92; background: var(--color-accent); }
-.heatmap-cell.level-5 { opacity: 1; background: var(--color-accent); }
+.heatmap-cell.level-1 {
+  opacity: 0.40;
+  background: var(--color-accent);
+}
+
+.heatmap-cell.level-2 {
+  opacity: 0.60;
+  background: var(--color-accent);
+}
+
+.heatmap-cell.level-3 {
+  opacity: 0.80;
+  background: var(--color-accent);
+}
+
+.heatmap-cell.level-4 {
+  opacity: 0.92;
+  background: var(--color-accent);
+}
+
+.heatmap-cell.level-5 {
+  opacity: 1;
+  background: var(--color-accent);
+}
 
 .heatmap-cell.today-selected {
   border: 2px solid #FFFFFF !important;
@@ -1078,7 +1154,7 @@ button:focus-visible {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .btn-secondary:hover {
+  .btn-secondary:not(.active):hover {
     border-color: rgba(255, 255, 255, 0.30) !important;
     border-top-color: rgba(255, 255, 255, 0.65) !important;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
@@ -1120,7 +1196,7 @@ button:focus-visible {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .pill-toggle-btn:hover {
+  .pill-toggle-btn:not(.active):hover {
     color: #FFFFFF !important;
     border-color: rgba(255, 255, 255, 0.28) !important;
     border-top-color: rgba(255, 255, 255, 0.55) !important;
@@ -1137,6 +1213,50 @@ button:focus-visible {
   border-color: #FFFFFF !important;
   font-weight: 800 !important;
   box-shadow: 0 4px 16px rgba(255, 255, 255, 0.35), inset 0 1px 0 #FFFFFF !important;
+}
+
+/* Global button text contrast guarantee: all active/selected buttons and their children MUST have dark text */
+.pill-toggle-btn.active,
+.pill-toggle-btn.active *,
+.pill-toggle-btn.active:hover,
+.pill-toggle-btn.active:hover *,
+.pill-toggle-btn.active:focus,
+.pill-toggle-btn.active:focus *,
+.pill-toggle-btn.active:active,
+.pill-toggle-btn.active:active *,
+.btn-secondary.active,
+.btn-secondary.active *,
+.btn-secondary.active:hover,
+.btn-secondary.active:hover *,
+.btn-secondary.active:focus,
+.btn-secondary.active:focus *,
+.btn-secondary.active:active,
+.btn-secondary.active:active *,
+.btn-primary,
+.btn-primary *,
+.btn-primary:hover,
+.btn-primary:hover *,
+.btn-primary:focus,
+.btn-primary:focus *,
+.btn-primary:active,
+.btn-primary:active *,
+.option-btn.selected,
+.option-btn.selected *,
+.option-btn.selected:hover,
+.option-btn.selected:hover *,
+.option-btn.selected:focus,
+.option-btn.selected:focus *,
+.option-btn.selected:active,
+.option-btn.selected:active *,
+.alan-btn.active,
+.alan-btn.active *,
+.alan-btn.active:hover,
+.alan-btn.active:hover *,
+.alan-btn.active:focus,
+.alan-btn.active:focus *,
+.alan-btn.active:active,
+.alan-btn.active:active * {
+  color: #060709 !important;
 }
 
 .clickable-card {
@@ -1219,6 +1339,7 @@ body.desktop-view-active .bottom-sheet {
     opacity: 0;
     transform: scale(0.96) translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -1226,22 +1347,49 @@ body.desktop-view-active .bottom-sheet {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* Stagger Animation Utilities (Emil Kowalski: 30-50ms natural cascade) */
-.stagger-container > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-container > *:nth-child(2) { animation-delay: 40ms; }
-.stagger-container > *:nth-child(3) { animation-delay: 80ms; }
-.stagger-container > *:nth-child(4) { animation-delay: 120ms; }
-.stagger-container > *:nth-child(5) { animation-delay: 160ms; }
-.stagger-container > *:nth-child(6) { animation-delay: 200ms; }
+.stagger-container>*:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stagger-container>*:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.stagger-container>*:nth-child(3) {
+  animation-delay: 80ms;
+}
+
+.stagger-container>*:nth-child(4) {
+  animation-delay: 120ms;
+}
+
+.stagger-container>*:nth-child(5) {
+  animation-delay: 160ms;
+}
+
+.stagger-container>*:nth-child(6) {
+  animation-delay: 200ms;
+}
 
 .stagger-item {
   opacity: 0;
@@ -1253,6 +1401,7 @@ body.desktop-view-active .bottom-sheet {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1265,6 +1414,7 @@ body.desktop-view-active .bottom-sheet {
     background: #ffffff !important;
     color: #000000 !important;
   }
+
   .mobile-viewport-shell {
     width: 100% !important;
     max-width: 100% !important;
@@ -1274,6 +1424,7 @@ body.desktop-view-active .bottom-sheet {
     box-shadow: none !important;
     background: #ffffff !important;
   }
+
   .floating-bottom-nav,
   .status-bar-time,
   .no-print {
@@ -1336,9 +1487,12 @@ body.desktop-view-active .bottom-sheet {
    Knowunity AI Mascot & Tutor Animations
    ========================================================================== */
 @keyframes mascotFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-8px) rotate(1.5deg);
   }
@@ -1349,6 +1503,7 @@ body.desktop-view-active .bottom-sheet {
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -1356,10 +1511,13 @@ body.desktop-view-active .bottom-sheet {
 }
 
 @keyframes typingPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(0.8);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.15);
@@ -1418,7 +1576,8 @@ input[type="range"]::-webkit-slider-thumb,
   border-radius: 50%;
   background: #FFFFFF;
   cursor: grab;
-  margin-top: -6px; /* (18px - 6px) / 2 to center thumb on 6px track */
+  margin-top: -6px;
+  /* (18px - 6px) / 2 to center thumb on 6px track */
   border: 3px solid var(--slider-accent, var(--color-accent, #00F0FF));
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 12px var(--slider-accent, rgba(0, 240, 255, 0.45));
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.15s ease;

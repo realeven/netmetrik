@@ -222,7 +222,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               fontWeight: 800,
               borderRadius: 9,
               background: tab === 'register' ? 'var(--color-accent)' : 'transparent',
-              color: tab === 'register' ? '#FFFFFF' : 'var(--color-text-muted)',
+              color: tab === 'register' ? '#060709' : 'var(--color-text-muted)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -244,7 +244,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               fontWeight: 800,
               borderRadius: 9,
               background: tab === 'login' ? 'var(--color-accent)' : 'transparent',
-              color: tab === 'login' ? '#FFFFFF' : 'var(--color-text-muted)',
+              color: tab === 'login' ? '#060709' : 'var(--color-text-muted)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -342,7 +342,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         textAlign: 'center',
                         transition: 'all 0.15s ease',
                         background: isSelected ? 'var(--color-accent)' : 'rgba(255, 255, 255, 0.05)',
-                        color: isSelected ? '#FFFFFF' : 'var(--color-text-dim)',
+                        color: isSelected ? '#060709' : 'var(--color-text-dim)',
                         border: isSelected ? '1px solid var(--color-accent)' : '1px solid rgba(255, 255, 255, 0.08)',
                         boxShadow: isSelected ? '0 3px 10px rgba(10, 132, 255, 0.35)' : 'none'
                       }}
