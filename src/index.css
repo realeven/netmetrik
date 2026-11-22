@@ -339,9 +339,22 @@ button,
   }
 
   /* Mobile Fluid & Compact Cards for Analiz & Rapor */
-  .app-card {
+  .app-card:not(.flush-card) {
     padding: 14px 14px !important;
     border-radius: 18px !important;
+  }
+
+  .app-card.flush-card {
+    padding: 0 !important;
+    border-radius: 16px !important;
+  }
+
+  .topic-mobile-item {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .topic-mobile-item:active {
+    background: rgba(255, 255, 255, 0.08) !important;
   }
 
   .wave-hero-card {

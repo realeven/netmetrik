@@ -5145,7 +5145,7 @@ function CurriculumScreenView({
   topicProgress,
   onCycleStatus,
   onToggleTopicCompleted,
-  onOpenOsymDistribution,
+  onOpenOsymDistribution: _onOpenOsymDistribution,
   userFieldTrack = 'sayisal',
   isDesktop
 }: {
@@ -5212,36 +5212,48 @@ function CurriculumScreenView({
   };
 
   return (
-    <div style={{ padding: isDesktop ? 0 : '0 12px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 14 : 10 }}>
+    <div style={{ padding: isDesktop ? 0 : '0 12px 140px 12px', display: 'flex', flexDirection: 'column', gap: isDesktop ? 14 : 10, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       {/* Top Main Section Switcher: Konu Takip Çizelgesi vs ÖSYM Soru Dağılımı */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%', boxSizing: 'border-box' }}>
         <button
           type="button"
           className={`btn-secondary ${activeCurriculumTab === 'mufredat' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: isDesktop ? '12px 14px' : '9px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
+          style={{
+            justifyContent: 'center',
+            padding: isDesktop ? '12px 14px' : '9px 8px',
+            fontSize: isDesktop ? 13 : 11.5,
+            fontWeight: 800,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
           onClick={() => {
             sounds.playTabSwitch();
             setActiveCurriculumTab('mufredat');
           }}
         >
-          <BookOpen size={16} />
-          <span>Konu Takip Çizelgesi</span>
+          <BookOpen size={isDesktop ? 16 : 14} />
+          <span>{isDesktop ? 'Konu Takip Çizelgesi' : 'Konu Takip'}</span>
         </button>
         <button
           type="button"
           className={`btn-secondary ${activeCurriculumTab === 'osym' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: isDesktop ? '12px 14px' : '9px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
+          style={{
+            justifyContent: 'center',
+            padding: isDesktop ? '12px 14px' : '9px 8px',
+            fontSize: isDesktop ? 13 : 11.5,
+            fontWeight: 800,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
           onClick={() => {
             sounds.playTabSwitch();
-            if (onOpenOsymDistribution) {
-              onOpenOsymDistribution();
-            } else {
-              setActiveCurriculumTab('osym');
-            }
+            setActiveCurriculumTab('osym');
           }}
         >
-          <Flame size={16} color="var(--color-accent)" />
-          <span>ÖSYM Soru Dağılımı</span>
+          <Flame size={isDesktop ? 16 : 14} color="var(--color-accent)" />
+          <span>{isDesktop ? 'ÖSYM Soru Dağılımı' : 'ÖSYM Dağılımı'}</span>
         </button>
       </div>
 
@@ -5255,26 +5267,38 @@ function CurriculumScreenView({
       ) : (
         <>
           {/* Category Toggle: TYT vs AYT */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%', boxSizing: 'border-box' }}>
             <button
               className={`btn-secondary ${examCategory === 'TYT' ? 'active' : ''}`}
-              style={{ justifyContent: 'center', padding: isDesktop ? '10px 14px' : '8px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
+              style={{
+                justifyContent: 'center',
+                padding: isDesktop ? '10px 14px' : '8px 6px',
+                fontSize: isDesktop ? 13 : 11.5,
+                fontWeight: 800,
+                whiteSpace: 'nowrap'
+              }}
               onClick={() => {
                 sounds.playTabSwitch();
                 setExamCategory('TYT');
               }}
             >
-              📘 TYT Konu Tablosu
+              📘 {isDesktop ? 'TYT Konu Tablosu' : 'TYT Tablosu'}
             </button>
             <button
               className={`btn-secondary ${examCategory === 'AYT' ? 'active' : ''}`}
-              style={{ justifyContent: 'center', padding: isDesktop ? '10px 14px' : '8px 10px', fontSize: isDesktop ? 13 : 11.5, fontWeight: 800 }}
+              style={{
+                justifyContent: 'center',
+                padding: isDesktop ? '10px 14px' : '8px 6px',
+                fontSize: isDesktop ? 13 : 11.5,
+                fontWeight: 800,
+                whiteSpace: 'nowrap'
+              }}
               onClick={() => {
                 sounds.playTabSwitch();
                 setExamCategory('AYT');
               }}
             >
-              📕 AYT Konu Tablosu
+              📕 {isDesktop ? 'AYT Konu Tablosu' : 'AYT Tablosu'}
             </button>
           </div>
 
@@ -5290,13 +5314,16 @@ function CurriculumScreenView({
                 border: '1px solid rgba(212, 255, 0, 0.2)',
                 borderRadius: 12,
                 overflowX: 'auto',
-                WebkitOverflowScrolling: 'touch'
+                WebkitOverflowScrolling: 'touch',
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box'
               }}
             >
-              <span style={{ fontSize: isDesktop ? 11 : 10, fontWeight: 800, color: 'var(--color-accent)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: isDesktop ? 11 : 10, fontWeight: 800, color: 'var(--color-accent)', whiteSpace: 'nowrap', flexShrink: 0 }}>
                 🎯 Alan:
               </span>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap', flexShrink: 0 }}>
                 {[
                   { id: 'sayisal', label: '🔬 Sayısal (MF)' },
                   { id: 'esit_agirlik', label: '⚖️ Eşit Ağırlık (TM)' },
@@ -5309,7 +5336,12 @@ function CurriculumScreenView({
                       key={track.id}
                       type="button"
                       className={`alan-btn${isActive ? ' active' : ''}`}
-                      style={{ padding: isDesktop ? '5px 10px' : '4px 8px', borderRadius: 8, fontSize: isDesktop ? 11 : 10 }}
+                      style={{
+                        padding: isDesktop ? '5px 10px' : '4px 8px',
+                        borderRadius: 8,
+                        fontSize: isDesktop ? 11 : 10,
+                        whiteSpace: 'nowrap'
+                      }}
                       onClick={() => {
                         sounds.playClick();
                         const nextTrack = selectedFieldTrack === track.id ? 'all' : (track.id as any);
@@ -5331,22 +5363,24 @@ function CurriculumScreenView({
             style={{
               background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.08) 0%, rgba(26, 28, 34, 1) 100%)',
               border: '1px solid var(--color-border)',
-              padding: isDesktop ? 16 : '12px 14px'
+              padding: isDesktop ? 16 : '12px 14px',
+              width: '100%',
+              boxSizing: 'border-box'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <div>
                 <div style={{ fontSize: isDesktop ? 16 : 13.5, fontWeight: 800 }}>
                   {examCategory === 'AYT' && selectedFieldTrack === 'sayisal'
-                    ? 'AYT Sayısal (MF) Müfredat İlerlemesi'
+                    ? (isDesktop ? 'AYT Sayısal (MF) Müfredat İlerlemesi' : 'AYT Sayısal İlerlemesi')
                     : examCategory === 'AYT' && selectedFieldTrack === 'esit_agirlik'
-                    ? 'AYT Eşit Ağırlık (TM) Müfredat İlerlemesi'
+                    ? (isDesktop ? 'AYT Eşit Ağırlık (TM) Müfredat İlerlemesi' : 'AYT E.A. İlerlemesi')
                     : examCategory === 'AYT' && selectedFieldTrack === 'sozel'
-                    ? 'AYT Sözel (TS) Müfredat İlerlemesi'
-                    : `${examCategory} Müfredat İlerlemesi`}
+                    ? (isDesktop ? 'AYT Sözel (TS) Müfredat İlerlemesi' : 'AYT Sözel İlerlemesi')
+                    : `${examCategory} İlerlemesi`}
                 </div>
                 <div style={{ fontSize: isDesktop ? 12 : 10.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                  Toplam {completedTopicsInCategory} / {totalTopicsInCategory} Konu Tamamlandı
+                  {completedTopicsInCategory} / {totalTopicsInCategory} Konu Tamamlandı
                 </div>
               </div>
               <div
@@ -5361,7 +5395,7 @@ function CurriculumScreenView({
               </div>
             </div>
 
-            <div style={{ width: '100%', height: 8, background: '#14161C', borderRadius: 99, overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: 7, background: '#14161C', borderRadius: 99, overflow: 'hidden' }}>
               <div
                 style={{
                   width: `${categoryPct}%`,
@@ -5375,9 +5409,9 @@ function CurriculumScreenView({
           </div>
 
           {/* Search & Status Filters */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ position: 'relative' }}>
-              <Search size={16} color="var(--color-text-dim)" style={{ position: 'absolute', left: 12, top: 12 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
+              <Search size={16} color="var(--color-text-dim)" style={{ position: 'absolute', left: 12, top: 11 }} />
               <input
                 type="text"
                 placeholder="Konu ara (ör: fonksiyon, türev, paragraf)..."
@@ -5385,27 +5419,30 @@ function CurriculumScreenView({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px 12px 10px 36px',
+                  boxSizing: 'border-box',
+                  padding: '9px 12px 9px 36px',
                   borderRadius: 12,
                   background: '#18191E',
                   border: '1px solid var(--color-border)',
                   color: '#FFFFFF',
-                  fontSize: 13,
+                  fontSize: 12.5,
                   outline: 'none'
                 }}
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6, width: '100%', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <button
                   className={`pill-toggle-btn ${statusFilter === 'all' ? 'active' : ''}`}
+                  style={{ fontSize: 11, padding: '4px 9px' }}
                   onClick={() => setStatusFilter('all')}
                 >
                   Tümü
                 </button>
                 <button
                   className={`pill-toggle-btn ${statusFilter === 'completed' ? 'active' : ''}`}
+                  style={{ fontSize: 11, padding: '4px 9px' }}
                   onClick={() => {
                     sounds.playClick();
                     setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed');
@@ -5416,6 +5453,7 @@ function CurriculumScreenView({
                 </button>
                 <button
                   className={`pill-toggle-btn ${statusFilter === 'in_progress' ? 'active' : ''}`}
+                  style={{ fontSize: 11, padding: '4px 9px' }}
                   onClick={() => {
                     sounds.playClick();
                     setStatusFilter(statusFilter === 'in_progress' ? 'all' : 'in_progress');
@@ -5426,12 +5464,12 @@ function CurriculumScreenView({
                 </button>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, fontSize: 11 }}>
-                <button onClick={expandAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 700 }}>
+              <div style={{ display: 'flex', gap: 8, fontSize: 11, flexShrink: 0 }}>
+                <button onClick={expandAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
                   Tümünü Aç
                 </button>
                 <span style={{ color: 'var(--color-text-dim)' }}>•</span>
-                <button onClick={collapseAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+                <button onClick={collapseAll} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', padding: 0 }}>
                   Kapat
                 </button>
               </div>
@@ -5439,7 +5477,7 @@ function CurriculumScreenView({
           </div>
 
           {/* Subjects Accordion List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', boxSizing: 'border-box' }}>
             {availableSubjects.map((sub) => {
               const isExpanded = !!expandedSubjectCodes[sub.code];
               const subTopics = sub.topics.filter((t) => {
@@ -5459,24 +5497,28 @@ function CurriculumScreenView({
               return (
                 <div
                   key={sub.code}
-                  className="app-card"
+                  className="app-card flush-card"
                   style={{
                     padding: 0,
                     overflow: 'hidden',
                     border: '1px solid var(--color-border)',
-                    background: '#18191E'
+                    background: '#18191E',
+                    width: '100%',
+                    boxSizing: 'border-box'
                   }}
                 >
+                  {/* Subject Accordion Header */}
                   <div
                     onClick={() => toggleSubjectExpand(sub.code)}
                     style={{
-                      padding: isDesktop ? '14px 16px' : '10px 12px',
+                      padding: isDesktop ? '14px 16px' : '11px 13px',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       cursor: 'pointer',
                       borderBottom: isExpanded ? '1px solid var(--color-border)' : 'none',
-                      background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent'
+                      background: isExpanded ? 'rgba(255,255,255,0.02)' : 'transparent',
+                      userSelect: 'none'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? 10 : 8, minWidth: 0, flex: 1 }}>
@@ -5491,9 +5533,11 @@ function CurriculumScreenView({
                         }}
                       />
                       <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                        <div style={{ fontSize: isDesktop ? 14 : 13, fontWeight: 800, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.name}</div>
+                        <div style={{ fontSize: isDesktop ? 14 : 13, fontWeight: 800, color: '#FFFFFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {sub.name}
+                        </div>
                         <div style={{ fontSize: isDesktop ? 11 : 10, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                          {completedSub}/{totalSub} Konu
+                          {completedSub}/{totalSub} Konu Tamamlandı
                         </div>
                       </div>
                     </div>
@@ -5515,157 +5559,303 @@ function CurriculumScreenView({
                   </div>
 
                   {isExpanded && (
-                    <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                      <table
-                        style={{
-                          width: '100%',
-                          borderCollapse: 'collapse',
-                          fontSize: isDesktop ? 12 : 11,
-                          textAlign: 'left',
-                          minWidth: isDesktop ? '100%' : 380
-                        }}
-                      >
-                        <thead>
-                          <tr
-                            style={{
-                              background: '#121318',
-                              borderBottom: '1px solid var(--color-border)',
-                              color: 'var(--color-text-muted)',
-                              fontWeight: 800,
-                              fontSize: isDesktop ? 11 : 10
-                            }}
-                          >
-                            <th style={{ padding: isDesktop ? '10px 12px' : '7px 8px', width: isDesktop ? 44 : 34, textAlign: 'center' }}>Tik</th>
-                            <th style={{ padding: isDesktop ? '10px 14px' : '7px 8px' }}>Konu Adı</th>
-                            <th style={{ padding: isDesktop ? '10px 12px' : '7px 6px', textAlign: 'center', width: isDesktop ? 130 : 70 }}>ÖSYM Çıkmış</th>
-                            <th style={{ padding: isDesktop ? '10px 14px' : '7px 8px', textAlign: 'right', width: isDesktop ? 130 : 80 }}>Durum</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {subTopics.map((topic, idx) => {
-                            const topicKey = `${sub.code}_${topic}`;
-                            const currentStatus: TopicStatus = topicProgress[topicKey] || 'not_started';
-                            const isCompleted = currentStatus === 'completed';
+                    isDesktop ? (
+                      /* DESKTOP TABLE VIEW */
+                      <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <table
+                          style={{
+                            width: '100%',
+                            borderCollapse: 'collapse',
+                            fontSize: 12,
+                            textAlign: 'left'
+                          }}
+                        >
+                          <thead>
+                            <tr
+                              style={{
+                                background: '#121318',
+                                borderBottom: '1px solid var(--color-border)',
+                                color: 'var(--color-text-muted)',
+                                fontWeight: 800,
+                                fontSize: 11
+                              }}
+                            >
+                              <th style={{ padding: '10px 12px', width: 44, textAlign: 'center' }}>Tik</th>
+                              <th style={{ padding: '10px 14px' }}>Konu Adı</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'center', width: 130 }}>ÖSYM Çıkmış</th>
+                              <th style={{ padding: '10px 14px', textAlign: 'right', width: 130 }}>Durum</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {subTopics.map((topic, idx) => {
+                              const topicKey = `${sub.code}_${topic}`;
+                              const currentStatus: TopicStatus = topicProgress[topicKey] || 'not_started';
+                              const isCompleted = currentStatus === 'completed';
 
-                            // Match topic with ÖSYM distribution data
-                            const osymSub = OSYM_QUESTION_DISTRIBUTION.find((os) => os.code === sub.code);
-                            const osymTopic = osymSub?.topics.find((ot) => {
-                              const a = ot.topic.toLowerCase().trim();
-                              const b = topic.toLowerCase().trim();
-                              return a === b || a.includes(b) || b.includes(a);
-                            });
+                              const osymSub = OSYM_QUESTION_DISTRIBUTION.find((os) => os.code === sub.code);
+                              const osymTopic = osymSub?.topics.find((ot) => {
+                                const a = ot.topic.toLowerCase().trim();
+                                const b = topic.toLowerCase().trim();
+                                return a === b || a.includes(b) || b.includes(a);
+                              });
 
-                            return (
-                              <tr
-                                key={topic}
-                                onClick={() => {
-                                  if (onToggleTopicCompleted) {
-                                    onToggleTopicCompleted(topicKey);
-                                  } else {
-                                    onCycleStatus(topicKey);
-                                  }
-                                }}
-                                style={{
-                                  borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                                  background: isCompleted
-                                    ? 'rgba(212, 255, 0, 0.04)'
-                                    : idx % 2 === 1
-                                    ? 'rgba(255, 255, 255, 0.015)'
-                                    : 'transparent',
-                                  cursor: 'pointer',
-                                  transition: 'background 0.12s ease'
-                                }}
-                                className="table-row-hover"
-                              >
-                                <td style={{ padding: isDesktop ? '10px 12px' : '7px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {isCompleted ? (
-                                      <CheckCircle2 size={isDesktop ? 19 : 17} color="var(--color-accent)" />
-                                    ) : currentStatus === 'in_progress' ? (
-                                      <Circle size={isDesktop ? 19 : 17} color="#00F0FF" />
-                                    ) : (
-                                      <Circle size={isDesktop ? 19 : 17} color="rgba(255, 255, 255, 0.25)" />
-                                    )}
-                                  </div>
-                                </td>
-                                <td style={{ padding: isDesktop ? '10px 14px' : '7px 8px', verticalAlign: 'middle' }}>
-                                  <span
-                                    style={{
-                                      fontSize: isDesktop ? 13 : 11.5,
-                                      fontWeight: isCompleted ? 700 : 600,
-                                      color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
-                                      textDecoration: isCompleted ? 'line-through' : 'none'
-                                    }}
-                                  >
-                                    {topic}
-                                  </span>
-                                </td>
-                                <td style={{ padding: isDesktop ? '10px 12px' : '7px 4px', textAlign: 'center', verticalAlign: 'middle' }}>
-                                  {osymTopic ? (
+                              return (
+                                <tr
+                                  key={topic}
+                                  onClick={() => {
+                                    if (onToggleTopicCompleted) {
+                                      onToggleTopicCompleted(topicKey);
+                                    } else {
+                                      onCycleStatus(topicKey);
+                                    }
+                                  }}
+                                  style={{
+                                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                                    background: isCompleted
+                                      ? 'rgba(212, 255, 0, 0.04)'
+                                      : idx % 2 === 1
+                                      ? 'rgba(255, 255, 255, 0.015)'
+                                      : 'transparent',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  className="table-row-hover"
+                                >
+                                  <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      {isCompleted ? (
+                                        <CheckCircle2 size={19} color="var(--color-accent)" />
+                                      ) : currentStatus === 'in_progress' ? (
+                                        <Circle size={19} color="#00F0FF" />
+                                      ) : (
+                                        <Circle size={19} color="rgba(255, 255, 255, 0.25)" />
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
                                     <span
                                       style={{
-                                        fontSize: isDesktop ? 11 : 9.5,
-                                        fontWeight: 800,
-                                        fontFamily: 'var(--font-mono)',
-                                        padding: '2px 6px',
-                                        borderRadius: 6,
-                                        background: osymTopic.total >= 10 ? 'rgba(212, 255, 0, 0.12)' : 'rgba(255, 255, 255, 0.05)',
-                                        color: osymTopic.total >= 10 ? 'var(--color-accent)' : 'var(--color-text-dim)'
+                                        fontSize: 13,
+                                        fontWeight: isCompleted ? 700 : 600,
+                                        color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
+                                        textDecoration: isCompleted ? 'line-through' : 'none'
                                       }}
                                     >
-                                      {osymTopic.total} Soru
+                                      {topic}
                                     </span>
-                                  ) : (
-                                    <span style={{ fontSize: 10, color: 'var(--color-text-dim)' }}>–</span>
-                                  )}
-                                </td>
-                                <td style={{ padding: isDesktop ? '10px 14px' : '7px 6px', textAlign: 'right', verticalAlign: 'middle' }}>
-                                  <span
-                                    style={{
-                                      fontSize: isDesktop ? 10 : 9,
-                                      fontWeight: 800,
-                                      padding: isDesktop ? '3px 8px' : '2px 6px',
-                                      borderRadius: 6,
-                                      background:
-                                        isCompleted
-                                          ? 'rgba(212, 255, 0, 0.15)'
-                                          : currentStatus === 'in_progress'
-                                          ? 'rgba(0, 240, 255, 0.15)'
-                                          : currentStatus === 'needs_review'
-                                          ? 'rgba(192, 132, 252, 0.15)'
-                                          : '#1A1C22',
-                                      color:
-                                        isCompleted
-                                          ? 'var(--color-accent)'
-                                          : currentStatus === 'in_progress'
-                                          ? '#00F0FF'
-                                          : currentStatus === 'needs_review'
-                                          ? '#C084FC'
-                                          : 'var(--color-text-dim)',
-                                      border:
-                                        isCompleted
-                                          ? '1px solid rgba(212, 255, 0, 0.3)'
-                                          : currentStatus === 'in_progress'
-                                          ? '1px solid rgba(0, 240, 255, 0.3)'
-                                          : currentStatus === 'needs_review'
-                                          ? '1px solid rgba(192, 132, 252, 0.3)'
-                                          : '1px solid #232530',
-                                      display: 'inline-block',
-                                      whiteSpace: 'nowrap'
-                                    }}
-                                  >
-                                    {isCompleted && '✓ Bitti'}
-                                    {currentStatus === 'in_progress' && '⏳ Çalışılıyor'}
-                                    {currentStatus === 'needs_review' && '🔄 Tekrar Et'}
-                                    {currentStatus === 'not_started' && '○ Başlanmadı'}
-                                  </span>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                                  </td>
+                                  <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                    {osymTopic ? (
+                                      <span
+                                        style={{
+                                          fontSize: 11,
+                                          fontWeight: 800,
+                                          fontFamily: 'var(--font-mono)',
+                                          padding: '2px 6px',
+                                          borderRadius: 6,
+                                          background: osymTopic.total >= 10 ? 'rgba(212, 255, 0, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                                          color: osymTopic.total >= 10 ? 'var(--color-accent)' : 'var(--color-text-dim)'
+                                        }}
+                                      >
+                                        {osymTopic.total} Soru
+                                      </span>
+                                    ) : (
+                                      <span style={{ fontSize: 10, color: 'var(--color-text-dim)' }}>–</span>
+                                    )}
+                                  </td>
+                                  <td style={{ padding: '10px 14px', textAlign: 'right', verticalAlign: 'middle' }}>
+                                    <span
+                                      style={{
+                                        fontSize: 10,
+                                        fontWeight: 800,
+                                        padding: '3px 8px',
+                                        borderRadius: 6,
+                                        background:
+                                          isCompleted
+                                            ? 'rgba(212, 255, 0, 0.15)'
+                                            : currentStatus === 'in_progress'
+                                            ? 'rgba(0, 240, 255, 0.15)'
+                                            : currentStatus === 'needs_review'
+                                            ? 'rgba(192, 132, 252, 0.15)'
+                                            : '#1A1C22',
+                                        color:
+                                          isCompleted
+                                            ? 'var(--color-accent)'
+                                            : currentStatus === 'in_progress'
+                                            ? '#00F0FF'
+                                            : currentStatus === 'needs_review'
+                                            ? '#C084FC'
+                                            : 'var(--color-text-dim)',
+                                        border:
+                                          isCompleted
+                                            ? '1px solid rgba(212, 255, 0, 0.3)'
+                                            : currentStatus === 'in_progress'
+                                            ? '1px solid rgba(0, 240, 255, 0.3)'
+                                            : currentStatus === 'needs_review'
+                                            ? '1px solid rgba(192, 132, 252, 0.3)'
+                                            : '1px solid #232530',
+                                        display: 'inline-block',
+                                        whiteSpace: 'nowrap'
+                                      }}
+                                    >
+                                      {isCompleted && '✓ Bitti'}
+                                      {currentStatus === 'in_progress' && '⏳ Çalışılıyor'}
+                                      {currentStatus === 'needs_review' && '🔄 Tekrar Et'}
+                                      {currentStatus === 'not_started' && '○ Başlanmadı'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      /* MOBILE NATIVE-STYLE LIST VIEW */
+                      <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        {subTopics.map((topic, idx) => {
+                          const topicKey = `${sub.code}_${topic}`;
+                          const currentStatus: TopicStatus = topicProgress[topicKey] || 'not_started';
+                          const isCompleted = currentStatus === 'completed';
+
+                          const osymSub = OSYM_QUESTION_DISTRIBUTION.find((os) => os.code === sub.code);
+                          const osymTopic = osymSub?.topics.find((ot) => {
+                            const a = ot.topic.toLowerCase().trim();
+                            const b = topic.toLowerCase().trim();
+                            return a === b || a.includes(b) || b.includes(a);
+                          });
+
+                          return (
+                            <div
+                              key={topic}
+                              className="topic-mobile-item"
+                              onClick={() => {
+                                sounds.playClick();
+                                if (onToggleTopicCompleted) {
+                                  onToggleTopicCompleted(topicKey);
+                                } else {
+                                  onCycleStatus(topicKey);
+                                }
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                padding: '11px 12px',
+                                borderBottom: idx === subTopics.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.04)',
+                                background: isCompleted
+                                  ? 'rgba(212, 255, 0, 0.035)'
+                                  : idx % 2 === 1
+                                  ? 'rgba(255, 255, 255, 0.012)'
+                                  : 'transparent',
+                                cursor: 'pointer',
+                                transition: 'background 0.12s ease',
+                                boxSizing: 'border-box',
+                                width: '100%'
+                              }}
+                            >
+                              {/* Completion circle toggle */}
+                              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                                {isCompleted ? (
+                                  <CheckCircle2 size={20} color="var(--color-accent)" />
+                                ) : currentStatus === 'in_progress' ? (
+                                  <Circle size={20} color="#00F0FF" />
+                                ) : (
+                                  <Circle size={20} color="rgba(255, 255, 255, 0.25)" />
+                                )}
+                              </div>
+
+                              {/* Topic Name & ÖSYM Sub-Badge */}
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div
+                                  style={{
+                                    fontSize: 12.5,
+                                    fontWeight: isCompleted ? 700 : 600,
+                                    color: isCompleted ? 'var(--color-text-muted)' : '#FFFFFF',
+                                    textDecoration: isCompleted ? 'line-through' : 'none',
+                                    lineHeight: 1.35,
+                                    wordBreak: 'break-word'
+                                  }}
+                                >
+                                  {topic}
+                                </div>
+                                {osymTopic && osymTopic.total > 0 && (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
+                                    <span
+                                      style={{
+                                        fontSize: 9.5,
+                                        fontWeight: 700,
+                                        fontFamily: 'var(--font-mono)',
+                                        padding: '1px 5px',
+                                        borderRadius: 4,
+                                        background: osymTopic.total >= 10 ? 'rgba(212, 255, 0, 0.12)' : 'rgba(255, 255, 255, 0.06)',
+                                        color: osymTopic.total >= 10 ? 'var(--color-accent)' : 'var(--color-text-dim)',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 3
+                                      }}
+                                    >
+                                      <span>🎯</span>
+                                      <span>{osymTopic.total} ÖSYM Sorusu</span>
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Status Pill Badge */}
+                              <div
+                                style={{ flexShrink: 0 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  sounds.playClick();
+                                  onCycleStatus(topicKey);
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: 9.5,
+                                    fontWeight: 800,
+                                    padding: '3px 7px',
+                                    borderRadius: 6,
+                                    background:
+                                      isCompleted
+                                        ? 'rgba(212, 255, 0, 0.15)'
+                                        : currentStatus === 'in_progress'
+                                        ? 'rgba(0, 240, 255, 0.15)'
+                                        : currentStatus === 'needs_review'
+                                        ? 'rgba(192, 132, 252, 0.15)'
+                                        : '#1A1C22',
+                                    color:
+                                      isCompleted
+                                        ? 'var(--color-accent)'
+                                        : currentStatus === 'in_progress'
+                                        ? '#00F0FF'
+                                        : currentStatus === 'needs_review'
+                                        ? '#C084FC'
+                                        : 'var(--color-text-dim)',
+                                    border:
+                                      isCompleted
+                                        ? '1px solid rgba(212, 255, 0, 0.3)'
+                                        : currentStatus === 'in_progress'
+                                        ? '1px solid rgba(0, 240, 255, 0.3)'
+                                        : currentStatus === 'needs_review'
+                                        ? '1px solid rgba(192, 132, 252, 0.3)'
+                                        : '1px solid #232530',
+                                    display: 'inline-block',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {isCompleted && '✓ Bitti'}
+                                  {currentStatus === 'in_progress' && '⏳ Sürüyor'}
+                                  {currentStatus === 'needs_review' && '🔄 Tekrar'}
+                                  {currentStatus === 'not_started' && '○ Başla'}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )
                   )}
                 </div>
               );
