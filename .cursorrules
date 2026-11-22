@@ -1,0 +1,9 @@
+# NetMetrik AI Rules
+
+## APK Güncelleme Otomasyonu
+Kullanıcı sohbet içinde ne zaman "APK'yı güncelle" derse:
+- Hiçbir ek onay veya soru sormadan doğrudan:
+  `powershell -ExecutionPolicy Bypass -File c:\Users\burak\.gemini\antigravity-ide\scratch\ekoc-clone\app\build-apk.ps1`
+  çalıştır.
+- İşlem bittiğinde üretilen güncel APK yolunu ver:
+  `c:\Users\burak\.gemini\antigravity-ide\scratch\ekoc-clone\app\android\app\build\outputs\apk\debug\app-debug.apk`

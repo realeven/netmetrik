@@ -58,6 +58,9 @@ import { FormulaGameView } from './components/FormulaGameView';
 import { YksRankCalculatorModal } from './components/YksRankCalculatorModal';
 import { OSYM_QUESTION_DISTRIBUTION } from './data/osymDistributionData';
 import { sounds } from './lib/sound';
+import { App as CapacitorApp } from '@capacitor/app';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
 import {
   getCurrentCloudUser,
   pushPayloadToCloud,
@@ -68,7 +71,10 @@ import {
   setCustomSupabaseConfig,
   removeCustomSupabaseConfig,
   isRealSupabaseActive,
-  type CloudUser
+  subscribeToCloudChanges,
+  flushOfflineQueue,
+  type CloudUser,
+  type SyncPayload
 } from './lib/syncEngine';
 import {
   YKS_SUBJECTS,
@@ -265,6 +271,18 @@ export default function App() {
     return !onboarded;
   });
 
+  // Helper to apply incoming cloud payload to all states
+  const applyCloudPayload = (cloudData: SyncPayload) => {
+    if (cloudData.profile) setProfile(cloudData.profile);
+    if (Array.isArray(cloudData.exams)) setExams(cloudData.exams);
+    if (Array.isArray(cloudData.tasks)) setTasks(cloudData.tasks);
+    if (Array.isArray(cloudData.questionLogs)) setQuestionLogs(cloudData.questionLogs);
+    if (Array.isArray(cloudData.questionVault)) setQuestionVault(cloudData.questionVault);
+    if (Array.isArray(cloudData.books)) setBooks(cloudData.books);
+    if (cloudData.topicProgress) setTopicProgress(cloudData.topicProgress);
+    setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
+  };
+
   // 1. Initial Cloud Auth Check & Hydrate
   useEffect(() => {
     getCurrentCloudUser().then(async (user) => {
@@ -274,14 +292,7 @@ export default function App() {
         try {
           const cloudData = await pullPayloadFromCloud();
           if (cloudData) {
-            if (cloudData.profile) setProfile(cloudData.profile);
-            if (Array.isArray(cloudData.exams)) setExams(cloudData.exams);
-            if (Array.isArray(cloudData.tasks)) setTasks(cloudData.tasks);
-            if (Array.isArray(cloudData.questionLogs)) setQuestionLogs(cloudData.questionLogs);
-            if (Array.isArray(cloudData.questionVault)) setQuestionVault(cloudData.questionVault);
-            if (Array.isArray(cloudData.books)) setBooks(cloudData.books);
-            if (cloudData.topicProgress) setTopicProgress(cloudData.topicProgress);
-            setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
+            applyCloudPayload(cloudData);
           }
         } catch (err) {
           console.warn('Initial cloud pull error:', err);
@@ -295,21 +306,38 @@ export default function App() {
     });
   }, []);
 
-  // 2. Tab Visibility Check (Auto-pull when opening app on another device/tab)
+  // 2. Real-Time Cloud Subscription (Instant multi-device / APK-Web sync)
+  useEffect(() => {
+    if (!cloudUser || cloudUser.isMock) return;
+    const unsubscribe = subscribeToCloudChanges(cloudUser.id, (payload) => {
+      applyCloudPayload(payload);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [cloudUser]);
+
+  // 3. Online/Offline Network Status & Auto-Flush Listener
+  useEffect(() => {
+    const handleOnline = async () => {
+      if (cloudUser) {
+        await flushOfflineQueue();
+        const fresh = await pullPayloadFromCloud();
+        if (fresh) applyCloudPayload(fresh);
+      }
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [cloudUser]);
+
+  // 4. Tab Visibility Check (Auto-pull when switching tabs or foregrounding app)
   useEffect(() => {
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible' && cloudUser) {
         try {
           const cloudData = await pullPayloadFromCloud();
           if (cloudData) {
-            if (cloudData.profile) setProfile(cloudData.profile);
-            if (Array.isArray(cloudData.exams)) setExams(cloudData.exams);
-            if (Array.isArray(cloudData.tasks)) setTasks(cloudData.tasks);
-            if (Array.isArray(cloudData.questionLogs)) setQuestionLogs(cloudData.questionLogs);
-            if (Array.isArray(cloudData.questionVault)) setQuestionVault(cloudData.questionVault);
-            if (Array.isArray(cloudData.books)) setBooks(cloudData.books);
-            if (cloudData.topicProgress) setTopicProgress(cloudData.topicProgress);
-            setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
+            applyCloudPayload(cloudData);
           }
         } catch (err) {
           console.warn('Visibility cloud pull error:', err);
@@ -320,7 +348,7 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [cloudUser]);
 
-  // 3. Debounced Auto-Push on any state change (Only if logged in; guest mode remains purely local)
+  // 5. Debounced Auto-Push on state change (Fast & offline-safe)
   useEffect(() => {
     if (!cloudUser) return;
     const timer = setTimeout(() => {
@@ -339,10 +367,67 @@ export default function App() {
           setLastSyncedTime(new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
         }
       });
-    }, 2500);
+    }, 1200);
 
     return () => clearTimeout(timer);
   }, [cloudUser, profile, exams, tasks, questionLogs, questionVault, books, topicProgress]);
+
+  // 6. Native Android Hardware Back Button, Status Bar & Splash Screen
+  useEffect(() => {
+    // Hide splash screen smoothly on mount
+    SplashScreen.hide().catch(() => {});
+
+    // Dark Status Bar matching obsidian theme (#0B0D12)
+    StatusBar.setBackgroundColor({ color: '#0B0D12' }).catch(() => {});
+    StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+
+    // Native hardware back button listener
+    const backListenerPromise = CapacitorApp.addListener('backButton', () => {
+      // Step 1: If any modal or detail sheet is open at root level, close it
+      if (showQuickModal) {
+        setShowQuickModal(false);
+        return;
+      }
+      if (activeAnalizModal) {
+        setActiveAnalizModal(null);
+        return;
+      }
+      if (activeFeatureModal) {
+        setActiveFeatureModal(null);
+        return;
+      }
+      if (showOnboardingModal) {
+        setShowOnboardingModal(false);
+        return;
+      }
+
+      // If any active subview modal exists in DOM (e.g., exam detail), click its close button or dispatch ESC
+      const modalClose = document.querySelector<HTMLButtonElement>('[data-dismiss="modal"], .modal-close-btn');
+      if (modalClose) {
+        modalClose.click();
+        return;
+      }
+
+      // Step 2: If on any screen other than home, go back to home tab
+      if (activeTab !== 'home') {
+        handleNavigateTab('home');
+        return;
+      }
+
+      // Step 3: Only when on home with no modals open, exit app
+      CapacitorApp.exitApp();
+    });
+
+    return () => {
+      backListenerPromise.then((handle) => handle.remove()).catch(() => {});
+    };
+  }, [
+    activeTab,
+    showQuickModal,
+    activeAnalizModal,
+    activeFeatureModal,
+    showOnboardingModal
+  ]);
 
   const handleCloudLogin = async (email: string, pass: string) => {
     const user = await loginCloudUser(email, pass);

@@ -1,5 +1,5 @@
 // ============================================================================
-// NetMetrik - Auto Cloud Sync Engine (Offline-First)
+// NetMetrik - Auto Cloud Sync Engine (Offline-First + Real-Time Listener)
 // ============================================================================
 import { supabase, setCustomSupabaseConfig, removeCustomSupabaseConfig } from './supabase';
 import type {
@@ -33,6 +33,9 @@ export interface CloudUser {
   isMock?: boolean;
 }
 
+const OFFLINE_QUEUE_KEY = 'netmetrik_offline_sync_queue';
+const LAST_KNOWN_UPDATED_AT_KEY = 'netmetrik_last_synced_updated_at';
+
 export function isRealSupabaseActive(): boolean {
   return Boolean(supabase);
 }
@@ -58,12 +61,14 @@ export async function getCurrentCloudUser(): Promise<CloudUser | null> {
     }
   }
 
-  const mockUserStr = localStorage.getItem('netmetrik_mock_cloud_user');
-  if (mockUserStr) {
-    try {
-      return JSON.parse(mockUserStr);
-    } catch {
-      return null;
+  if (typeof window !== 'undefined') {
+    const mockUserStr = localStorage.getItem('netmetrik_mock_cloud_user');
+    if (mockUserStr) {
+      try {
+        return JSON.parse(mockUserStr);
+      } catch {
+        return null;
+      }
     }
   }
 
@@ -71,12 +76,69 @@ export async function getCurrentCloudUser(): Promise<CloudUser | null> {
 }
 
 /**
+ * Queue payload locally when offline
+ */
+export function queueOfflinePayload(payload: SyncPayload): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn('Failed to queue offline payload:', e);
+  }
+}
+
+/**
+ * Get queued offline payload
+ */
+export function getQueuedOfflinePayload(): SyncPayload | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Clear queued offline payload
+ */
+export function clearQueuedOfflinePayload(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(OFFLINE_QUEUE_KEY);
+}
+
+/**
+ * Flush any queued offline data to cloud once network is restored
+ */
+export async function flushOfflineQueue(): Promise<boolean> {
+  if (typeof window !== 'undefined' && !navigator.onLine) {
+    return false;
+  }
+  const queued = getQueuedOfflinePayload();
+  if (!queued) return false;
+
+  const success = await pushPayloadToCloud(queued);
+  if (success) {
+    clearQueuedOfflinePayload();
+  }
+  return success;
+}
+
+/**
  * Push all application data to cloud.
- * Silently does nothing if the user is in Guest Mode (not logged in).
+ * Offline-first: if offline or push fails, queues payload locally.
  */
 export async function pushPayloadToCloud(payload: SyncPayload): Promise<boolean> {
   const user = await getCurrentCloudUser();
-  if (!user) return false; // Guest mode: stays offline/local only
+  if (!user) return false; // Guest mode stays purely local
+
+  // If network is offline, queue locally immediately
+  if (typeof window !== 'undefined' && !navigator.onLine) {
+    queueOfflinePayload(payload);
+    return false;
+  }
 
   if (supabase && !user.isMock) {
     try {
@@ -88,24 +150,36 @@ export async function pushPayloadToCloud(payload: SyncPayload): Promise<boolean>
           client_updated_at: payload.clientUpdatedAt,
           synced_at: new Date().toISOString()
         });
+
       if (error) {
-        console.warn('Cloud sync push error:', error.message);
+        console.warn('Cloud sync push error, saving to offline queue:', error.message);
+        queueOfflinePayload(payload);
         return false;
+      }
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(LAST_KNOWN_UPDATED_AT_KEY, payload.clientUpdatedAt);
+        clearQueuedOfflinePayload();
       }
       return true;
     } catch (err) {
-      console.warn('Cloud push failed:', err);
+      console.warn('Cloud push network error, queuing offline:', err);
+      queueOfflinePayload(payload);
       return false;
     }
   } else {
-    // Simulated cloud store for this user (cross-device/tab simulation)
-    localStorage.setItem(`netmetrik_cloud_store_${user.email}`, JSON.stringify(payload));
+    // Simulated cloud store for local testing
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`netmetrik_cloud_store_${user.email}`, JSON.stringify(payload));
+      localStorage.setItem(LAST_KNOWN_UPDATED_AT_KEY, payload.clientUpdatedAt);
+    }
     return true;
   }
 }
 
 /**
  * Pull all data from cloud for the logged-in user.
+ * Supports conflict resolution using clientUpdatedAt.
  */
 export async function pullPayloadFromCloud(): Promise<SyncPayload | null> {
   const user = await getCurrentCloudUser();
@@ -119,22 +193,80 @@ export async function pullPayloadFromCloud(): Promise<SyncPayload | null> {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error || !data) return null;
-      return data.payload as SyncPayload;
+      if (error || !data || !data.payload) return null;
+      const cloudPayload = data.payload as SyncPayload;
+      if (typeof window !== 'undefined' && cloudPayload.clientUpdatedAt) {
+        localStorage.setItem(LAST_KNOWN_UPDATED_AT_KEY, cloudPayload.clientUpdatedAt);
+      }
+      return cloudPayload;
     } catch (err) {
       console.warn('Cloud pull failed:', err);
       return null;
     }
   } else {
-    const raw = localStorage.getItem(`netmetrik_cloud_store_${user.email}`);
-    if (raw) {
-      try {
-        return JSON.parse(raw);
-      } catch {
-        return null;
+    if (typeof window !== 'undefined') {
+      const raw = localStorage.getItem(`netmetrik_cloud_store_${user.email}`);
+      if (raw) {
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
       }
     }
     return null;
+  }
+}
+
+/**
+ * Real-time subscription to cloud changes for instant multi-device / APK-Web sync.
+ * Triggers callback whenever remote data changes if newer than local data.
+ */
+export function subscribeToCloudChanges(
+  userId: string,
+  onRemoteUpdate: (payload: SyncPayload) => void
+): () => void {
+  if (!supabase || !userId) {
+    return () => {};
+  }
+
+  try {
+    const channel = supabase
+      .channel(`sync-user-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'student_sync',
+          filter: `user_id=eq.${userId}`
+        },
+        (change) => {
+          const newRow = change.new as { payload?: SyncPayload; client_updated_at?: string } | null;
+          if (newRow && newRow.payload) {
+            const remotePayload = newRow.payload;
+            const remoteTime = new Date(remotePayload.clientUpdatedAt || newRow.client_updated_at || 0).getTime();
+            const localLastStr = typeof window !== 'undefined' ? localStorage.getItem(LAST_KNOWN_UPDATED_AT_KEY) : null;
+            const localTime = localLastStr ? new Date(localLastStr).getTime() : 0;
+
+            // Conflict resolution: only update if remote is newer
+            if (remoteTime > localTime) {
+              if (typeof window !== 'undefined' && remotePayload.clientUpdatedAt) {
+                localStorage.setItem(LAST_KNOWN_UPDATED_AT_KEY, remotePayload.clientUpdatedAt);
+              }
+              onRemoteUpdate(remotePayload);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase?.removeChannel(channel);
+    };
+  } catch (err) {
+    console.warn('Failed to subscribe to realtime changes:', err);
+    return () => {};
   }
 }
 
@@ -159,7 +291,9 @@ export async function loginCloudUser(email: string, pass: string): Promise<Cloud
     name: email.split('@')[0],
     isMock: true
   };
-  localStorage.setItem('netmetrik_mock_cloud_user', JSON.stringify(mockUser));
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('netmetrik_mock_cloud_user', JSON.stringify(mockUser));
+  }
   return mockUser;
 }
 
@@ -200,7 +334,9 @@ export async function registerCloudUser(
     name,
     isMock: true
   };
-  localStorage.setItem('netmetrik_mock_cloud_user', JSON.stringify(mockUser));
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('netmetrik_mock_cloud_user', JSON.stringify(mockUser));
+  }
   return mockUser;
 }
 
@@ -211,5 +347,7 @@ export async function logoutCloudUser(): Promise<void> {
   if (supabase) {
     await supabase.auth.signOut();
   }
-  localStorage.removeItem('netmetrik_mock_cloud_user');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('netmetrik_mock_cloud_user');
+  }
 }

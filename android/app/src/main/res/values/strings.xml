@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NetMetrik</string>
+    <string name="title_activity_main">NetMetrik</string>
+    <string name="package_name">com.netmetrik.app</string>
+    <string name="custom_url_scheme">com.netmetrik.app</string>
+</resources>
