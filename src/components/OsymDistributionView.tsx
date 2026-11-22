@@ -98,7 +98,7 @@ export function OsymDistributionView({
     <div
       style={{
         position: 'relative',
-        padding: isDesktop ? '0 0 40px 0' : '0 12px 140px 12px',
+        padding: isDesktop ? '0 0 40px 0' : '0 0 30px 0',
         display: 'flex',
         flexDirection: 'column',
         gap: isDesktop ? 14 : 10,
@@ -122,7 +122,10 @@ export function OsymDistributionView({
         }
       `}</style>
 
-      {/* 🌟 1. Exam Toggle (TYT vs AYT) */}
+      {/* 🌟 1. Exam Toggle (TYT vs AYT) + Version indicator */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: -6 }}>
+        <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)' }}>v1.3</span>
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%', boxSizing: 'border-box' }}>
         <button
           type="button"
@@ -163,12 +166,12 @@ export function OsymDistributionView({
         </button>
       </div>
 
-      {/* 🌟 2. Progress Summary Banner Card */}
+      {/* 🌟 2. Progress Summary Banner Card — NO app-card class to avoid CSS !important overrides */}
       <div
-        className="app-card"
         style={{
           background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(26, 28, 34, 1) 100%)',
           border: '1px solid rgba(56, 189, 248, 0.25)',
+          borderRadius: isDesktop ? 20 : 16,
           padding: isDesktop ? 16 : '12px 14px',
           width: '100%',
           boxSizing: 'border-box'
@@ -478,7 +481,6 @@ export function OsymDistributionView({
           return (
             <div
               key={subject.code}
-              className="app-card flush-card"
               style={{
                 background: '#18191E',
                 border: '1px solid var(--color-border)',
@@ -641,8 +643,8 @@ export function OsymDistributionView({
                                   background: isCompleted
                                     ? 'rgba(34, 197, 94, 0.04)'
                                     : idx % 2 === 1
-                                    ? 'rgba(255, 255, 255, 0.015)'
-                                    : 'transparent',
+                                      ? 'rgba(255, 255, 255, 0.015)'
+                                      : 'transparent',
                                   transition: 'background 0.12s ease',
                                   height: 42
                                 }}
@@ -816,8 +818,8 @@ export function OsymDistributionView({
                               background: isCompleted
                                 ? 'rgba(34, 197, 94, 0.05)'
                                 : idx % 2 === 1
-                                ? 'rgba(255, 255, 255, 0.015)'
-                                : 'transparent',
+                                  ? 'rgba(255, 255, 255, 0.015)'
+                                  : 'transparent',
                               borderBottom: idx === filteredTopics.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.04)',
                               boxSizing: 'border-box',
                               width: '100%'

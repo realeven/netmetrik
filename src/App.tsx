@@ -115,7 +115,7 @@ export default function App() {
       if (saved && ['home', 'calendar', 'analytics', 'profile', 'exams', 'curriculum', 'pomodoro', 'osym', 'formula'].includes(saved)) {
         return saved as any;
       }
-    } catch {}
+    } catch { }
     return 'home';
   });
   const [isMuted, setIsMuted] = useState(() => sounds.isMuted());
@@ -134,7 +134,7 @@ export default function App() {
       setActiveTab(tab);
       try {
         localStorage.setItem('netmetrik_active_tab', tab);
-      } catch {}
+      } catch { }
       // Reset scroll position so every screen starts perfectly aligned at top-left
       window.scrollTo(0, 0);
       const container = document.querySelector('.screen-scroll-container');
@@ -236,7 +236,7 @@ export default function App() {
   const [showQuickModal, setShowQuickModal] = useState(false);
   const [quickActionType, setQuickActionType] = useState<'question' | 'study_time' | 'task' | 'exam'>('question');
   const [activeAnalizModal, setActiveAnalizModal] = useState<'trend' | 'exam_time' | 'question_count' | 'study_time' | null>(null);
-  
+
   // Selected Feature Modal for Features (6, 7, 8, 21, 22, 26, 27)
   const [activeFeatureModal, setActiveFeatureModal] = useState<FeatureModalType>(null);
 
@@ -413,11 +413,11 @@ export default function App() {
   // 6. Native Android Hardware Back Button, Status Bar & Splash Screen
   useEffect(() => {
     // Hide splash screen smoothly on mount
-    SplashScreen.hide().catch(() => {});
+    SplashScreen.hide().catch(() => { });
 
     // Dark Status Bar matching obsidian theme (#0B0D12)
-    StatusBar.setBackgroundColor({ color: '#0B0D12' }).catch(() => {});
-    StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+    StatusBar.setBackgroundColor({ color: '#0B0D12' }).catch(() => { });
+    StatusBar.setStyle({ style: Style.Dark }).catch(() => { });
 
     // Native hardware back button listener
     const backListenerPromise = CapacitorApp.addListener('backButton', () => {
@@ -457,7 +457,7 @@ export default function App() {
     });
 
     return () => {
-      backListenerPromise.then((handle) => handle.remove()).catch(() => {});
+      backListenerPromise.then((handle) => handle.remove()).catch(() => { });
     };
   }, [
     activeTab,
@@ -1095,12 +1095,14 @@ export default function App() {
       )}
 
       {activeTab === 'osym' && (
-        <OsymDistributionView
-          topicProgress={topicProgress}
-          onToggleTopicCompleted={handleToggleTopicCompleted}
-          userFieldTrack={profile.fieldTrack}
-          isDesktop={isDesktop}
-        />
+        <div style={{ padding: isDesktop ? 0 : '0 12px 140px 12px', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+          <OsymDistributionView
+            topicProgress={topicProgress}
+            onToggleTopicCompleted={handleToggleTopicCompleted}
+            userFieldTrack={profile.fieldTrack}
+            isDesktop={isDesktop}
+          />
+        </div>
       )}
 
       {activeTab === 'formula' && (
@@ -1142,214 +1144,214 @@ export default function App() {
           {/* Desktop Left Sidebar (hidden when in immersive NetFocus mode) */}
           {activeTab !== 'pomodoro' && (
             <aside className="desktop-sidebar">
-            <div>
-              {/* Brand Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 11, paddingBottom: 18, borderBottom: '1px solid var(--color-border)' }}>
-                <div
-                  onClick={() => handleNavigateTab('home')}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 10,
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 14px rgba(10, 132, 255, 0.35)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    flexShrink: 0,
-                    cursor: 'pointer',
-                    transition: 'transform 0.15s ease'
-                  }}
-                  title="NetMetrik"
-                >
-                  <img
-                    src="/logo.jpg"
-                    alt="NetMetrik Logo"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </div>
-                <div>
-                  <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--color-accent)', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-                    NetMetrik
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#FFFFFF', marginTop: 1 }}>
-                    YKS Çalışma Koçu
-                  </div>
-                </div>
-              </div>
-
-              {/* Navigation Items */}
-              <nav className="desktop-nav-list">
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'home' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('home')}
-                >
-                  <Home size={19} />
-                  <span>Bugün (Ana Sayfa)</span>
-                </button>
-
-                <button
-                  className="desktop-nav-btn"
-                  onClick={() => handleNavigateTab('pomodoro')}
-                >
-                  <Timer size={18} />
-                  <span>NetFocus Odak</span>
-                  <span
+              <div>
+                {/* Brand Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 11, paddingBottom: 18, borderBottom: '1px solid var(--color-border)' }}>
+                  <div
+                    onClick={() => handleNavigateTab('home')}
                     style={{
-                      marginLeft: 'auto',
-                      fontSize: 10,
-                      fontWeight: 600,
-                      padding: '2px 7px',
-                      borderRadius: 99,
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      color: 'var(--color-text-muted)'
-                    }}
-                  >
-                    Odak
-                  </span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'calendar' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('calendar')}
-                >
-                  <BarChart3 size={19} />
-                  <span>Haftalık Soru Çizelgesi</span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'exams' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('exams')}
-                >
-                  <Award size={19} />
-                  <span>Denemeler & Karne</span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'curriculum' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('curriculum')}
-                >
-                  <BookOpen size={19} />
-                  <span>Konu Takip Çizelgesi</span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'osym' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('osym')}
-                >
-                  <Flame size={19} color={activeTab === 'osym' ? 'var(--color-accent)' : undefined} />
-                  <span>ÖSYM Soru Dağılımı</span>
-                  <span
-                    style={{
-                      fontSize: 9.5,
-                      fontWeight: 800,
-                      padding: '2px 7px',
-                      borderRadius: 99,
-                      background: 'rgba(212, 255, 0, 0.15)',
-                      color: 'var(--color-accent)'
-                    }}
-                  >
-                    2018–2026
-                  </span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'formula' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('formula')}
-                >
-                  <Sparkles size={19} color={activeTab === 'formula' ? 'var(--color-accent)' : undefined} />
-                  <span>Formül Düellosu</span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'analytics' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('analytics')}
-                >
-                  <BarChart3 size={19} />
-                  <span>Analiz & Rapor</span>
-                </button>
-
-                <button
-                  className={`desktop-nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
-                  onClick={() => handleNavigateTab('profile')}
-                >
-                  <User size={19} />
-                  <span>Profil & Bulut</span>
-                </button>
-              </nav>
-            </div>
-
-            {/* Bottom Actions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 16, borderTop: '1px solid var(--color-border)' }}>
-              <button
-                className="btn-primary"
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px' }}
-                onClick={() => {
-                  sounds.playClick();
-                  setQuickActionType('question');
-                  setShowQuickModal(true);
-                }}
-              >
-                <Plus size={18} strokeWidth={2.5} />
-                <span>Hızlı Soru / Görev Ekle</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode('mobile')}
-                className="btn-secondary"
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13 }}
-                title="Mobil Görünüme Geç"
-              >
-                <Smartphone size={16} />
-                <span>📱 Mobil Görünüme Geç</span>
-              </button>
-
-              {/* Ses Kontrolü */}
-              <button
-                onClick={handleToggleMute}
-                className="btn-secondary"
-                style={{ width: '100%', padding: '8px 10px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                title={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
-              >
-                {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                <span>{isMuted ? 'Sessiz Mod (Aç)' : 'Efekt Sesleri Açık'}</span>
-              </button>
-
-              {/* Bulut Senkronizasyon Durumu */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
-                {cloudUser ? (
-                  <span className="badge-sync-cloud active" style={{ fontSize: 10.5, padding: '4px 8px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={cloudUser.email}>
-                    <Cloud size={12} /> {cloudUser.email}
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => {
-                      sounds.playClick();
-                      setShowOnboardingModal(true);
-                    }}
-                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 10,
+                      overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 5,
-                      padding: '4px 10px',
-                      borderRadius: 99,
-                      background: 'rgba(10, 132, 255, 0.1)',
-                      border: '1px solid rgba(10, 132, 255, 0.25)',
-                      color: 'var(--color-accent)',
-                      fontSize: 10.5,
-                      fontWeight: 800,
-                      cursor: 'pointer'
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 14px rgba(10, 132, 255, 0.35)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s ease'
                     }}
-                    title="Giriş Yap veya Hesap Oluştur"
+                    title="NetMetrik"
                   >
-                    <Cloud size={12} /> Giriş Yap / Kayıt Ol
+                    <img
+                      src="/logo.jpg"
+                      alt="NetMetrik Logo"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--color-accent)', letterSpacing: 0.8, textTransform: 'uppercase' }}>
+                      NetMetrik
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#FFFFFF', marginTop: 1 }}>
+                      YKS Çalışma Koçu
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Items */}
+                <nav className="desktop-nav-list">
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'home' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('home')}
+                  >
+                    <Home size={19} />
+                    <span>Bugün (Ana Sayfa)</span>
                   </button>
-                )}
+
+                  <button
+                    className="desktop-nav-btn"
+                    onClick={() => handleNavigateTab('pomodoro')}
+                  >
+                    <Timer size={18} />
+                    <span>NetFocus Odak</span>
+                    <span
+                      style={{
+                        marginLeft: 'auto',
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '2px 7px',
+                        borderRadius: 99,
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        color: 'var(--color-text-muted)'
+                      }}
+                    >
+                      Odak
+                    </span>
+                  </button>
+
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'calendar' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('calendar')}
+                  >
+                    <BarChart3 size={19} />
+                    <span>Haftalık Soru Çizelgesi</span>
+                  </button>
+
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'exams' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('exams')}
+                  >
+                    <Award size={19} />
+                    <span>Denemeler & Karne</span>
+                  </button>
+
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'curriculum' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('curriculum')}
+                  >
+                    <BookOpen size={19} />
+                    <span>Konu Takip Çizelgesi</span>
+                  </button>
+
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'osym' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('osym')}
+                  >
+                    <Flame size={19} color={activeTab === 'osym' ? 'var(--color-accent)' : undefined} />
+                    <span>ÖSYM Soru Dağılımı</span>
+                    <span
+                      style={{
+                        fontSize: 9.5,
+                        fontWeight: 800,
+                        padding: '2px 7px',
+                        borderRadius: 99,
+                        background: 'rgba(212, 255, 0, 0.15)',
+                        color: 'var(--color-accent)'
+                      }}
+                    >
+                      2018–2026
+                    </span>
+                  </button>
+
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'formula' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('formula')}
+                  >
+                    <Sparkles size={19} color={activeTab === 'formula' ? 'var(--color-accent)' : undefined} />
+                    <span>Formül Düellosu</span>
+                  </button>
+
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('analytics')}
+                  >
+                    <BarChart3 size={19} />
+                    <span>Analiz & Rapor</span>
+                  </button>
+
+                  <button
+                    className={`desktop-nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
+                    onClick={() => handleNavigateTab('profile')}
+                  >
+                    <User size={19} />
+                    <span>Profil & Bulut</span>
+                  </button>
+                </nav>
               </div>
-            </div>
-          </aside>
-        )}
+
+              {/* Bottom Actions */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 16, borderTop: '1px solid var(--color-border)' }}>
+                <button
+                  className="btn-primary"
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px' }}
+                  onClick={() => {
+                    sounds.playClick();
+                    setQuickActionType('question');
+                    setShowQuickModal(true);
+                  }}
+                >
+                  <Plus size={18} strokeWidth={2.5} />
+                  <span>Hızlı Soru / Görev Ekle</span>
+                </button>
+
+                <button
+                  onClick={() => setViewMode('mobile')}
+                  className="btn-secondary"
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13 }}
+                  title="Mobil Görünüme Geç"
+                >
+                  <Smartphone size={16} />
+                  <span>📱 Mobil Görünüme Geç</span>
+                </button>
+
+                {/* Ses Kontrolü */}
+                <button
+                  onClick={handleToggleMute}
+                  className="btn-secondary"
+                  style={{ width: '100%', padding: '8px 10px', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  title={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
+                >
+                  {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                  <span>{isMuted ? 'Sessiz Mod (Aç)' : 'Efekt Sesleri Açık'}</span>
+                </button>
+
+                {/* Bulut Senkronizasyon Durumu */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                  {cloudUser ? (
+                    <span className="badge-sync-cloud active" style={{ fontSize: 10.5, padding: '4px 8px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={cloudUser.email}>
+                      <Cloud size={12} /> {cloudUser.email}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        sounds.playClick();
+                        setShowOnboardingModal(true);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '4px 10px',
+                        borderRadius: 99,
+                        background: 'rgba(10, 132, 255, 0.1)',
+                        border: '1px solid rgba(10, 132, 255, 0.25)',
+                        color: 'var(--color-accent)',
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                      }}
+                      title="Giriş Yap veya Hesap Oluştur"
+                    >
+                      <Cloud size={12} /> Giriş Yap / Kayıt Ol
+                    </button>
+                  )}
+                </div>
+              </div>
+            </aside>
+          )}
 
           {/* Desktop Main Workspace Area */}
           <div
@@ -1386,117 +1388,117 @@ export default function App() {
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
               }}
             >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {/* NetMetrik Brand Logo in Cyber Cyan */}
-              <div
-                onClick={() => handleNavigateTab('home')}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 11,
-                  overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 0 16px var(--color-glow)',
-                  flexShrink: 0,
-                  cursor: 'pointer',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  transition: 'transform 140ms var(--ease-spring)'
-                }}
-                className="clickable-card"
-                title="NetMetrik Ana Sayfa"
-              >
-                <img
-                  src="/logo.jpg"
-                  alt="NetMetrik Logo"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* NetMetrik Brand Logo in Cyber Cyan */}
+                <div
+                  onClick={() => handleNavigateTab('home')}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 11,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 16px var(--color-glow)',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    transition: 'transform 140ms var(--ease-spring)'
+                  }}
+                  className="clickable-card"
+                  title="NetMetrik Ana Sayfa"
+                >
+                  <img
+                    src="/logo.jpg"
+                    alt="NetMetrik Logo"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+                <div>
+                  <div style={{ fontSize: 9.5, fontWeight: 800, color: 'var(--color-accent)', letterSpacing: 1.1, textTransform: 'uppercase', lineHeight: 1 }}>
+                    NetMetrik
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, marginTop: 2, letterSpacing: -0.3 }}>
+                    {activeTab === 'analytics' && 'Analiz & Rapor'}
+                    {activeTab === 'home' && 'Bugün'}
+                    {activeTab === 'calendar' && 'Haftalık Soru Çizelgesi'}
+                    {activeTab === 'exams' && 'Denemeler & Karne'}
+                    {activeTab === 'curriculum' && 'Konu Takip'}
+                    {activeTab === 'osym' && 'ÖSYM Soru Dağılımı'}
+                    {activeTab === 'formula' && 'Formül Düellosu'}
+                    {activeTab === 'profile' && 'Profilim'}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: 9.5, fontWeight: 800, color: 'var(--color-accent)', letterSpacing: 1.1, textTransform: 'uppercase', lineHeight: 1 }}>
-                  NetMetrik
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.2, marginTop: 2, letterSpacing: -0.3 }}>
-                  {activeTab === 'analytics' && 'Analiz & Rapor'}
-                  {activeTab === 'home' && 'Bugün'}
-                  {activeTab === 'calendar' && 'Haftalık Soru Çizelgesi'}
-                  {activeTab === 'exams' && 'Denemeler & Karne'}
-                  {activeTab === 'curriculum' && 'Konu Takip'}
-                  {activeTab === 'osym' && 'ÖSYM Soru Dağılımı'}
-                  {activeTab === 'formula' && 'Formül Düellosu'}
-                  {activeTab === 'profile' && 'Profilim'}
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* ÖSYM Quick Access Button */}
+                <button
+                  onClick={() => handleNavigateTab('osym')}
+                  style={{
+                    background: activeTab === 'osym' ? 'rgba(212, 255, 0, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                    border: activeTab === 'osym' ? '1px solid var(--color-accent)' : '1px solid var(--color-border)',
+                    color: activeTab === 'osym' ? 'var(--color-accent)' : '#fff',
+                    borderRadius: 11,
+                    padding: '6px 9px',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 3,
+                    cursor: 'pointer'
+                  }}
+                  title="ÖSYM Soru Dağılımı (2018–2026)"
+                >
+                  <Flame size={13} color="var(--color-accent)" />
+                  <span>ÖSYM</span>
+                </button>
+
+                {/* Flocus Mobile Quick Access Button */}
+                <button
+                  onClick={() => handleNavigateTab('pomodoro')}
+                  style={{
+                    background: 'rgba(212, 255, 0, 0.14)',
+                    border: '1px solid rgba(212, 255, 0, 0.45)',
+                    color: '#D4FF00',
+                    borderRadius: 11,
+                    padding: '6px 10px',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: 'pointer',
+                    transition: 'transform 140ms var(--ease-out)'
+                  }}
+                  title="NetFocus Pomodoro & Ambiyans"
+                >
+                  <Timer size={13} />
+                  <span>Odak</span>
+                </button>
+
+                <button
+                  onClick={() => handleNavigateTab('profile')}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: '50%',
+                    background: activeTab === 'profile' ? 'var(--color-accent)' : 'rgba(255, 255, 255, 0.08)',
+                    border: activeTab === 'profile' ? '2px solid #FFFFFF' : '1px solid rgba(255, 255, 255, 0.12)',
+                    color: activeTab === 'profile' ? 'var(--color-on-accent)' : '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform 140ms var(--ease-out)'
+                  }}
+                  title="Profilime Git"
+                >
+                  <User size={15} />
+                </button>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {/* ÖSYM Quick Access Button */}
-              <button
-                onClick={() => handleNavigateTab('osym')}
-                style={{
-                  background: activeTab === 'osym' ? 'rgba(212, 255, 0, 0.2)' : 'rgba(255, 255, 255, 0.08)',
-                  border: activeTab === 'osym' ? '1px solid var(--color-accent)' : '1px solid var(--color-border)',
-                  color: activeTab === 'osym' ? 'var(--color-accent)' : '#fff',
-                  borderRadius: 11,
-                  padding: '6px 9px',
-                  fontSize: 11,
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 3,
-                  cursor: 'pointer'
-                }}
-                title="ÖSYM Soru Dağılımı (2018–2026)"
-              >
-                <Flame size={13} color="var(--color-accent)" />
-                <span>ÖSYM</span>
-              </button>
-
-              {/* Flocus Mobile Quick Access Button */}
-              <button
-                onClick={() => handleNavigateTab('pomodoro')}
-                style={{
-                  background: 'rgba(212, 255, 0, 0.14)',
-                  border: '1px solid rgba(212, 255, 0, 0.45)',
-                  color: '#D4FF00',
-                  borderRadius: 11,
-                  padding: '6px 10px',
-                  fontSize: 11,
-                  fontWeight: 900,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  cursor: 'pointer',
-                  transition: 'transform 140ms var(--ease-out)'
-                }}
-                title="NetFocus Pomodoro & Ambiyans"
-              >
-                <Timer size={13} />
-                <span>Odak</span>
-              </button>
-
-              <button
-                onClick={() => handleNavigateTab('profile')}
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: '50%',
-                  background: activeTab === 'profile' ? 'var(--color-accent)' : 'rgba(255, 255, 255, 0.08)',
-                  border: activeTab === 'profile' ? '2px solid #FFFFFF' : '1px solid rgba(255, 255, 255, 0.12)',
-                  color: activeTab === 'profile' ? 'var(--color-on-accent)' : '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'transform 140ms var(--ease-out)'
-                }}
-                title="Profilime Git"
-              >
-                <User size={15} />
-              </button>
-            </div>
-          </div>
-        )}
+          )}
 
           {/* Screen Content Area with Tab Transitions */}
           <main
@@ -1957,16 +1959,16 @@ export default function App() {
             >
               {liveFocusActivity.isStopwatchRunning
                 ? (() => {
-                    const hrs = Math.floor(liveFocusActivity.stopwatchSeconds / 3600);
-                    const mins = Math.floor((liveFocusActivity.stopwatchSeconds % 3600) / 60);
-                    const secs = liveFocusActivity.stopwatchSeconds % 60;
-                    return `${hrs > 0 ? `${hrs.toString().padStart(2, '0')}:` : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                  })()
+                  const hrs = Math.floor(liveFocusActivity.stopwatchSeconds / 3600);
+                  const mins = Math.floor((liveFocusActivity.stopwatchSeconds % 3600) / 60);
+                  const secs = liveFocusActivity.stopwatchSeconds % 60;
+                  return `${hrs > 0 ? `${hrs.toString().padStart(2, '0')}:` : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                })()
                 : (() => {
-                    const m = Math.floor(liveFocusActivity.pomodoroTimeLeft / 60);
-                    const s = liveFocusActivity.pomodoroTimeLeft % 60;
-                    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                  })()}
+                  const m = Math.floor(liveFocusActivity.pomodoroTimeLeft / 60);
+                  const s = liveFocusActivity.pomodoroTimeLeft % 60;
+                  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                })()}
             </div>
           </div>
 
@@ -3590,8 +3592,8 @@ function CalendarTasksView({
       {calendarSubTab === 'schedule' && (
         <WeeklyQuestionSchedule
           questionLogs={questionLogs}
-          onAddQuestionLog={onAddQuestionLog || (() => {})}
-          onDeleteQuestionLog={onDeleteQuestionLog || (() => {})}
+          onAddQuestionLog={onAddQuestionLog || (() => { })}
+          onDeleteQuestionLog={onDeleteQuestionLog || (() => { })}
           isDesktop={isDesktop}
         />
       )}
@@ -3599,467 +3601,467 @@ function CalendarTasksView({
       {/* SUB-TAB 2: ODAK & KRONOMETRE & FLOCUS */}
       {calendarSubTab === 'timer' && (
         <>
-      {/* Flocus Focus & Ambient Sounds Banner */}
-      {onOpenFlocus && (
-        <div
-          onClick={() => {
-            sounds.playSuccess();
-            onOpenFlocus();
-          }}
-          style={{
-            background: 'linear-gradient(180deg, #242733 0%, #161822 36%, #0F1015 75%, #08090C 100%)',
-            border: '1.5px solid rgba(255, 255, 255, 0.20)',
-            borderTop: '2.2px solid rgba(255, 255, 255, 0.55)',
-            borderBottom: '1.5px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 20,
-            padding: '16px 20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.7), inset 0 2px 2px rgba(255, 255, 255, 0.35)',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Flocus Focus & Ambient Sounds Banner */}
+          {onOpenFlocus && (
             <div
+              onClick={() => {
+                sounds.playSuccess();
+                onOpenFlocus();
+              }}
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                background: 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)',
-                color: '#080B10',
+                background: 'linear-gradient(180deg, #242733 0%, #161822 36%, #0F1015 75%, #08090C 100%)',
+                border: '1.5px solid rgba(255, 255, 255, 0.20)',
+                borderTop: '2.2px solid rgba(255, 255, 255, 0.55)',
+                borderBottom: '1.5px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: 20,
+                padding: '16px 20px',
                 display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 900,
-                boxShadow: '0 4px 12px rgba(255, 255, 255, 0.25)'
+                cursor: 'pointer',
+                boxShadow: '0 16px 36px rgba(0, 0, 0, 0.7), inset 0 2px 2px rgba(255, 255, 255, 0.35)',
+                transition: 'all 0.2s ease'
               }}
             >
-              <Timer size={22} color="#080B10" />
-            </div>
-            <div>
-              <div style={{ fontSize: 14.5, fontWeight: 800, color: '#FFF', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span>NetFocus Odaklanma Alanı</span>
-                <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 99, background: 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)', color: '#000', fontWeight: 900 }}>YENİ</span>
-              </div>
-              <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                Ambiyans sesleri (yağmur, şömine, lo-fi), estetik saat & temalar
-              </div>
-            </div>
-          </div>
-          <button
-            className="btn-primary"
-            style={{
-              padding: '8px 16px',
-              fontSize: 12,
-              whiteSpace: 'nowrap'
-            }}
-          >
-            NetFocus'a Git ✨
-          </button>
-        </div>
-      )}
-
-      {/* Dual Mode Switcher Banner: Feature 15 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <button
-          className={`btn-secondary ${timerType === 'countdown' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
-          onClick={() => {
-            sounds.playClick();
-            onSwitchTimerType('countdown');
-          }}
-        >
-          <Timer size={16} />
-          <span>Geri Sayım (Pomodoro)</span>
-        </button>
-        <button
-          className={`btn-secondary ${timerType === 'stopwatch' ? 'active' : ''}`}
-          style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
-          onClick={() => {
-            sounds.playClick();
-            onSwitchTimerType('stopwatch');
-          }}
-        >
-          <Clock size={16} />
-          <span>Serbest Kronometre</span>
-        </button>
-      </div>
-
-      {/* Focus Timer Card */}
-      <div
-        className="app-card"
-        style={{
-          textAlign: 'center',
-          position: 'relative'
-        }}
-      >
-        {timerType === 'countdown' ? (
-          <>
-            {/* Countdown Mode Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, fontSize: 16 }}>
-                <Timer size={18} color="var(--color-accent)" />
-                <span>Odaklanma Sayacı</span>
-              </div>
-
-              {/* Mode Pill Toggle */}
-              <div
-                style={{
-                  display: 'flex',
-                  background: '#0E0F12',
-                  padding: 3,
-                  borderRadius: 999,
-                  border: '1px solid var(--color-border)'
-                }}
-              >
-                <button
-                  onClick={() => onSwitchMode('study')}
-                  style={{
-                    background: timerMode === 'study' ? 'var(--color-accent)' : 'transparent',
-                    color: timerMode === 'study' ? '#000000' : 'var(--color-text-muted)',
-                    fontWeight: 700,
-                    fontSize: 11,
-                    border: 'none',
-                    borderRadius: 999,
-                    padding: '4px 10px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Çalışma
-                </button>
-                <button
-                  onClick={() => onSwitchMode('break')}
-                  style={{
-                    background: timerMode === 'break' ? '#38BDF8' : 'transparent',
-                    color: timerMode === 'break' ? '#000000' : 'var(--color-text-muted)',
-                    fontWeight: 700,
-                    fontSize: 11,
-                    border: 'none',
-                    borderRadius: 999,
-                    padding: '4px 10px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Mola
-                </button>
-              </div>
-            </div>
-
-            {/* Duration Quick Presets Bar */}
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                  {timerMode === 'study' ? 'Çalışma Süresi:' : 'Mola Süresi:'}
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'
-                  }}
-                >
-                  {currentTargetMinutes} Dakika
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
-                {(timerMode === 'study' ? studyPresets : breakPresets).map((preset) => {
-                  const isActive = currentTargetMinutes === preset;
-                  return (
-                    <button
-                      key={preset}
-                      onClick={() => onSetDuration(preset)}
-                      style={{
-                        padding: '5px 11px',
-                        borderRadius: 999,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        background: isActive ? 'var(--color-surface-hover)' : 'rgba(255,255,255,0.03)',
-                        border: isActive
-                          ? `1.5px solid ${timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'}`
-                          : '1px solid var(--color-border)',
-                        color: isActive ? '#FFFFFF' : 'var(--color-text-muted)',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      {preset} dk
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Circular Timer Readout */}
-            <div style={{ position: 'relative', width: 170, height: 170, margin: '0 auto 14px auto' }}>
-              <svg style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
-                <circle cx="85" cy="85" r="74" stroke="#212328" strokeWidth="8" fill="transparent" />
-                <circle
-                  cx="85"
-                  cy="85"
-                  r="74"
-                  stroke={timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'}
-                  strokeWidth="8"
-                  fill="transparent"
-                  strokeDasharray={2 * Math.PI * 74}
-                  strokeDashoffset={2 * Math.PI * 74 * (1 - progressPct / 100)}
-                  strokeLinecap="round"
-                  style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-                />
-              </svg>
-
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <div className="tabular-nums" style={{ fontSize: 36, fontWeight: 900, fontFamily: 'var(--font-mono)', letterSpacing: '-0.02em' }}>
-                  {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div
                   style={{
-                    fontSize: 11,
-                    color: timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8',
-                    fontWeight: 700,
-                    marginTop: 2
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)',
+                    color: '#080B10',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.25)'
                   }}
                 >
-                  {timerMode === 'study' ? selectedTimerSubject : '☕ Dinlenme Zamanı'}
+                  <Timer size={22} color="#080B10" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: '#FFF', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>NetFocus Odaklanma Alanı</span>
+                    <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 99, background: 'linear-gradient(180deg, #FFFFFF 0%, #E2E4EC 45%, #C8CBD8 100%)', color: '#000', fontWeight: 900 }}>YENİ</span>
+                  </div>
+                  <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                    Ambiyans sesleri (yağmur, şömine, lo-fi), estetik saat & temalar
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Main Controls & Step Buttons */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <button
-                onClick={() => onAdjustDelta(-5)}
-                className="btn-secondary"
-                style={{ padding: '8px 12px', fontSize: 11, fontWeight: 700 }}
-                title="5 dakika azalt"
-              >
-                <Minus size={14} />
-                <span>-5 dk</span>
-              </button>
-
               <button
                 className="btn-primary"
-                onClick={onToggleTimer}
                 style={{
-                  minWidth: 125,
-                  padding: '12px 18px',
-                  backgroundColor: timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'
+                  padding: '8px 16px',
+                  fontSize: 12,
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {isTimerRunning ? <Pause size={18} /> : <Play size={18} />}
-                <span>{isTimerRunning ? 'Duraklat' : 'Başlat'}</span>
-              </button>
-
-              <button
-                onClick={() => onAdjustDelta(5)}
-                className="btn-secondary"
-                style={{ padding: '8px 12px', fontSize: 11, fontWeight: 700 }}
-                title="5 dakika ekle"
-              >
-                <Plus size={14} />
-                <span>+5 dk</span>
-              </button>
-
-              <button className="btn-secondary" onClick={onResetTimer} title="Sıfırla" style={{ padding: '10px 12px' }}>
-                <RotateCcw size={16} />
+                NetFocus'a Git ✨
               </button>
             </div>
-          </>
-        ) : (
-          /* Feature 15: Freeform Stopwatch Mode */
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, fontSize: 16 }}>
-                <Clock size={18} color="#00F0FF" />
-                <span>Serbest Kronometre</span>
-              </div>
-              <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF', fontWeight: 700 }}>
-                Süre Kısıtlamasız
-              </span>
-            </div>
+          )}
 
-            {/* Big Digital Stopwatch Display */}
-            <div style={{ padding: '24px 0', margin: '0 auto 10px auto' }}>
-              <div
-                className="tabular-nums"
-                style={{
-                  fontSize: 48,
-                  fontWeight: 900,
-                  fontFamily: 'var(--font-mono)',
-                  letterSpacing: '-0.02em',
-                  color: isStopwatchRunning ? '#00F0FF' : '#FFF'
-                }}
-              >
-                {swHrs > 0 ? `${String(swHrs).padStart(2, '0')}:` : ''}
-                {String(swMins).padStart(2, '0')}:{String(swSecs).padStart(2, '0')}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 6 }}>
-                {isStopwatchRunning ? '⚡ Odaklanma oturumu devam ediyor...' : 'Başlat butonuna basarak süre tutun'}
-              </div>
-            </div>
-
-            {/* Stopwatch Controls */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <button
-                className="btn-primary"
-                onClick={onToggleStopwatch}
-                style={{ minWidth: 130, padding: '12px 20px', backgroundColor: '#00F0FF', color: '#000' }}
-              >
-                {isStopwatchRunning ? <Pause size={18} /> : <Play size={18} />}
-                <span>{isStopwatchRunning ? 'Durdur' : 'Başlat'}</span>
-              </button>
-
-              <button className="btn-secondary" onClick={onResetStopwatch} title="Sıfırla" style={{ padding: '10px 14px' }}>
-                <RotateCcw size={16} />
-                <span>Sıfırla</span>
-              </button>
-
-              {stopwatchSeconds > 30 && (
-                <button
-                  className="btn-primary"
-                  onClick={onSaveStopwatchSession}
-                  style={{ backgroundColor: 'var(--color-accent)', color: '#000' }}
-                >
-                  <Check size={16} />
-                  <span>Seansı Kaydet</span>
-                </button>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Bottom Bar: Subject Select & Completed Sessions */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: 12,
-            borderTop: '1px solid var(--color-border)',
-            gap: 8,
-            flexWrap: 'wrap'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Ders:</span>
-            <select
-              value={selectedTimerSubject}
-              onChange={(e) => onSelectSubject(e.target.value)}
-              style={{
-                padding: '4px 10px',
-                borderRadius: 8,
-                background: '#1D1F25',
-                border: '1px solid var(--color-border)',
-                color: '#FFFFFF',
-                fontSize: 12,
-                fontWeight: 600,
-                outline: 'none'
+          {/* Dual Mode Switcher Banner: Feature 15 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <button
+              className={`btn-secondary ${timerType === 'countdown' ? 'active' : ''}`}
+              style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+              onClick={() => {
+                sounds.playClick();
+                onSwitchTimerType('countdown');
               }}
             >
-              {YKS_SUBJECTS.map((s) => (
-                <option key={s.code} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+              <Timer size={16} />
+              <span>Geri Sayım (Pomodoro)</span>
+            </button>
+            <button
+              className={`btn-secondary ${timerType === 'stopwatch' ? 'active' : ''}`}
+              style={{ justifyContent: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 800 }}
+              onClick={() => {
+                sounds.playClick();
+                onSwitchTimerType('stopwatch');
+              }}
+            >
+              <Clock size={16} />
+              <span>Serbest Kronometre</span>
+            </button>
           </div>
 
-          <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
-            Tamamlanan Seans: <strong style={{ color: 'var(--color-accent)' }}>{completedSessionsCount}</strong>
+          {/* Focus Timer Card */}
+          <div
+            className="app-card"
+            style={{
+              textAlign: 'center',
+              position: 'relative'
+            }}
+          >
+            {timerType === 'countdown' ? (
+              <>
+                {/* Countdown Mode Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, fontSize: 16 }}>
+                    <Timer size={18} color="var(--color-accent)" />
+                    <span>Odaklanma Sayacı</span>
+                  </div>
+
+                  {/* Mode Pill Toggle */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      background: '#0E0F12',
+                      padding: 3,
+                      borderRadius: 999,
+                      border: '1px solid var(--color-border)'
+                    }}
+                  >
+                    <button
+                      onClick={() => onSwitchMode('study')}
+                      style={{
+                        background: timerMode === 'study' ? 'var(--color-accent)' : 'transparent',
+                        color: timerMode === 'study' ? '#000000' : 'var(--color-text-muted)',
+                        fontWeight: 700,
+                        fontSize: 11,
+                        border: 'none',
+                        borderRadius: 999,
+                        padding: '4px 10px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Çalışma
+                    </button>
+                    <button
+                      onClick={() => onSwitchMode('break')}
+                      style={{
+                        background: timerMode === 'break' ? '#38BDF8' : 'transparent',
+                        color: timerMode === 'break' ? '#000000' : 'var(--color-text-muted)',
+                        fontWeight: 700,
+                        fontSize: 11,
+                        border: 'none',
+                        borderRadius: 999,
+                        padding: '4px 10px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Mola
+                    </button>
+                  </div>
+                </div>
+
+                {/* Duration Quick Presets Bar */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                      {timerMode === 'study' ? 'Çalışma Süresi:' : 'Mola Süresi:'}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 800,
+                        color: timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'
+                      }}
+                    >
+                      {currentTargetMinutes} Dakika
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {(timerMode === 'study' ? studyPresets : breakPresets).map((preset) => {
+                      const isActive = currentTargetMinutes === preset;
+                      return (
+                        <button
+                          key={preset}
+                          onClick={() => onSetDuration(preset)}
+                          style={{
+                            padding: '5px 11px',
+                            borderRadius: 999,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: isActive ? 'var(--color-surface-hover)' : 'rgba(255,255,255,0.03)',
+                            border: isActive
+                              ? `1.5px solid ${timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'}`
+                              : '1px solid var(--color-border)',
+                            color: isActive ? '#FFFFFF' : 'var(--color-text-muted)',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {preset} dk
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Circular Timer Readout */}
+                <div style={{ position: 'relative', width: 170, height: 170, margin: '0 auto 14px auto' }}>
+                  <svg style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+                    <circle cx="85" cy="85" r="74" stroke="#212328" strokeWidth="8" fill="transparent" />
+                    <circle
+                      cx="85"
+                      cy="85"
+                      r="74"
+                      stroke={timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'}
+                      strokeWidth="8"
+                      fill="transparent"
+                      strokeDasharray={2 * Math.PI * 74}
+                      strokeDashoffset={2 * Math.PI * 74 * (1 - progressPct / 100)}
+                      strokeLinecap="round"
+                      style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                    />
+                  </svg>
+
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <div className="tabular-nums" style={{ fontSize: 36, fontWeight: 900, fontFamily: 'var(--font-mono)', letterSpacing: '-0.02em' }}>
+                      {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8',
+                        fontWeight: 700,
+                        marginTop: 2
+                      }}
+                    >
+                      {timerMode === 'study' ? selectedTimerSubject : '☕ Dinlenme Zamanı'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main Controls & Step Buttons */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <button
+                    onClick={() => onAdjustDelta(-5)}
+                    className="btn-secondary"
+                    style={{ padding: '8px 12px', fontSize: 11, fontWeight: 700 }}
+                    title="5 dakika azalt"
+                  >
+                    <Minus size={14} />
+                    <span>-5 dk</span>
+                  </button>
+
+                  <button
+                    className="btn-primary"
+                    onClick={onToggleTimer}
+                    style={{
+                      minWidth: 125,
+                      padding: '12px 18px',
+                      backgroundColor: timerMode === 'study' ? 'var(--color-accent)' : '#38BDF8'
+                    }}
+                  >
+                    {isTimerRunning ? <Pause size={18} /> : <Play size={18} />}
+                    <span>{isTimerRunning ? 'Duraklat' : 'Başlat'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => onAdjustDelta(5)}
+                    className="btn-secondary"
+                    style={{ padding: '8px 12px', fontSize: 11, fontWeight: 700 }}
+                    title="5 dakika ekle"
+                  >
+                    <Plus size={14} />
+                    <span>+5 dk</span>
+                  </button>
+
+                  <button className="btn-secondary" onClick={onResetTimer} title="Sıfırla" style={{ padding: '10px 12px' }}>
+                    <RotateCcw size={16} />
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Feature 15: Freeform Stopwatch Mode */
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, fontSize: 16 }}>
+                    <Clock size={18} color="#00F0FF" />
+                    <span>Serbest Kronometre</span>
+                  </div>
+                  <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF', fontWeight: 700 }}>
+                    Süre Kısıtlamasız
+                  </span>
+                </div>
+
+                {/* Big Digital Stopwatch Display */}
+                <div style={{ padding: '24px 0', margin: '0 auto 10px auto' }}>
+                  <div
+                    className="tabular-nums"
+                    style={{
+                      fontSize: 48,
+                      fontWeight: 900,
+                      fontFamily: 'var(--font-mono)',
+                      letterSpacing: '-0.02em',
+                      color: isStopwatchRunning ? '#00F0FF' : '#FFF'
+                    }}
+                  >
+                    {swHrs > 0 ? `${String(swHrs).padStart(2, '0')}:` : ''}
+                    {String(swMins).padStart(2, '0')}:{String(swSecs).padStart(2, '0')}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 6 }}>
+                    {isStopwatchRunning ? '⚡ Odaklanma oturumu devam ediyor...' : 'Başlat butonuna basarak süre tutun'}
+                  </div>
+                </div>
+
+                {/* Stopwatch Controls */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <button
+                    className="btn-primary"
+                    onClick={onToggleStopwatch}
+                    style={{ minWidth: 130, padding: '12px 20px', backgroundColor: '#00F0FF', color: '#000' }}
+                  >
+                    {isStopwatchRunning ? <Pause size={18} /> : <Play size={18} />}
+                    <span>{isStopwatchRunning ? 'Durdur' : 'Başlat'}</span>
+                  </button>
+
+                  <button className="btn-secondary" onClick={onResetStopwatch} title="Sıfırla" style={{ padding: '10px 14px' }}>
+                    <RotateCcw size={16} />
+                    <span>Sıfırla</span>
+                  </button>
+
+                  {stopwatchSeconds > 30 && (
+                    <button
+                      className="btn-primary"
+                      onClick={onSaveStopwatchSession}
+                      style={{ backgroundColor: 'var(--color-accent)', color: '#000' }}
+                    >
+                      <Check size={16} />
+                      <span>Seansı Kaydet</span>
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Bottom Bar: Subject Select & Completed Sessions */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingTop: 12,
+                borderTop: '1px solid var(--color-border)',
+                gap: 8,
+                flexWrap: 'wrap'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Ders:</span>
+                <select
+                  value={selectedTimerSubject}
+                  onChange={(e) => onSelectSubject(e.target.value)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 8,
+                    background: '#1D1F25',
+                    border: '1px solid var(--color-border)',
+                    color: '#FFFFFF',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    outline: 'none'
+                  }}
+                >
+                  {YKS_SUBJECTS.map((s) => (
+                    <option key={s.code} value={s.name}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
+                Tamamlanan Seans: <strong style={{ color: 'var(--color-accent)' }}>{completedSessionsCount}</strong>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      </>
+        </>
       )}
 
       {/* SUB-TAB 3: GÜNLÜK GÖREVLER LİSTESİ */}
       {calendarSubTab === 'tasks' && (
-      <div className="app-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 15 }}>Günlük Görev Listesi</div>
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Bugün tamamlanması hedeflenen plan</div>
-          </div>
-          <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onOpenAddTask}>
-            <Plus size={14} />
-            <span>Görev Ekle</span>
-          </button>
-        </div>
-
-        {/* Filter Pills */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
-          <button className={`pill-toggle-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
-            Tümü ({tasks.length})
-          </button>
-          <button className={`pill-toggle-btn ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>
-            Kalan ({tasks.filter((t) => !t.isCompleted).length})
-          </button>
-          <button className={`pill-toggle-btn ${filter === 'completed' ? 'active' : ''}`} onClick={() => setFilter('completed')}>
-            Biten ({tasks.filter((t) => t.isCompleted).length})
-          </button>
-        </div>
-
-        {/* Tasks List Items */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filteredTasks.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--color-text-muted)', fontSize: 13 }}>
-              Bu filtrede görev bulunamadı.
+        <div className="app-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 15 }}>Günlük Görev Listesi</div>
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Bugün tamamlanması hedeflenen plan</div>
             </div>
-          ) : (
-            filteredTasks.map((task) => (
-              <div
-                key={task.id}
-                onClick={() => onToggleTask(task.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '12px 14px',
-                  borderRadius: 14,
-                  background: task.isCompleted ? 'rgba(212, 255, 0, 0.05)' : '#1D1F25',
-                  border: task.isCompleted ? '1px solid rgba(212, 255, 0, 0.3)' : '1px solid var(--color-border)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {task.isCompleted ? (
-                  <CheckCircle2 size={22} color="var(--color-accent)" />
-                ) : (
-                  <Circle size={22} color="var(--color-text-muted)" />
-                )}
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      textDecoration: task.isCompleted ? 'line-through' : 'none',
-                      color: task.isCompleted ? 'var(--color-text-muted)' : '#FFFFFF'
-                    }}
-                  >
-                    {task.subjectName} • {task.topicName}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
-                    Hedef: {task.targetQuestions} soru • {task.targetMinutes} dakika
+            <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onOpenAddTask}>
+              <Plus size={14} />
+              <span>Görev Ekle</span>
+            </button>
+          </div>
+
+          {/* Filter Pills */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+            <button className={`pill-toggle-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
+              Tümü ({tasks.length})
+            </button>
+            <button className={`pill-toggle-btn ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>
+              Kalan ({tasks.filter((t) => !t.isCompleted).length})
+            </button>
+            <button className={`pill-toggle-btn ${filter === 'completed' ? 'active' : ''}`} onClick={() => setFilter('completed')}>
+              Biten ({tasks.filter((t) => t.isCompleted).length})
+            </button>
+          </div>
+
+          {/* Tasks List Items */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {filteredTasks.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--color-text-muted)', fontSize: 13 }}>
+                Bu filtrede görev bulunamadı.
+              </div>
+            ) : (
+              filteredTasks.map((task) => (
+                <div
+                  key={task.id}
+                  onClick={() => onToggleTask(task.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '12px 14px',
+                    borderRadius: 14,
+                    background: task.isCompleted ? 'rgba(212, 255, 0, 0.05)' : '#1D1F25',
+                    border: task.isCompleted ? '1px solid rgba(212, 255, 0, 0.3)' : '1px solid var(--color-border)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {task.isCompleted ? (
+                    <CheckCircle2 size={22} color="var(--color-accent)" />
+                  ) : (
+                    <Circle size={22} color="var(--color-text-muted)" />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        textDecoration: task.isCompleted ? 'line-through' : 'none',
+                        color: task.isCompleted ? 'var(--color-text-muted)' : '#FFFFFF'
+                      }}
+                    >
+                      {task.subjectName} • {task.topicName}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                      Hedef: {task.targetQuestions} soru • {task.targetMinutes} dakika
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
-      </div>
       )}
     </div>
   );
@@ -5359,10 +5361,10 @@ function CurriculumScreenView({
 
           {/* Category Overall Progress Banner */}
           <div
-            className="app-card"
             style={{
               background: 'linear-gradient(135deg, rgba(212, 255, 0, 0.08) 0%, rgba(26, 28, 34, 1) 100%)',
               border: '1px solid var(--color-border)',
+              borderRadius: isDesktop ? 20 : 16,
               padding: isDesktop ? 16 : '12px 14px',
               width: '100%',
               boxSizing: 'border-box'
@@ -5374,10 +5376,10 @@ function CurriculumScreenView({
                   {examCategory === 'AYT' && selectedFieldTrack === 'sayisal'
                     ? (isDesktop ? 'AYT Sayısal (MF) Müfredat İlerlemesi' : 'AYT Sayısal İlerlemesi')
                     : examCategory === 'AYT' && selectedFieldTrack === 'esit_agirlik'
-                    ? (isDesktop ? 'AYT Eşit Ağırlık (TM) Müfredat İlerlemesi' : 'AYT E.A. İlerlemesi')
-                    : examCategory === 'AYT' && selectedFieldTrack === 'sozel'
-                    ? (isDesktop ? 'AYT Sözel (TS) Müfredat İlerlemesi' : 'AYT Sözel İlerlemesi')
-                    : `${examCategory} İlerlemesi`}
+                      ? (isDesktop ? 'AYT Eşit Ağırlık (TM) Müfredat İlerlemesi' : 'AYT E.A. İlerlemesi')
+                      : examCategory === 'AYT' && selectedFieldTrack === 'sozel'
+                        ? (isDesktop ? 'AYT Sözel (TS) Müfredat İlerlemesi' : 'AYT Sözel İlerlemesi')
+                        : `${examCategory} İlerlemesi`}
                 </div>
                 <div style={{ fontSize: isDesktop ? 12 : 10.5, color: 'var(--color-text-muted)', marginTop: 2 }}>
                   {completedTopicsInCategory} / {totalTopicsInCategory} Konu Tamamlandı
@@ -5497,11 +5499,11 @@ function CurriculumScreenView({
               return (
                 <div
                   key={sub.code}
-                  className="app-card flush-card"
                   style={{
                     padding: 0,
                     overflow: 'hidden',
                     border: '1px solid var(--color-border)',
+                    borderRadius: 16,
                     background: '#18191E',
                     width: '100%',
                     boxSizing: 'border-box'
@@ -5614,8 +5616,8 @@ function CurriculumScreenView({
                                     background: isCompleted
                                       ? 'rgba(212, 255, 0, 0.04)'
                                       : idx % 2 === 1
-                                      ? 'rgba(255, 255, 255, 0.015)'
-                                      : 'transparent',
+                                        ? 'rgba(255, 255, 255, 0.015)'
+                                        : 'transparent',
                                     cursor: 'pointer',
                                     transition: 'background 0.12s ease'
                                   }}
@@ -5674,26 +5676,26 @@ function CurriculumScreenView({
                                           isCompleted
                                             ? 'rgba(212, 255, 0, 0.15)'
                                             : currentStatus === 'in_progress'
-                                            ? 'rgba(0, 240, 255, 0.15)'
-                                            : currentStatus === 'needs_review'
-                                            ? 'rgba(192, 132, 252, 0.15)'
-                                            : '#1A1C22',
+                                              ? 'rgba(0, 240, 255, 0.15)'
+                                              : currentStatus === 'needs_review'
+                                                ? 'rgba(192, 132, 252, 0.15)'
+                                                : '#1A1C22',
                                         color:
                                           isCompleted
                                             ? 'var(--color-accent)'
                                             : currentStatus === 'in_progress'
-                                            ? '#00F0FF'
-                                            : currentStatus === 'needs_review'
-                                            ? '#C084FC'
-                                            : 'var(--color-text-dim)',
+                                              ? '#00F0FF'
+                                              : currentStatus === 'needs_review'
+                                                ? '#C084FC'
+                                                : 'var(--color-text-dim)',
                                         border:
                                           isCompleted
                                             ? '1px solid rgba(212, 255, 0, 0.3)'
                                             : currentStatus === 'in_progress'
-                                            ? '1px solid rgba(0, 240, 255, 0.3)'
-                                            : currentStatus === 'needs_review'
-                                            ? '1px solid rgba(192, 132, 252, 0.3)'
-                                            : '1px solid #232530',
+                                              ? '1px solid rgba(0, 240, 255, 0.3)'
+                                              : currentStatus === 'needs_review'
+                                                ? '1px solid rgba(192, 132, 252, 0.3)'
+                                                : '1px solid #232530',
                                         display: 'inline-block',
                                         whiteSpace: 'nowrap'
                                       }}
@@ -5746,8 +5748,8 @@ function CurriculumScreenView({
                                 background: isCompleted
                                   ? 'rgba(212, 255, 0, 0.035)'
                                   : idx % 2 === 1
-                                  ? 'rgba(255, 255, 255, 0.012)'
-                                  : 'transparent',
+                                    ? 'rgba(255, 255, 255, 0.012)'
+                                    : 'transparent',
                                 cursor: 'pointer',
                                 transition: 'background 0.12s ease',
                                 boxSizing: 'border-box',
@@ -5821,26 +5823,26 @@ function CurriculumScreenView({
                                       isCompleted
                                         ? 'rgba(212, 255, 0, 0.15)'
                                         : currentStatus === 'in_progress'
-                                        ? 'rgba(0, 240, 255, 0.15)'
-                                        : currentStatus === 'needs_review'
-                                        ? 'rgba(192, 132, 252, 0.15)'
-                                        : '#1A1C22',
+                                          ? 'rgba(0, 240, 255, 0.15)'
+                                          : currentStatus === 'needs_review'
+                                            ? 'rgba(192, 132, 252, 0.15)'
+                                            : '#1A1C22',
                                     color:
                                       isCompleted
                                         ? 'var(--color-accent)'
                                         : currentStatus === 'in_progress'
-                                        ? '#00F0FF'
-                                        : currentStatus === 'needs_review'
-                                        ? '#C084FC'
-                                        : 'var(--color-text-dim)',
+                                          ? '#00F0FF'
+                                          : currentStatus === 'needs_review'
+                                            ? '#C084FC'
+                                            : 'var(--color-text-dim)',
                                     border:
                                       isCompleted
                                         ? '1px solid rgba(212, 255, 0, 0.3)'
                                         : currentStatus === 'in_progress'
-                                        ? '1px solid rgba(0, 240, 255, 0.3)'
-                                        : currentStatus === 'needs_review'
-                                        ? '1px solid rgba(192, 132, 252, 0.3)'
-                                        : '1px solid #232530',
+                                          ? '1px solid rgba(0, 240, 255, 0.3)'
+                                          : currentStatus === 'needs_review'
+                                            ? '1px solid rgba(192, 132, 252, 0.3)'
+                                            : '1px solid #232530',
                                     display: 'inline-block',
                                     whiteSpace: 'nowrap'
                                   }}
@@ -6171,7 +6173,7 @@ function ProfileScreenView({
 
   return (
     <div style={{ padding: isDesktop ? 0 : '0 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      
+
       {/* SEGMENTED CONTROL HEADER (Apple HIG) */}
       <div
         style={{
@@ -6267,7 +6269,7 @@ function ProfileScreenView({
       {/* ==================================================================== */}
       {activeSubTab === 'profile' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          
+
           {/* USER IDENTITY CARD */}
           <div className="app-card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
@@ -6496,7 +6498,7 @@ function ProfileScreenView({
       {/* ==================================================================== */}
       {activeSubTab === 'settings' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          
+
           {/* VIEW MODE TOGGLE (DESKTOP VS MOBILE) */}
           {onToggleViewMode && (
             <div className="app-card">
@@ -6654,7 +6656,7 @@ function ProfileScreenView({
       {/* ==================================================================== */}
       {activeSubTab === 'cloud' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          
+
           {/* CLOUD MULTI-DEVICE SYNC CARD */}
           <div className="app-card" style={{ border: cloudUser ? '1px solid var(--color-accent-border)' : '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -7665,9 +7667,8 @@ function QuestionVaultModal({
                         selectedOption === currentQuestion.correctAnswer
                           ? 'rgba(48, 209, 88, 0.12)'
                           : 'rgba(255, 69, 58, 0.12)',
-                      border: `1.5px solid ${
-                        selectedOption === currentQuestion.correctAnswer ? '#30D158' : '#FF453A'
-                      }`,
+                      border: `1.5px solid ${selectedOption === currentQuestion.correctAnswer ? '#30D158' : '#FF453A'
+                        }`,
                       animation: 'slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}
                   >
@@ -7730,11 +7731,10 @@ function QuestionVaultModal({
                         style={{
                           marginTop: 10,
                           paddingTop: 10,
-                          borderTop: `1px solid ${
-                            selectedOption === currentQuestion.correctAnswer
+                          borderTop: `1px solid ${selectedOption === currentQuestion.correctAnswer
                               ? 'rgba(48, 209, 88, 0.2)'
                               : 'rgba(255, 69, 58, 0.2)'
-                          }`,
+                            }`,
                           fontSize: 13,
                           color: '#FFFFFF',
                           lineHeight: 1.45
