@@ -76,7 +76,7 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
 }) => {
   const todayKey = useMemo(() => formatDateKey(new Date()), []);
   const [currentMonday, setCurrentMonday] = useState<Date>(() => getMonday(new Date()));
-  const [viewMode, setViewMode] = useState<'matrix' | 'cards'>('matrix');
+  const [viewMode, setViewMode] = useState<'matrix' | 'cards'>(() => (isDesktop ? 'matrix' : 'cards'));
 
   // Quick Add Question Modal state (No minutes entered here)
   const [showAddModal, setShowAddModal] = useState(false);
@@ -557,7 +557,7 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
           style={{
             display: 'grid',
             gridTemplateColumns: isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
-            gap: 10,
+            gap: 8,
             marginTop: 14
           }}
         >
@@ -565,13 +565,13 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.03)',
               borderRadius: 12,
-              padding: '10px 12px',
+              padding: '8px 10px',
               border: '1px solid rgba(255, 255, 255, 0.06)'
             }}
           >
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Haftalık Soru Çözümü</div>
-            <div style={{ fontSize: 19, fontWeight: 900, color: 'var(--color-accent)', marginTop: 2 }}>
-              {weeklyTotalQuestions} <span style={{ fontSize: 12, color: 'var(--color-text-dim)', fontWeight: 600 }}>Soru</span>
+            <div style={{ fontSize: 10.5, color: 'var(--color-text-muted)' }}>Haftalık Soru</div>
+            <div style={{ fontSize: isDesktop ? 19 : 16, fontWeight: 900, color: 'var(--color-accent)', marginTop: 2 }}>
+              {weeklyTotalQuestions} <span style={{ fontSize: 11, color: 'var(--color-text-dim)', fontWeight: 600 }}>Soru</span>
             </div>
           </div>
 
@@ -579,12 +579,12 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.03)',
               borderRadius: 12,
-              padding: '10px 12px',
+              padding: '8px 10px',
               border: '1px solid rgba(255, 255, 255, 0.06)'
             }}
           >
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Toplam Çalışma Süresi</div>
-            <div style={{ fontSize: 19, fontWeight: 900, color: '#30D158', marginTop: 2 }}>
+            <div style={{ fontSize: 10.5, color: 'var(--color-text-muted)' }}>Toplam Süre</div>
+            <div style={{ fontSize: isDesktop ? 19 : 16, fontWeight: 900, color: '#30D158', marginTop: 2 }}>
               {weeklyTotalMinutes >= 60 ? (
                 <>
                   {Math.floor(weeklyTotalMinutes / 60)}s {weeklyTotalMinutes % 60}d
@@ -593,8 +593,8 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
                 <>{weeklyTotalMinutes} dk</>
               )}
             </div>
-            <div style={{ fontSize: 10, color: 'var(--color-text-dim)', marginTop: 2 }}>
-              NetFocus + Genel Etüt Dahil
+            <div style={{ fontSize: 9.5, color: 'var(--color-text-dim)', marginTop: 2 }}>
+              NetFocus Dahil
             </div>
           </div>
 
@@ -602,14 +602,14 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.03)',
               borderRadius: 12,
-              padding: '10px 12px',
+              padding: '8px 10px',
               border: '1px solid rgba(255, 255, 255, 0.06)'
             }}
           >
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Günlük Soru Ortalaması</div>
-            <div style={{ fontSize: 19, fontWeight: 900, color: '#FF9F0A', marginTop: 2 }}>
+            <div style={{ fontSize: 10.5, color: 'var(--color-text-muted)' }}>Günlük Ortalama</div>
+            <div style={{ fontSize: isDesktop ? 19 : 16, fontWeight: 900, color: '#FF9F0A', marginTop: 2 }}>
               {dailyAverageQuestions}{' '}
-              <span style={{ fontSize: 12, color: 'var(--color-text-dim)', fontWeight: 600 }}>Soru/Gün</span>
+              <span style={{ fontSize: 11, color: 'var(--color-text-dim)', fontWeight: 600 }}>Soru/G</span>
             </div>
           </div>
 
@@ -617,18 +617,18 @@ export const WeeklyQuestionSchedule: React.FC<WeeklyQuestionScheduleProps> = ({
             style={{
               background: 'rgba(255, 255, 255, 0.03)',
               borderRadius: 12,
-              padding: '10px 12px',
+              padding: '8px 10px',
               border: '1px solid rgba(255, 255, 255, 0.06)'
             }}
           >
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Günlük Ortalama Çalışma</div>
-            <div style={{ fontSize: 19, fontWeight: 900, color: '#BF5AF2', marginTop: 2 }}>
+            <div style={{ fontSize: 10.5, color: 'var(--color-text-muted)' }}>Ort. Çalışma</div>
+            <div style={{ fontSize: isDesktop ? 19 : 16, fontWeight: 900, color: '#BF5AF2', marginTop: 2 }}>
               {dailyAverageMinutes >= 60
                 ? `${(dailyAverageMinutes / 60).toFixed(1)} Saat`
                 : `${dailyAverageMinutes} dk`}
             </div>
-            <div style={{ fontSize: 10, color: 'var(--color-text-dim)', marginTop: 2 }}>
-              Ortalama Odak Süresi
+            <div style={{ fontSize: 9.5, color: 'var(--color-text-dim)', marginTop: 2 }}>
+              Odak Süresi
             </div>
           </div>
         </div>

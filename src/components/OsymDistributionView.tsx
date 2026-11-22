@@ -234,16 +234,18 @@ export function OsymDistributionView({
         <div
           style={{
             position: 'relative',
-            minWidth: 185,
+            width: isDesktop ? 'auto' : '100%',
+            minWidth: isDesktop ? 185 : 'auto',
             borderRadius: 16,
-            padding: '14px 22px',
+            padding: isDesktop ? '14px 22px' : '12px 16px',
             background: 'linear-gradient(135deg, rgba(140, 195, 255, 0.22) 0%, rgba(35, 75, 125, 0.35) 45%, rgba(12, 20, 36, 0.85) 100%)',
             border: '1.5px solid rgba(160, 215, 255, 0.45)',
             borderTop: '2px solid rgba(255, 255, 255, 0.7)',
             boxShadow: '0 12px 32px rgba(0, 160, 255, 0.16), inset 0 1px 2px rgba(255, 255, 255, 0.5), inset 0 -1px 2px rgba(0, 0, 0, 0.5)',
             textAlign: 'center',
             backdropFilter: 'blur(16px)',
-            userSelect: 'none'
+            userSelect: 'none',
+            boxSizing: 'border-box'
           }}
         >
           <div
@@ -285,7 +287,7 @@ export function OsymDistributionView({
       </div>
 
       {/* 🌟 2. Big Segmented Toggle Buttons (TYT vs AYT Soru Dağılımı Tabloları) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, zIndex: 1 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isDesktop ? 12 : 8, zIndex: 1 }}>
         {/* TYT Button */}
         <button
           type="button"
@@ -296,30 +298,30 @@ export function OsymDistributionView({
           }}
           style={{
             cursor: 'pointer',
-            height: 52,
+            height: isDesktop ? 52 : 46,
             borderRadius: 9999,
             border: selectedExam === 'TYT' ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
             background: selectedExam === 'TYT' ? '#FFFFFF' : 'rgba(28, 30, 38, 0.75)',
             color: selectedExam === 'TYT' ? '#0A0C10' : 'rgba(255, 255, 255, 0.45)',
-            fontSize: 14.5,
+            fontSize: isDesktop ? 14.5 : 12,
             fontWeight: selectedExam === 'TYT' ? 800 : 700,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 10,
+            gap: 8,
             boxShadow: selectedExam === 'TYT' ? '0 6px 25px rgba(255, 255, 255, 0.2)' : 'none',
             transition: 'all 0.18s ease'
           }}
         >
           <span
             style={{
-              width: 10,
-              height: 10,
+              width: 8,
+              height: 8,
               borderRadius: 2,
               background: selectedExam === 'TYT' ? '#0284C7' : 'rgba(255, 255, 255, 0.3)'
             }}
           />
-          <span>TYT Soru Dağılımı Tabloları</span>
+          <span>{isDesktop ? 'TYT Soru Dağılımı Tabloları' : 'TYT Tabloları'}</span>
         </button>
 
         {/* AYT Button */}
@@ -332,30 +334,30 @@ export function OsymDistributionView({
           }}
           style={{
             cursor: 'pointer',
-            height: 52,
+            height: isDesktop ? 52 : 46,
             borderRadius: 9999,
             border: selectedExam === 'AYT' ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
             background: selectedExam === 'AYT' ? '#FFFFFF' : 'rgba(28, 30, 38, 0.75)',
             color: selectedExam === 'AYT' ? '#0A0C10' : 'rgba(255, 255, 255, 0.45)',
-            fontSize: 14.5,
+            fontSize: isDesktop ? 14.5 : 12,
             fontWeight: selectedExam === 'AYT' ? 800 : 700,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 10,
+            gap: 8,
             boxShadow: selectedExam === 'AYT' ? '0 6px 25px rgba(255, 255, 255, 0.2)' : 'none',
             transition: 'all 0.18s ease'
           }}
         >
           <span
             style={{
-              width: 10,
-              height: 10,
+              width: 8,
+              height: 8,
               borderRadius: 2,
-              background: selectedExam === 'AYT' ? '#E11D48' : 'rgba(255, 255, 255, 0.3)'
+              background: selectedExam === 'AYT' ? '#D946EF' : 'rgba(255, 255, 255, 0.3)'
             }}
           />
-          <span>AYT Soru Dağılımı Tabloları</span>
+          <span>{isDesktop ? 'AYT Soru Dağılımı Tabloları' : 'AYT Tabloları'}</span>
         </button>
       </div>
 

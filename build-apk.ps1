@@ -31,10 +31,16 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $apkPath = "$appDir\android\app\build\outputs\apk\debug\app-debug.apk"
+$namedApkPath = "$appDir\android\app\build\outputs\apk\debug\netmetrikv1.apk"
+$rootNamedApk = "$appDir\netmetrikv1.apk"
+
 if (Test-Path $apkPath) {
+    Copy-Item -Path $apkPath -Destination $namedApkPath -Force
+    Copy-Item -Path $apkPath -Destination $rootNamedApk -Force
     Write-Host "`n========================================================" -ForegroundColor Green
     Write-Host " [BASARILI] GUNCEL ANDROID APK DERLENDI!" -ForegroundColor Green
-    Write-Host " APK Dosya Yolu: $apkPath" -ForegroundColor Yellow
+    Write-Host " APK Dosya Yolu: $namedApkPath" -ForegroundColor Yellow
+    Write-Host " Proje Kokundeki APK: $rootNamedApk" -ForegroundColor Yellow
     Write-Host "========================================================`n" -ForegroundColor Green
     exit 0
 } else {
