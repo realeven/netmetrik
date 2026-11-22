@@ -13,6 +13,7 @@ import {
   Pause,
   RotateCcw,
   Sparkles,
+  Gamepad2,
   X,
   CheckCircle2,
   Circle,
@@ -1566,16 +1567,16 @@ export default function App() {
                 />
               </button>
 
-              {/* Tab 5: Profile & Settings */}
+              {/* Tab 5: Formül Düellosu / Oyunu */}
               <button
-                className={`nav-item-icon-btn ${activeTab === 'profile' ? 'active' : ''}`}
-                onClick={() => handleNavigateTab('profile')}
-                title="Profil & Ayarlar"
+                className={`nav-item-icon-btn ${activeTab === 'formula' ? 'active' : ''}`}
+                onClick={() => handleNavigateTab('formula')}
+                title="Formül Düellosu"
               >
-                <User
+                <Gamepad2
                   size={25}
-                  color={activeTab === 'profile' ? 'var(--color-accent)' : undefined}
-                  strokeWidth={activeTab === 'profile' ? 2.8 : 2}
+                  color={activeTab === 'formula' ? 'var(--color-accent)' : undefined}
+                  strokeWidth={activeTab === 'formula' ? 2.8 : 2}
                 />
               </button>
             </nav>
