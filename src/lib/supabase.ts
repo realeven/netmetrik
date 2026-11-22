@@ -97,3 +97,22 @@ export async function signOut() {
   if (!supabase) return;
   return supabase.auth.signOut();
 }
+
+/**
+ * Send password reset email
+ */
+export async function sendPasswordResetEmail(email: string) {
+  if (!supabase) throw new Error('Supabase henüz yapılandırılmadı.');
+  const redirectUrl = typeof window !== 'undefined' ? window.location.origin : 'https://netmetrik.vercel.app';
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: redirectUrl
+  });
+}
+
+/**
+ * Update user password
+ */
+export async function updateUserPassword(newPassword: string) {
+  if (!supabase) throw new Error('Supabase henüz yapılandırılmadı.');
+  return supabase.auth.updateUser({ password: newPassword });
+}

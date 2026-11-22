@@ -56,8 +56,10 @@ import { ModernSlider } from './components/ModernSlider';
 import { YksCountdownCard } from './components/YksCountdownCard';
 import { FormulaGameView } from './components/FormulaGameView';
 import { YksRankCalculatorModal } from './components/YksRankCalculatorModal';
+import { PasswordResetModal } from './components/PasswordResetModal';
 import { OSYM_QUESTION_DISTRIBUTION } from './data/osymDistributionData';
 import { sounds } from './lib/sound';
+import { supabase } from './lib/supabase';
 import { App as CapacitorApp } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -270,6 +272,25 @@ export default function App() {
     const onboarded = localStorage.getItem('netmetrik_onboarded');
     return !onboarded;
   });
+  const [showPasswordResetModal, setShowPasswordResetModal] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    return hash.includes('type=recovery') || search.includes('type=recovery');
+  });
+
+  // Listen for Supabase password recovery events
+  useEffect(() => {
+    if (!supabase) return;
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowPasswordResetModal(true);
+      }
+    });
+    return () => {
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   // Helper to apply incoming cloud payload to all states
   const applyCloudPayload = (cloudData: SyncPayload) => {
@@ -1818,6 +1839,17 @@ export default function App() {
         }}
         onLogin={async (email, pass) => {
           await handleCloudLogin(email, pass);
+        }}
+      />
+
+      {/* 7. Password Reset / Recovery Modal */}
+      <PasswordResetModal
+        isOpen={showPasswordResetModal}
+        onClose={() => setShowPasswordResetModal(false)}
+        onSuccess={() => {
+          getCurrentCloudUser().then((u) => {
+            if (u) setCloudUser(u);
+          });
         }}
       />
 

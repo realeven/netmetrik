@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, GraduationCap, Compass, ArrowRight, Check, X } from 'lucide-react';
 import { sounds } from '../lib/sound';
+import { sendPasswordResetEmail } from '../lib/supabase';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -29,6 +30,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!email.trim() || !email.includes('@')) {
+      setError('Şifre sıfırlamak için lütfen önce e-posta adresinizi yukarıya yazın.');
+      return;
+    }
+    try {
+      setLoading(true);
+      setError(null);
+      await sendPasswordResetEmail(email.trim());
+      setResetSent(true);
+      sounds.playSuccess();
+    } catch (err: any) {
+      setError(err?.message || 'Sıfırlama e-postası gönderilemedi.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -510,9 +530,27 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 800, color: '#C8CFDC', marginBottom: 6 }}>
-                Şifren *
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label style={{ fontSize: 11.5, fontWeight: 800, color: '#C8CFDC' }}>
+                  Şifren *
+                </label>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-accent)',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: 0,
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Şifremi Unuttum?
+                </button>
+              </div>
               <div style={{ position: 'relative' }}>
                 <Lock
                   size={16}
@@ -537,6 +575,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 />
               </div>
             </div>
+
+            {resetSent && (
+              <div
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  background: 'rgba(48, 209, 88, 0.12)',
+                  border: '1px solid rgba(48, 209, 88, 0.3)',
+                  color: '#30D158',
+                  fontSize: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+              >
+                <Check size={16} />
+                <span>Şifre sıfırlama linki e-postanıza gönderildi! Gelen kutunuzu kontrol edin.</span>
+              </div>
+            )}
 
             <button
               type="submit"
