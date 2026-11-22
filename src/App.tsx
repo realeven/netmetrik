@@ -1350,18 +1350,6 @@ export default function App() {
         </div>
       ) : (
         <div className="mobile-viewport-shell">
-          {/* Native-style Status Bar (hidden in NetFocus) */}
-          {activeTab !== 'pomodoro' && (
-            <div className="status-bar-time">
-              <span>18:07</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-                <span>VoLTE</span>
-                <span>5G</span>
-                <span>🔋 85%</span>
-              </div>
-            </div>
-          )}
-
           {/* Screen Title & Header Action with Cyber Cyan Brand Logo (hidden in NetFocus) */}
           {activeTab !== 'pomodoro' && (
             <div
@@ -1370,11 +1358,11 @@ export default function App() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '12px 18px',
+                padding: 'calc(10px + env(safe-area-inset-top, 0px)) 16px 12px 16px',
                 position: 'sticky',
                 top: 0,
                 zIndex: 45,
-                background: 'rgba(12, 16, 24, 0.88)',
+                background: 'rgba(12, 16, 24, 0.92)',
                 backdropFilter: 'blur(24px) saturate(160%)',
                 WebkitBackdropFilter: 'blur(24px) saturate(160%)',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
@@ -1468,29 +1456,6 @@ export default function App() {
               >
                 <Timer size={13} />
                 <span>Odak</span>
-              </button>
-
-              {/* Switch to Desktop PC Mode Button */}
-              <button
-                onClick={() => setViewMode('desktop')}
-                style={{
-                  background: 'rgba(0, 240, 255, 0.12)',
-                  border: '1px solid rgba(0, 240, 255, 0.35)',
-                  color: 'var(--color-accent)',
-                  borderRadius: 11,
-                  padding: '6px 10px',
-                  fontSize: 11,
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  cursor: 'pointer',
-                  transition: 'transform 140ms var(--ease-out)'
-                }}
-                title="Geniş Ekran PC Moduna Geç"
-              >
-                <Monitor size={13} />
-                <span>PC</span>
               </button>
 
               <button
