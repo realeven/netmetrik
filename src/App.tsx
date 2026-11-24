@@ -27,7 +27,6 @@ import {
   Search,
   Flame,
   Shield,
-  ShieldCheck,
   Printer,
   Smartphone,
   Camera,
@@ -2951,7 +2950,7 @@ function HomeScreenView({
   books,
   topicProgress: _topicProgress,
   onToggleTask,
-  onActivateFreeze,
+  onActivateFreeze: _onActivateFreeze,
   onOpenFeatureModal,
   onNavigate,
   onOpenQuickAdd,
@@ -2980,141 +2979,12 @@ function HomeScreenView({
   const completedTests = books.reduce((sum, b) => sum + b.completedTests, 0);
   const bookCompletionPct = Math.round((completedTests / (totalTests || 1)) * 100);
 
-  const heroGreetingBanner = (
-    <div
-      className="app-card"
-      style={{
-        padding: '22px 24px',
-        position: 'relative'
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 99, background: 'linear-gradient(180deg, #2A2D3A 0%, #151722 50%, #0C0E14 100%)', border: '1.5px solid rgba(255, 255, 255, 0.22)', borderTop: '1.8px solid rgba(255, 255, 255, 0.55)', fontSize: 11, fontWeight: 700, color: '#FFFFFF', marginBottom: 12, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3)' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFFFFF', boxShadow: '0 0 6px #FFFFFF' }} />
-            <span>2026-2027 HAZIRLIK SEZONU</span>
-          </div>
-          <h1 style={{ fontSize: isDesktop ? 24 : 20, fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: -0.4 }}>
-            Hoş geldin{profile.name ? `, ${profile.name}` : ''} 👋
-          </h1>
-          <p style={{ margin: '6px 0 0 0', fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>
-            {profile.targetDepartment ? (
-              <>
-                Hedef: <strong style={{ color: '#FFFFFF' }}>{profile.targetDepartment}</strong> ({profile.fieldTrack?.toUpperCase() || 'SAY'}) • <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>{profile.targetUniversity}</span>
-              </>
-            ) : (
-              <span>Hedef: <em style={{ color: 'var(--color-text-dim)' }}>Henüz hedef bölüm seçilmedi</em></span>
-            )}
-          </p>
-        </div>
-
-        {/* Quick status metrics group */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 99, background: 'linear-gradient(180deg, #2A251D 0%, #1A1612 50%, #0E0C0A 100%)', border: '1.5px solid rgba(255, 159, 10, 0.35)', borderTop: '1.8px solid rgba(255, 159, 10, 0.65)', color: '#FF9F0A', fontSize: 12, fontWeight: 700, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)' }}>
-            <Flame size={15} color="#FF9F0A" />
-            <span>{profile.currentStreak} Gün Seri</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 99, background: 'linear-gradient(180deg, #1C2A20 0%, #111A13 50%, #0A0F0B 100%)', border: '1.5px solid rgba(48, 209, 88, 0.35)', borderTop: '1.8px solid rgba(48, 209, 88, 0.65)', color: '#30D158', fontSize: 12, fontWeight: 700, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)' }}>
-            <Target size={15} color="#30D158" />
-            <span>%{questionPct} Tamamlandı</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   const countdownCard = (
     <YksCountdownCard
       countdown={countdown}
       progressPercent={64}
       quote={MOTIVATIONAL_QUOTES[0] || 'Her gün çözdüğün fazladan 1 soru, sınav günü binlerce rakibinin önüne geçmeni sağlar.'}
     />
-  );
-
-  const streakCard = (
-    <div
-      className="app-card"
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '18px 20px'
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            background: 'rgba(255, 159, 10, 0.15)',
-            border: '1px solid rgba(255, 159, 10, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}
-        >
-          <Flame size={24} color="#FF9F0A" />
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 16.5, fontWeight: 700, color: '#FFFFFF' }}>
-              {profile.currentStreak} Günlük Seri
-            </span>
-          </div>
-          <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2, fontWeight: 500 }}>
-            En uzun serin: <strong style={{ color: '#FF9F0A' }}>{profile.longestStreak} gün</strong> • Çizgiyi koru
-          </div>
-        </div>
-      </div>
-
-      <div>
-        {profile.streakFreezeActive ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '6px 12px',
-              borderRadius: 99,
-              background: 'rgba(0, 229, 153, 0.15)',
-              border: '1px solid #00E599',
-              color: '#00E599',
-              fontSize: 11.5,
-              fontWeight: 800
-            }}
-            title="Bugün ders çalışmasan dahi serin bozulmayacak"
-          >
-            <ShieldCheck size={14} />
-            <span>Kalkan Aktif</span>
-          </div>
-        ) : profile.streakFreezeAvailable > 0 ? (
-          <button
-            onClick={onActivateFreeze}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '7px 14px',
-              borderRadius: 99,
-              background: 'rgba(0, 240, 255, 0.15)',
-              border: '1px solid #00F0FF',
-              color: '#00F0FF',
-              fontSize: 11.5,
-              fontWeight: 800,
-              cursor: 'pointer'
-            }}
-            title="1 adet koruma kalkanını harcayarak serini koru"
-          >
-            <Shield size={14} />
-            <span>Kalkanı Aç ({profile.streakFreezeAvailable})</span>
-          </button>
-        ) : (
-          <span style={{ fontSize: 11, color: 'var(--color-text-dim)' }}>Kalkan: 0</span>
-        )}
-      </div>
-    </div>
   );
 
   const quickToolsCard = (
@@ -3360,12 +3230,10 @@ function HomeScreenView({
       <div className="desktop-home-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {countdownCard}
-          {heroGreetingBanner}
           {goalsCard}
           {tasksCard}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          {streakCard}
           {quickToolsCard}
         </div>
       </div>
@@ -3375,8 +3243,6 @@ function HomeScreenView({
   return (
     <div style={{ padding: '0 18px', display: 'flex', flexDirection: 'column', gap: 16 }}>
       {countdownCard}
-      {heroGreetingBanner}
-      {streakCard}
       {quickToolsCard}
       {goalsCard}
       {tasksCard}
